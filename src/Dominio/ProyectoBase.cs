@@ -6,7 +6,7 @@ namespace transformador_mda.src.Dominio
     /// <summary>
     /// Clase para almacenar la información sobre la estructura completa del proyecto a generar
     /// </summary>
-    internal class ProyectoBase
+    public class ProyectoBase
     {
         /// <summary>
         /// Nombre del proyecto
