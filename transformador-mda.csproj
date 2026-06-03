@@ -84,6 +84,9 @@
     <Compile Include="src\Dominio\Elemento.cs" />
     <Compile Include="src\Dominio\Metodo.cs" />
     <Compile Include="src\Dominio\ProyectoBase.cs" />
+    <Compile Include="src\Dominio\TiposAsociaciones.cs" />
+    <Compile Include="src\Dominio\TiposClases.cs" />
+    <Compile Include="src\Dominio\TiposElementos.cs" />
     <Compile Include="src\Dominio\Visibilidad.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
