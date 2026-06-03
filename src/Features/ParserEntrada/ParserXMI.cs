@@ -10,13 +10,13 @@ namespace transformador_mda.src.Features.ParserEntrada
     {
         #region "Atributos"
 
-        private XDocument _documento;
-
-        private XElement _elemento_actual;
-
         private ClavesSoportadasXMI.Enumeracion _clave_actual;
 
         private ProyectoBase _proyecto;
+        
+        private XDocument _documento;
+
+        private XElement _elemento_actual;
 
         #endregion
 
@@ -46,12 +46,12 @@ namespace transformador_mda.src.Features.ParserEntrada
             LeerFichero();
             
 
-            return new ProyectoBase(); // Aquí deberías devolver el proyecto parseado
+            return _proyecto; 
         }
 
         #endregion
 
-        #region "Métodos privados"
+        #region "Métodos protegidos"
 
         protected override bool EsFormatoValido()
         {
@@ -120,10 +120,8 @@ namespace transformador_mda.src.Features.ParserEntrada
                 case ClavesSoportadasXMI.Enumeracion.METODO:
                     ProcesarMetodo();
                     break;
-                case ClavesSoportadasXMI.Enumeracion.HERENCIA:
-                    ProcesarHerencia();
-                    break;
                 case ClavesSoportadasXMI.Enumeracion.ASOCIACION:
+                case ClavesSoportadasXMI.Enumeracion.HERENCIA:
                     ProcesarAsociacion();
                     break;
                 default:
@@ -136,13 +134,17 @@ namespace transformador_mda.src.Features.ParserEntrada
             if (_elemento_actual == null)
                 return;
 
-            string nombre = _elemento_actual.Attribute("name")?.Value;
+            string id = ObtenerId(_elemento_actual);
+            if (string.IsNullOrEmpty(id))
+                return;
 
+            string nombre = _elemento_actual.Attribute("name")?.Value;
             if (string.IsNullOrWhiteSpace(nombre))
                 return;
 
             Directorio directorio = new Directorio
             {
+                Id = id,
                 Nombre = nombre,
                 Namespace = nombre.Replace(" ", "_").ToLower(),
                 Clases = new System.Collections.Generic.List<Clase>()
@@ -156,16 +158,20 @@ namespace transformador_mda.src.Features.ParserEntrada
             if (_elemento_actual == null)
                 return;
 
-            string nombre = _elemento_actual.Attribute("name")?.Value;
+            string id = ObtenerId(_elemento_actual);
+            if (string.IsNullOrEmpty(id))
+                return;
 
+            string nombre = _elemento_actual.Attribute("name")?.Value;
             if (string.IsNullOrWhiteSpace(nombre))
                 return;
 
             Clase clase = new Clase
             {
+                Id = id,
                 Nombre = nombre,
                 Visibilidad = Visibilidad.ObtenerEnumeracion(_elemento_actual.Attribute("visibility")?.Value),
-                TipoClase = TipoClase.ObtenerEnumeracion(_elemento_actual.Attribute("xmi:type")?.Value,
+                TipoClase = TiposClases.ObtenerEnumeracion(_elemento_actual.Attribute("xmi:type")?.Value,
                     _elemento_actual.Attribute("isAbstract")?.Value == "true"),
                 Elementos = new List<Elemento>(),
                 Metodos = new List<Metodo>(),
@@ -177,22 +183,134 @@ namespace transformador_mda.src.Features.ParserEntrada
 
         protected override void ProcesarAtributoParametro()
         {
+            if (_elemento_actual == null)
+                return;
 
+            string id = ObtenerId(_elemento_actual);
+            if (string.IsNullOrEmpty(id))
+                return;
+
+            string nombre = _elemento_actual.Attribute("name")?.Value;
+            if (string.IsNullOrEmpty(nombre))
+                return;
+
+            Elemento elemento = new Elemento
+            {
+                Id = id,
+                Nombre = nombre,
+                Tipo = _elemento_actual.Attribute("type")?.Value,
+                Visibilidad = Visibilidad.ObtenerEnumeracion(_elemento_actual.Attribute("visibility")?.Value),
+                TipoElemento = _clave_actual == ClavesSoportadasXMI.Enumeracion.ATRIBUTO
+                    ? TiposElementos.Enumeracion.ATRIBUTO
+                    : TiposElementos.Enumeracion.PARAMETRO
+            };
+
+            if (elemento.TipoElemento == TiposElementos.Enumeracion.ATRIBUTO)
+                _proyecto.Directorios.LastOrDefault()?.Clases.LastOrDefault()?.Elementos.Add(elemento);
+            else
+                _proyecto.Directorios.LastOrDefault()?.Clases.LastOrDefault()?.Metodos.LastOrDefault()?.Parametros.Add(elemento);
         }
 
         protected override void ProcesarMetodo()
         {
+            if (_elemento_actual == null)
+                return;
 
-        }
+            string id = ObtenerId(_elemento_actual);
+            if (string.IsNullOrEmpty(id))
+                return;
 
-        protected override void ProcesarHerencia()
-        {
+            string nombre = _elemento_actual.Attribute("name")?.Value;
+            if (string.IsNullOrWhiteSpace(nombre))
+                return;
 
+            string tipoRetorno = _elemento_actual.Attribute("type")?.Value;
+            if (string.IsNullOrWhiteSpace(tipoRetorno))
+                tipoRetorno = "void";
+
+            Metodo metodo = new Metodo
+            {
+                Id = id,
+                Nombre = nombre,
+                TipoRetorno = tipoRetorno,
+                Visibilidad = Visibilidad.ObtenerEnumeracion(_elemento_actual.Attribute("visibility")?.Value)
+            };
+
+            _proyecto.Directorios.LastOrDefault()?.Clases.LastOrDefault()?.Metodos.Add(metodo);
         }
 
         protected override void ProcesarAsociacion()
         {
+            if (_elemento_actual == null)
+                return;
 
+            string tipo_xmi = _elemento_actual
+                .Attributes()
+                .FirstOrDefault(a => a.Name.LocalName == "type")
+                ?.Value;
+
+            string agregacion = _elemento_actual
+                .Descendants()
+                .Attributes()
+                .FirstOrDefault(a => a.Name.LocalName == "aggregation")
+                ?.Value;
+
+            string id = ObtenerId(_elemento_actual);
+            if (string.IsNullOrEmpty(id))
+                return;
+
+            Asociacion asociacion = new Asociacion();
+            if (string.IsNullOrWhiteSpace(agregacion))
+                asociacion.TipoAsociacion = TiposAsociaciones.ObtenerTipoAsociacion(tipo_xmi);
+            else 
+                asociacion.TipoAsociacion = TiposAsociaciones.ObtenerTipoAsociacion(agregacion);
+
+            List<string> clasesRelacionadas = ObtenerClasesRelacionadasAsociacion(_elemento_actual);
+            if (clasesRelacionadas.Count < 2)
+                return;
+
+            asociacion.Id = id;
+            asociacion.ClaseOrigen = clasesRelacionadas[0];
+            asociacion.ClaseDestino = clasesRelacionadas[1];
+            
+
+            _proyecto.Directorios.LastOrDefault()?.Clases.LastOrDefault()?.Asociaciones.Add(asociacion);
+        }
+        #endregion
+
+        #region "Métodos privados"
+
+        List<string> ObtenerClasesRelacionadasAsociacion(XElement param_elemento)
+        {
+            List<string> ret_resultado = new List<string>();
+
+            foreach(XElement extremo in param_elemento.Descendants())
+            {
+                if (extremo.Name.LocalName != "ownedEnd" &&
+                    extremo.Name.LocalName != "memberEnd")
+                    continue;
+
+                string referenciaTipo = extremo.Attribute("type")?.Value;
+                if (string.IsNullOrWhiteSpace(referenciaTipo))
+                    referenciaTipo = extremo.Attribute("href")?.Value;
+
+                string nombreClase = _proyecto.Directorios.LastOrDefault()?.ObtenerClasePorId(referenciaTipo)?.Nombre;
+                if (!string.IsNullOrWhiteSpace(nombreClase) &&
+                    !ret_resultado.Contains(nombreClase))
+                {
+                    ret_resultado.Add(nombreClase);
+                }
+            }
+
+            return ret_resultado;
+        }
+
+        private string ObtenerId(XElement param_elemento)
+        {
+            return param_elemento
+                .Attributes()
+                .FirstOrDefault(a => a.Name.LocalName == "id")
+                ?.Value;
         }
 
         #endregion

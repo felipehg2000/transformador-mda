@@ -27,8 +27,6 @@ namespace transformador_mda.src.Features.ParserEntrada
 
         protected abstract void ProcesarMetodo();
 
-        protected abstract void ProcesarHerencia();
-
         protected abstract void ProcesarAsociacion();
     }
 }
