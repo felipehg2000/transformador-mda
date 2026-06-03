@@ -1,27 +1,46 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
+using System.Collections.Generic;
 using transformador_mda.src.Dominio;
 
 namespace transformador_mda.src.Features.ParserEntrada
 {
+    /// <summary>
+    /// Clase encargada de parsear un fichero XMI y construir un modelo de proyecto a partir de su contenido.
+    /// </summary>
     public class ParserXMI : IParserEntrada
     {
         #region "Atributos"
 
+        /// <summary>
+        /// En el bucle de lectura del documento, clave que se está procesando.
+        /// </summary>
         private ClavesSoportadasXMI.Enumeracion _clave_actual;
 
+        /// <summary>
+        /// Datos del proyecto que se está leyendo.
+        /// </summary>
         private ProyectoBase _proyecto;
-        
+
+        /// <summary>
+        /// Documento XMI cargado en memoria para su procesamiento.
+        /// </summary>
         private XDocument _documento;
 
+        /// <summary>
+        /// En el bucle de lectura del documento, elemento que se está procesando.
+        /// </summary>
         private XElement _elemento_actual;
 
         #endregion
 
         #region "Constructor"
 
+        /// <summary>
+        /// Controlador de la clase, inicializa atributos.
+        /// </summary>
+        /// <param name="param_ruta_fichero">Ruta del fichero XMI a parsear.</param>
         public ParserXMI(string param_ruta_fichero) : base(param_ruta_fichero)
         { 
             _proyecto = new ProyectoBase();
@@ -31,6 +50,11 @@ namespace transformador_mda.src.Features.ParserEntrada
 
         #region "Métodos públicos"
         
+        /// <summary>
+        /// Método principal de la clase, parsea el fichero XMI y construye el modelo de proyecto.
+        /// </summary>
+        /// <returns>Modelo de proyecto construido a partir del fichero XMI.</returns>
+        /// <exception cref="Exception">Se lanza si el fichero no puede ser leído o el formato no es válido.</exception>
         public override ProyectoBase Parsear()
         {
             if (string.IsNullOrEmpty(_ruta_fichero))
@@ -53,15 +77,15 @@ namespace transformador_mda.src.Features.ParserEntrada
 
         #region "Métodos protegidos"
 
+        /// <summary>
+        /// Comprueba si el formato del documento XMI es válido para ser procesado.
+        /// </summary>
+        /// <returns>True si el formato es válido; de lo contrario, false.</returns>
         protected override bool EsFormatoValido()
         {
-            if (_documento == null)
-                return false;
-
-            if (_documento.Root == null)
-                return false;
-
-            if (_documento.Root.Name.LocalName != "XMI")
+            if (_documento == null ||
+                _documento.Root == null ||
+                _documento.Root.Name.LocalName != "XMI")
                 return false;
 
             if (!_documento.Descendants().Any(e => e.Name.LocalName == "Model"))
@@ -77,6 +101,9 @@ namespace transformador_mda.src.Features.ParserEntrada
             return contieneClavesSoportadas;
         }
 
+        /// <summary>
+        /// Lee el documento XMI por completo, procesando cada elemento relevante.
+        /// </summary>
         protected override void LeerFichero()
         {
             foreach (var elemento in _documento.Descendants())
@@ -103,6 +130,10 @@ namespace transformador_mda.src.Features.ParserEntrada
             }
         }
 
+        /// <summary>
+        /// Método de decisión de la clase, determina qué tipo de análisis hay que hacer.
+        /// </summary>
+        /// <exception cref="Exception">Se lanza cuando se encuentra una clave no soportada.</exception>
         protected override void ProcesarElemento()
         {
             switch (_clave_actual)
@@ -129,6 +160,9 @@ namespace transformador_mda.src.Features.ParserEntrada
             }
         }
 
+        /// <summary>
+        /// Procesa un elemento del tipo paquete en el documento XMI, creando un nuevo directorio en el modelo de proyecto.
+        /// </summary>
         protected override void ProcesarPaquete()
         {
             if (_elemento_actual == null)
@@ -153,6 +187,9 @@ namespace transformador_mda.src.Features.ParserEntrada
             _proyecto.Directorios.Add(directorio);
         }
 
+        /// <summary>
+        /// Procesa un elemento del tipo clase en el documento XMI, creando una nueva clase en el modelo de proyecto.
+        /// </summary>
         protected override void ProcesarClase()
         {
             if (_elemento_actual == null)
@@ -181,6 +218,9 @@ namespace transformador_mda.src.Features.ParserEntrada
             _proyecto.Directorios.LastOrDefault()?.Clases.Add(clase);
         }
 
+        /// <summary>
+        /// Procesa un elemento del tipo atributo o parámetro en el documento XMI, creando un nuevo elemento en la clase o método correspondiente del modelo de proyecto.
+        /// </summary>
         protected override void ProcesarAtributoParametro()
         {
             if (_elemento_actual == null)
@@ -211,6 +251,9 @@ namespace transformador_mda.src.Features.ParserEntrada
                 _proyecto.Directorios.LastOrDefault()?.Clases.LastOrDefault()?.Metodos.LastOrDefault()?.Parametros.Add(elemento);
         }
 
+        /// <summary>
+        /// Procesa un elemento del tipo método en el documento XMI, creando un nuevo método en la clase correspondiente del modelo de proyecto.
+        /// </summary>
         protected override void ProcesarMetodo()
         {
             if (_elemento_actual == null)
@@ -239,6 +282,9 @@ namespace transformador_mda.src.Features.ParserEntrada
             _proyecto.Directorios.LastOrDefault()?.Clases.LastOrDefault()?.Metodos.Add(metodo);
         }
 
+        /// <summary>
+        /// Procesa un elemento del tipo asociación o herencia en el documento XMI, creando una nueva asociación en el modelo de proyecto que relaciona las clases correspondientes.
+        /// </summary>
         protected override void ProcesarAsociacion()
         {
             if (_elemento_actual == null)
@@ -276,10 +322,16 @@ namespace transformador_mda.src.Features.ParserEntrada
 
             _proyecto.Directorios.LastOrDefault()?.Clases.LastOrDefault()?.Asociaciones.Add(asociacion);
         }
+        
         #endregion
 
         #region "Métodos privados"
 
+        /// <summary>
+        /// Obtiene los nombres de las clases relacionadas en una asociación.
+        /// </summary>
+        /// <param name="param_elemento">Elemento XMI que representa la asociación.</param>
+        /// <returns>Lista de nombres de las clases relacionadas.</returns>
         List<string> ObtenerClasesRelacionadasAsociacion(XElement param_elemento)
         {
             List<string> ret_resultado = new List<string>();
@@ -305,6 +357,11 @@ namespace transformador_mda.src.Features.ParserEntrada
             return ret_resultado;
         }
 
+        /// <summary>
+        /// Obtiene el valor del atributo id de un elemento del fichero XMI, si existe.
+        /// </summary>
+        /// <param name="param_elemento">Elemento XMI del cual se desea obtener el id.</param>
+        /// <returns>Valor del atributo id si existe; de lo contrario, null.</returns>
         private string ObtenerId(XElement param_elemento)
         {
             return param_elemento
