@@ -9,6 +9,11 @@ namespace transformador_mda.src.Dominio
     public class ProyectoBase
     {
         /// <summary>
+        /// Identificador único del proyecto.
+        /// </summary>
+        public string Id { get; set; }
+
+        /// <summary>
         /// Nombre del proyecto
         /// </summary>
         public string Nombre { get; set; }
@@ -24,8 +29,19 @@ namespace transformador_mda.src.Dominio
         [JsonConstructor]
         public ProyectoBase()
         {
+            Id = string.Empty;
             Nombre = string.Empty;
             Directorios = new List<Directorio>();
+        }
+
+        /// <summary>
+        /// Método para obtener un directorio por su identificador único.
+        /// </summary>
+        /// <param name="param_id">Identificador del directorio a buscar.</param>
+        /// <returns>El directorio encontrado o null si no existe.</returns>
+        public Directorio ObtenerDirectorioPorId(string param_id)
+        {
+            return Directorios.Find(directorio => directorio.Id == param_id);
         }
     }
 }

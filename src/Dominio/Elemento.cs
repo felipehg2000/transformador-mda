@@ -3,20 +3,15 @@
 namespace transformador_mda.src.Dominio
 {
     /// <summary>
-    /// Enumeración con los tipos de elementos que se pueden definir.
-    /// </summary>
-    public enum EnumTipoElemento
-    {
-        NULO = 0,           /// <summary> Elemento vacío, para inicializar atributos a vacío. </summary>
-        ATRIBUTO = 1,       /// <summary> Representa un elemento de tipo atributo. </summary>
-        PROPIEDAD = 2,      /// <summary> Representa un elemento de tipo propiedad. </summary>
-    }
-
-    /// <summary>
     /// Clase para almacenar la información sobre un elemento.
     /// </summary>
     public class Elemento
     {
+        /// <summary>
+        /// Identificador único del elemento.
+        /// </summary>
+        public string Id { get; set; }
+
         /// <summary>
         /// Nombre del atributo o la propiedad.
         /// </summary>
@@ -30,7 +25,7 @@ namespace transformador_mda.src.Dominio
         /// <summary>
         /// Tipo de elemento, para diferenciar entre atributos y propiedades.
         /// </summary>
-        public EnumTipoElemento TipoElemento { get; set; }
+        public TiposElementos.Enumeracion TipoElemento { get; set; }
 
         /// <summary>
         /// Visibilidad del atributo (publico, privado...)
@@ -46,9 +41,10 @@ namespace transformador_mda.src.Dominio
         [JsonConstructor]
         public Elemento()
         {
+            Id = string.Empty;
             Nombre = string.Empty;
             Tipo = string.Empty;
-            TipoElemento = EnumTipoElemento.NULO;
+            TipoElemento = TiposElementos.Enumeracion.NULO;
             Visibilidad = EnumVisibilidad.NULO;
         }
     }

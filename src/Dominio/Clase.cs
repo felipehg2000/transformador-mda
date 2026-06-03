@@ -1,45 +1,18 @@
 ﻿using System.Collections.Generic;
 using System.Text.Json.Serialization;
-using System.Xml.Linq;
 
 namespace transformador_mda.src.Dominio
 {
     /// <summary>
-    /// Enumeración, identifica el tipo de clase a generar.
-    /// </summary>
-    public enum EnumTiposClase
-    {
-        NULO = 0,               /// <summary> Inicialización a vacío </summary>
-        CLASE = 1,              /// <summary> Indica que el tipo de clase es una clase normal. </summary>
-        INTERFAZ = 2,           /// <summary> Indica que el tipo de clase es una interfaz. </summary>
-        CLASE_ABSTRACTA = 3,    /// <summary> Indica que el tipo de clase es una clase abstracta. </summary>
-        ENUMERACION = 4,        /// <summary> Indica que el tipo de clase es una enumeración. </summary>
-    }
-
-    static public class TipoClase
-    {
-        static public EnumTiposClase ObtenerEnumeracion(string param_tipo_clase, bool param_es_abstracto)
-        { 
-            if (param_tipo_clase == "uml:Interface")
-                return EnumTiposClase.INTERFAZ;
-            else if (param_tipo_clase == "uml:Enumeration")
-                return EnumTiposClase.ENUMERACION;
-            else if (param_es_abstracto)
-                return EnumTiposClase.CLASE_ABSTRACTA;
-            else if (param_tipo_clase == "uml:Class")
-                return EnumTiposClase.CLASE;
-
-            return EnumTiposClase.NULO;
-        }
-    }
-
-
-
-    /// <summary>
-    /// Objeto en el que almacenar toda la información relativa a una clase (toda la información que ofrecel el documento XMI)
+    /// Objeto en el que almacenar toda la información relativa a una clase (toda la información que ofrece el documento XMI)
     /// </summary>
     public class Clase
     {
+        /// <summary>
+        /// Identificador único de la clase.
+        /// </summary>
+        public string Id { get; set; }
+
         /// <summary>
         /// Almacena el nombre de la clase.
         /// </summary>
@@ -53,10 +26,10 @@ namespace transformador_mda.src.Dominio
         /// <summary>
         /// Almacena el tipo de clase
         /// </summary>
-        public EnumTiposClase TipoClase { get; set; }
-        
+        public TiposClases.Enumeracion TipoClase { get; set; }
+
         /// <summary>
-        /// Almacena información sobre los atributos y propiedades
+        /// Listado con los atributos y parámetros de la clase.
         /// </summary>
         public List<Elemento> Elementos { get; set; }
 
@@ -76,12 +49,43 @@ namespace transformador_mda.src.Dominio
         [JsonConstructor]
         public Clase()
         {
+            Id = string.Empty;
             Nombre = string.Empty;
             Visibilidad = EnumVisibilidad.NULO;
-            TipoClase = EnumTiposClase.NULO;
+            TipoClase = TiposClases.Enumeracion.NULO;
             Elementos = new List<Elemento>();
             Metodos = new List<Metodo>();
             Asociaciones = new List<Asociacion>();
+        }
+
+        /// <summary>
+        /// Método para obtener un elemento de la clase a través de su identificador único.
+        /// </summary>
+        /// <param name="param_id">Identificador del elemento a buscar.</param>
+        /// <returns>El elemento encontrado o null si no existe.</returns>
+        public Elemento ObtenerElementoPorId(string param_id)
+        {
+            return Elementos.Find(elemento => elemento.Id == param_id);
+        }
+
+        /// <summary>
+        /// Método para obtener un método de la clase a través de su identificador único.
+        /// </summary>
+        /// <param name="param_id">Identificador del método a buscar.</param>
+        /// <returns>El método encontrado o null si no existe.</returns>
+        public Metodo ObtenerMetodoPorId(string param_id)
+        {
+            return Metodos.Find(metodo => metodo.Id == param_id);
+        }
+
+        /// <summary>
+        /// Método para obtener una asociación de la clase a través de su identificador único.
+        /// </summary>
+        /// <param name="param_id">Identificador de la asociación a buscar.</param>
+        /// <returns>La asociación encontrada o null si no existe.</returns>
+        public Asociacion ObtenerAsociacionPorId(string param_id)
+        {
+            return Asociaciones.Find(asociacion => asociacion.Id == param_id);
         }
     }
 }

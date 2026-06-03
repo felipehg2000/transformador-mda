@@ -9,6 +9,11 @@ namespace transformador_mda.src.Dominio
     public class Metodo
     {
         /// <summary>
+        /// Identificador único del método.
+        /// </summary>
+        public string Id { get; set; }
+
+        /// <summary>
         /// Nombre de la operación.
         /// </summary>
         public string Nombre { get; set; }
@@ -38,6 +43,16 @@ namespace transformador_mda.src.Dominio
             TipoRetorno = string.Empty;
             Visibilidad = EnumVisibilidad.NULO;
             Parametros = new List<Elemento>();
+        }
+
+        /// <summary>
+        /// Busca un elemento dentro de la lista de parámetros por su identificador.
+        /// </summary>
+        /// <param name="param_id">Identificador del elemento a buscar.</param>
+        /// <returns>El elemento encontrado o null si no existe.</returns>
+        public Elemento BuscarElementoPorId(string param_id)
+        {
+            return Parametros.Find(elemento => elemento.Id == param_id);
         }
     }
 }
