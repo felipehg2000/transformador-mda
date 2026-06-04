@@ -63,7 +63,7 @@ namespace transformador_mda.src.Dominio
         public Configuracion()
         {
             TipoDiagrama = EnumTipoDiagrama.DiagramaDeClases;
-            TipoFicheroEntrada = EnumTipoFicheroEntrada.NULO;
+            TipoFicheroEntrada = EnumTipoFicheroEntrada.XMI;
             TipoSalida = EnumTipoSalida.C_SHARP;
             Proyecto = new ProyectoBase();
             RutaFicheroEntrada = string.Empty;

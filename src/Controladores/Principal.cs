@@ -6,7 +6,9 @@ using System.Text;
 using System.Threading.Tasks;
 using transformador_mda.src.Dominio;
 using transformador_mda.src.Features.CrearIds;
+using transformador_mda.src.Features.ExploradorFicheros;
 using transformador_mda.src.Features.GenerarSalida;
+using transformador_mda.src.Features.GestionConfiguracion;
 using transformador_mda.src.Features.ParserEntrada;
 
 namespace transformador_mda.src.Controladores
@@ -29,7 +31,7 @@ namespace transformador_mda.src.Controladores
 
         public Principal()
         {
-
+        Configuracion = new Configuracion();
         }
 
         #endregion
@@ -42,10 +44,11 @@ namespace transformador_mda.src.Controladores
         /// <param name="param_nombre_proyecto">Nombre del proyecto a generar.</param>
         /// <param name="param_directorio_raiz">Ruta del directorio raíz del proyecto.</param>
         /// <returns>True si el proceso es correcto, false si hay algún fallo.</returns>
-        public bool LeerFichero(string param_nombre_proyecto,
-            string param_directorio_raiz)
+        public bool LeerFichero(string param_ruta_fichero)
         {
-            IParserEntrada parser = FactoríaParser.CrearrParser(Configuracion);
+            Configuracion.RutaFicheroEntrada = param_ruta_fichero;
+
+            IParserEntrada parser = FactoríaParser.CrearParser(Configuracion);
             if (parser == null)
                 return false;
 
@@ -54,8 +57,6 @@ namespace transformador_mda.src.Controladores
                 return false;
 
             Configuracion.Proyecto.Id = CrearIdentificador.CrearGUID();
-            Configuracion.Proyecto.Nombre = param_nombre_proyecto;
-            Configuracion.Proyecto.DirectorioRaiz = param_directorio_raiz; 
 
             return true;
         }
@@ -71,6 +72,29 @@ namespace transformador_mda.src.Controladores
                 return false;
 
             return generador.GenerarSalida();
+        }
+
+
+        public bool ExportarConfiguracion()
+        {
+            string ruta_directorio = Folder.GetFolderPath("Directorio para almacenar la configuración...");
+            if (string.IsNullOrEmpty(ruta_directorio))
+                return false;
+
+            DAO.Exportar(Configuracion, ruta_directorio);
+            return true;
+        }
+
+
+        public bool ImportarConfiguracion()
+        {
+            string nombre_fichero = Files.GetFilePath("Buscar fichero XMI.",
+                "Archivos JSON (*.json) | *.json | Todos los archivos (*.*) | *.*");
+            if (string.IsNullOrEmpty(nombre_fichero))
+                return false;
+
+            Configuracion = DAO.Importar(nombre_fichero);
+            return true;
         }
 
         #endregion

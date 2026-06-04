@@ -44,7 +44,7 @@ namespace transformador_mda.src.Features.GenerarSalida
                 }
             }
 
-            throw new NotImplementedException();
+            return true;
         }
 
         #endregion
@@ -89,21 +89,38 @@ namespace transformador_mda.src.Features.GenerarSalida
 
             string textoNmaespace = Path.Combine(_directorio_actual.Namespace, _clase_actual.Nombre);
 
+            string herencia = string.Empty;
+            Asociacion asociacion_tmp = _clase_actual.Asociaciones.Find(a => a.TipoAsociacion == TiposAsociaciones.Enumeracion.HERENCIA);
+            if (asociacion_tmp != null)
+            {
+                string id_clase_origen = asociacion_tmp.ClaseOrigen;
+
+                foreach (var directorio in _proyecto.Directorios)
+                {
+                    Clase tmp = directorio.Clases.Find(c => c.Id == id_clase_origen);
+                    if (tmp.Id == id_clase_origen)
+                    {
+                        herencia = ": " + tmp.Nombre;
+                        break;
+                    }
+                }
+            }
+
             string ret_texto = PlantillasC_Sharp.ClaseBase;
 
-            ret_texto.Replace("{Namespace}", textoNmaespace);
-            ret_texto.Replace("{Visibilidad}", Visibilidad.ObtenerVisibilidad(_clase_actual.Visibilidad));
-            ret_texto.Replace("{TipoClase}", TiposClases.ObtenerTexto(_clase_actual.TipoClase));
-            ret_texto.Replace("{NombreClase}", _clase_actual.Nombre);
-            ret_texto.Replace("{Herencia}")
-            ret_texto.Replace("{Atributos}"         , atributos);
-            ret_texto.Replace("{Propiedades}"       , propiedades);
-            ret_texto.Replace("{Constructores}"     , constructores);
-            ret_texto.Replace("{MetodosPublicos}"   , metodosPublicos);
-            ret_texto.Replace("{MetodosProtegidos}" , metodosProtegidos);
-            ret_texto.Replace("{MetodosPrivados}"   , metodosPrivados);
+            ret_texto = ret_texto.Replace("{Namespace}", textoNmaespace);
+            ret_texto = ret_texto.Replace("{Visibilidad}", Visibilidad.ObtenerVisibilidad(_clase_actual.Visibilidad));
+            ret_texto = ret_texto.Replace("{TipoClase}", TiposClases.ObtenerTexto(_clase_actual.TipoClase));
+            ret_texto = ret_texto.Replace("{NombreClase}", _clase_actual.Nombre);
+            ret_texto = ret_texto.Replace("{Herencia}"          , herencia);
+            ret_texto = ret_texto.Replace("{Atributos}"         , atributos);
+            ret_texto = ret_texto.Replace("{Propiedades}"       , propiedades);
+            ret_texto = ret_texto.Replace("{Constructores}"     , constructores);
+            ret_texto = ret_texto.Replace("{MetodosPublicos}"   , metodosPublicos);
+            ret_texto = ret_texto.Replace("{MetodosProtegidos}" , metodosProtegidos);
+            ret_texto = ret_texto.Replace("{MetodosPrivados}"   , metodosPrivados);
 
-            throw new NotImplementedException();
+            return ret_texto;
         }
 
         protected override string GenerarElementos(List<Elemento> param_elementos)
@@ -138,11 +155,11 @@ namespace transformador_mda.src.Features.GenerarSalida
             foreach (var metodo in param_metodos)
             {
                 string textoMetodo = PlantillasC_Sharp.Metodo;
-                textoMetodo.Replace("{Visibilidad}"   , Visibilidad.ObtenerVisibilidad(metodo.Visibilidad));
-                textoMetodo.Replace("{TipoRetorno}"   , metodo.TipoRetorno);
-                textoMetodo.Replace("{NombreMetodo}"  , metodo.Nombre);
-                textoMetodo.Replace("{Parametros}"    , GenerarElementos(metodo.Parametros));
-                textoMetodo += "\n\n";
+                textoMetodo = textoMetodo.Replace("{Visibilidad}"   , Visibilidad.ObtenerVisibilidad(metodo.Visibilidad));
+                textoMetodo = textoMetodo.Replace("{TipoRetorno}"   , metodo.TipoRetorno);
+                textoMetodo = textoMetodo.Replace("{NombreMetodo}"  , metodo.Nombre);
+                textoMetodo = textoMetodo.Replace("{Parametros}"    , GenerarElementos(metodo.Parametros));
+                textoMetodo = textoMetodo += "\n\n";
 
                 ret_texto += textoMetodo;
             }

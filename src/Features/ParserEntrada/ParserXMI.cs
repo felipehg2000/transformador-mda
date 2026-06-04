@@ -3,6 +3,7 @@ using System.Linq;
 using System.Xml.Linq;
 using System.Collections.Generic;
 using transformador_mda.src.Dominio;
+using transformador_mda.src.Features.CrearIds;
 
 namespace transformador_mda.src.Features.ParserEntrada
 {
@@ -41,15 +42,26 @@ namespace transformador_mda.src.Features.ParserEntrada
         /// Controlador de la clase, inicializa atributos.
         /// </summary>
         /// <param name="param_ruta_fichero">Ruta del fichero XMI a parsear.</param>
-        public ParserXMI(string param_ruta_fichero) : base(param_ruta_fichero)
-        { 
+        public ParserXMI(string param_directorio_raiz, string param_nombre, string param_ruta_fichero) : base(param_ruta_fichero)
+        {
             _proyecto = new ProyectoBase();
+            _proyecto.DirectorioRaiz = param_directorio_raiz;
+            _proyecto.Nombre = param_nombre;
+
+            Directorio directorio = new Directorio()
+            {
+                Id = CrearIdentificador.CrearGUID(),
+                Nombre = param_directorio_raiz,
+                Namespace = param_nombre,
+                Clases = new List<Clase>()
+            };
+            _proyecto.Directorios.Add(directorio);
         }
 
         #endregion
 
         #region "Métodos públicos"
-        
+
         /// <summary>
         /// Método principal de la clase, parsea el fichero XMI y construye el modelo de proyecto.
         /// </summary>
@@ -68,7 +80,6 @@ namespace transformador_mda.src.Features.ParserEntrada
                 throw new Exception("El formato del documento XMI no es válido.");
 
             LeerFichero();
-            
 
             return _proyecto; 
         }
@@ -85,10 +96,7 @@ namespace transformador_mda.src.Features.ParserEntrada
         {
             if (_documento == null ||
                 _documento.Root == null ||
-                _documento.Root.Name.LocalName != "XMI")
-                return false;
-
-            if (!_documento.Descendants().Any(e => e.Name.LocalName == "Model"))
+                _documento.Root.Name.LocalName != "Model")
                 return false;
 
             bool contieneClavesSoportadas = _documento.Descendants().Any(e =>
@@ -203,13 +211,17 @@ namespace transformador_mda.src.Features.ParserEntrada
             if (string.IsNullOrWhiteSpace(nombre))
                 return;
 
+            string tipoXmi = _elemento_actual
+                .Attributes()
+                .FirstOrDefault(a => a.Name.LocalName == "type")
+                ?.Value;
+
             Clase clase = new Clase
             {
                 Id = id,
                 Nombre = nombre,
-                Visibilidad = Visibilidad.ObtenerEnumeracion(_elemento_actual.Attribute("visibility")?.Value),
-                TipoClase = TiposClases.ObtenerEnumeracion(_elemento_actual.Attribute("xmi:type")?.Value,
-                    _elemento_actual.Attribute("isAbstract")?.Value == "true"),
+                Visibilidad = EnumVisibilidad.PUBLICO,
+                TipoClase = TiposClases.ObtenerEnumeracion(tipoXmi, _elemento_actual.Attribute("isAbstract")?.Value == "true"),
                 Elementos = new List<Elemento>(),
                 Metodos = new List<Metodo>(),
                 Asociaciones = new List<Asociacion>()
@@ -295,30 +307,23 @@ namespace transformador_mda.src.Features.ParserEntrada
                 .FirstOrDefault(a => a.Name.LocalName == "type")
                 ?.Value;
 
-            string agregacion = _elemento_actual
-                .Descendants()
-                .Attributes()
-                .FirstOrDefault(a => a.Name.LocalName == "aggregation")
-                ?.Value;
+            bool esHerencia = _elemento_actual.Name.LocalName == "generalization";
+            bool esAgregacion = _elemento_actual.Name.LocalName == "aggregation";
 
             string id = ObtenerId(_elemento_actual);
             if (string.IsNullOrEmpty(id))
                 return;
 
             Asociacion asociacion = new Asociacion();
-            if (string.IsNullOrWhiteSpace(agregacion))
+            if (esAgregacion)
+                asociacion.TipoAsociacion = TiposAsociaciones.Enumeracion.AGREGACION;
+            else if (esHerencia)
+                asociacion.TipoAsociacion = TiposAsociaciones.Enumeracion.HERENCIA;
+            else
                 asociacion.TipoAsociacion = TiposAsociaciones.ObtenerTipoAsociacion(tipo_xmi);
-            else 
-                asociacion.TipoAsociacion = TiposAsociaciones.ObtenerTipoAsociacion(agregacion);
 
-            List<string> clasesRelacionadas = ObtenerClasesRelacionadasAsociacion(_elemento_actual);
-            if (clasesRelacionadas.Count < 2)
-                return;
-
-            asociacion.Id = id;
-            asociacion.ClaseOrigen = clasesRelacionadas[0];
-            asociacion.ClaseDestino = clasesRelacionadas[1];
-            
+            asociacion.ClaseDestino = _proyecto.Directorios.LastOrDefault()?.Clases.LastOrDefault()?.Id;
+            asociacion.ClaseOrigen = _elemento_actual.Attribute("general")?.Value;
 
             _proyecto.Directorios.LastOrDefault()?.Clases.LastOrDefault()?.Asociaciones.Add(asociacion);
         }
@@ -326,36 +331,6 @@ namespace transformador_mda.src.Features.ParserEntrada
         #endregion
 
         #region "Métodos privados"
-
-        /// <summary>
-        /// Obtiene los nombres de las clases relacionadas en una asociación.
-        /// </summary>
-        /// <param name="param_elemento">Elemento XMI que representa la asociación.</param>
-        /// <returns>Lista de nombres de las clases relacionadas.</returns>
-        List<string> ObtenerClasesRelacionadasAsociacion(XElement param_elemento)
-        {
-            List<string> ret_resultado = new List<string>();
-
-            foreach(XElement extremo in param_elemento.Descendants())
-            {
-                if (extremo.Name.LocalName != "ownedEnd" &&
-                    extremo.Name.LocalName != "memberEnd")
-                    continue;
-
-                string referenciaTipo = extremo.Attribute("type")?.Value;
-                if (string.IsNullOrWhiteSpace(referenciaTipo))
-                    referenciaTipo = extremo.Attribute("href")?.Value;
-
-                string nombreClase = _proyecto.Directorios.LastOrDefault()?.ObtenerClasePorId(referenciaTipo)?.Nombre;
-                if (!string.IsNullOrWhiteSpace(nombreClase) &&
-                    !ret_resultado.Contains(nombreClase))
-                {
-                    ret_resultado.Add(nombreClase);
-                }
-            }
-
-            return ret_resultado;
-        }
 
         /// <summary>
         /// Obtiene el valor del atributo id de un elemento del fichero XMI, si existe.
