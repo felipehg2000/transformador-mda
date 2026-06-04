@@ -21,6 +21,15 @@ namespace transformador_mda.src.Dominio
     }
 
     /// <summary>
+    /// Enumeración, identifica el tipo de salida a generar.
+    /// </summary>
+    public enum EnumTipoSalida
+    {
+        NULO = 0,                   /// <summary> Inicialización a vacío, para iniciar los atributos a vacío. </summary>
+        C_SHARP = 1,                /// <summary> Único tipo de salida soportado de momento, código C#. </summary>
+    }
+
+    /// <summary>
     /// Objeto en el que almacenar toda la información relativa a la configuración del proceso de transformación.
     /// </summary>
     public class Configuracion
@@ -34,6 +43,8 @@ namespace transformador_mda.src.Dominio
         /// Tipo de fichero de entrada a procesar, se utiliza para las factorías de lectura de ficheros.
         /// </summary>
         public EnumTipoFicheroEntrada TipoFicheroEntrada { get; set; }
+
+        public EnumTipoSalida TipoSalida { get; set; }
         
         /// <summary>
         /// Información relativa al proyecto a generar y a los artefactos a crear y sus relaciones.
@@ -51,8 +62,9 @@ namespace transformador_mda.src.Dominio
         [JsonConstructor]
         public Configuracion()
         {
-            TipoDiagrama = EnumTipoDiagrama.NULO;
+            TipoDiagrama = EnumTipoDiagrama.DiagramaDeClases;
             TipoFicheroEntrada = EnumTipoFicheroEntrada.NULO;
+            TipoSalida = EnumTipoSalida.C_SHARP;
             Proyecto = new ProyectoBase();
             RutaFicheroEntrada = string.Empty;
         }

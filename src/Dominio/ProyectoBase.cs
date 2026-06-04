@@ -19,6 +19,11 @@ namespace transformador_mda.src.Dominio
         public string Nombre { get; set; }
 
         /// <summary>
+        /// Directorio raíz del proyecto, a partir del cual se generará toda la estructura de directorios y archivos.
+        /// </summary>
+        public string DirectorioRaiz { get; set; }
+
+        /// <summary>
         /// Lista de directorios
         /// </summary>
         public List<Directorio> Directorios { get; set; }
@@ -31,6 +36,7 @@ namespace transformador_mda.src.Dominio
         {
             Id = string.Empty;
             Nombre = string.Empty;
+            DirectorioRaiz = string.Empty;
             Directorios = new List<Directorio>();
         }
 
