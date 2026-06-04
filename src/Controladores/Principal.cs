@@ -89,7 +89,7 @@ namespace transformador_mda.src.Controladores
         public bool ImportarConfiguracion()
         {
             string nombre_fichero = Files.GetFilePath("Buscar fichero XMI.",
-                "Archivos JSON (*.json) | *.json | Todos los archivos (*.*) | *.*");
+                "Archivos JSON (*.json) | *.json| Todos los archivos (*.*) | *.*");
             if (string.IsNullOrEmpty(nombre_fichero))
                 return false;
 

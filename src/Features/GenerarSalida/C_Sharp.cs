@@ -87,7 +87,7 @@ namespace transformador_mda.src.Features.GenerarSalida
             string metodosPrivados = GenerarMetodos(_clase_actual.Metodos.FindAll(m => m.Visibilidad == EnumVisibilidad.PROTEGIDO));
             string metodosProtegidos = GenerarMetodos(_clase_actual.Metodos.FindAll(m => m.Visibilidad == EnumVisibilidad.PRIVADO));
 
-            string textoNmaespace = Path.Combine(_directorio_actual.Namespace, _clase_actual.Nombre);
+            string textoNmaespace = _directorio_actual.Namespace + "." + _clase_actual.Nombre;
 
             string herencia = string.Empty;
             Asociacion asociacion_tmp = _clase_actual.Asociaciones.Find(a => a.TipoAsociacion == TiposAsociaciones.Enumeracion.HERENCIA);
@@ -134,9 +134,9 @@ namespace transformador_mda.src.Features.GenerarSalida
                 if (elemento.TipoElemento == TiposElementos.Enumeracion.PARAMETRO)
                     ret_texto += elemento.TipoElemento + " " + elemento.Nombre + ",";
                 if (elemento.Visibilidad == EnumVisibilidad.PUBLICO)
-                    ret_texto += "\t\t\tpublic " + elemento.TipoElemento + " " + elemento.Nombre + " { get; set; }\n";
+                    ret_texto += "\t\t\tpublic " + elemento.Tipo + " " + elemento.Nombre + " { get; set; }\n";
                 else
-                    ret_texto += "\t\t\t" + Visibilidad.ObtenerVisibilidad(elemento.Visibilidad) + " " + elemento.TipoElemento + " " + elemento.Nombre + ";\n";
+                    ret_texto += "\t\t\t" + Visibilidad.ObtenerVisibilidad(elemento.Visibilidad) + " " + elemento.Tipo + " " + elemento.Nombre + ";\n";
             }
 
             if (param_elementos.ElementAt(0).TipoElemento == TiposElementos.Enumeracion.PARAMETRO)
@@ -149,7 +149,7 @@ namespace transformador_mda.src.Features.GenerarSalida
         {
             string ret_texto = string.Empty;
 
-            if (param_metodos.Count > 0)
+            if (param_metodos == null || param_metodos.Count == 0)
                 return ret_texto;
 
             foreach (var metodo in param_metodos)
