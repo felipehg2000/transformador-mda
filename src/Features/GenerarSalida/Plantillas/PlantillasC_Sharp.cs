@@ -32,12 +32,6 @@ namespace {Namespace}
 
         #endregion
 
-        #region ""Constructores""
-
-{Constructores}
-
-        #endregion
-
         #region ""Métodos Públicos""
 
 {MetodosPublicos}
@@ -62,7 +56,8 @@ namespace {Namespace}
         /// Plantilla para los métodos base.
         /// </summary>
         public static string Metodo =
-@"      {Visibilidad} {TipoRetorno} {NombreMetodo}({Parametros})
+@"
+        {Visibilidad} {TipoRetorno} {NombreMetodo}({Parametros})
         {
 
         }";
