@@ -1,10 +1,4 @@
-﻿using System;
-using System.CodeDom.Compiler;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using transformador_mda.src.Dominio;
+﻿using transformador_mda.src.Dominio;
 using transformador_mda.src.Features.CrearIds;
 using transformador_mda.src.Features.ExploradorFicheros;
 using transformador_mda.src.Features.GenerarSalida;
@@ -29,9 +23,12 @@ namespace transformador_mda.src.Controladores
 
         #region "Constructor"
 
+        /// <summary>
+        /// Constructor de la clase, inicializa atributos.
+        /// </summary>
         public Principal()
         {
-        Configuracion = new Configuracion();
+            Configuracion = new Configuracion();
         }
 
         #endregion
@@ -74,7 +71,10 @@ namespace transformador_mda.src.Controladores
             return generador.GenerarSalida();
         }
 
-
+        /// <summary>
+        /// Método para llamar a la funcionalidad de exportar configuración.
+        /// </summary>
+        /// <returns>True si el proceso ha sido correcto, false si el usuario ha cancelado el proceso.</returns>
         public bool ExportarConfiguracion()
         {
             string ruta_directorio = Folder.GetFolderPath("Directorio para almacenar la configuración...");
@@ -85,7 +85,10 @@ namespace transformador_mda.src.Controladores
             return true;
         }
 
-
+        /// <summary>
+        /// Método para llamar a la funcionalidad de importar configuración.
+        /// </summary>
+        /// <returns>False si el usuario ha cancelado el proceso true si ha ido todo bien.</returns>
         public bool ImportarConfiguracion()
         {
             string nombre_fichero = Files.GetFilePath("Buscar fichero XMI.",

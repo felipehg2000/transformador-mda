@@ -122,7 +122,7 @@ namespace transformador_mda.src.Features.GenerarSalida
             string metodosPrivados = GenerarMetodos(
                 _clase_actual.Metodos.FindAll(m => m.Visibilidad == EnumVisibilidad.PRIVADO));
 
-            string textoNamespace = _directorio_actual.Namespace;
+            string textoNamespace = _proyecto.Nombre + "." + _directorio_actual.Namespace;
 
             string herencia = GenerarHerencia();
 
@@ -335,7 +335,7 @@ namespace transformador_mda.src.Features.GenerarSalida
                 if (directorioClaseRelacionada.Namespace == _directorio_actual.Namespace)
                     continue;
 
-                string referencia = "using " + directorioClaseRelacionada.Namespace + ";";
+                string referencia = "using " + _proyecto.Nombre + "." + directorioClaseRelacionada.Namespace + ";";
 
                 if (!referencias.Contains(referencia))
                     referencias.Add(referencia);

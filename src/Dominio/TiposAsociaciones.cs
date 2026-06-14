@@ -2,6 +2,9 @@
 
 namespace transformador_mda.src.Dominio
 {
+    /// <summary>
+    /// Clase para gestiónar los posibles tipos de asociaciones entre clases.
+    /// </summary>
     static public class TiposAsociaciones
     {
         /// <summary>
@@ -17,6 +20,12 @@ namespace transformador_mda.src.Dominio
             DEPENDENCIA = 5,    /// <summary> Relación de dependencia entre clases </summary>
         }
 
+        /// <summary>
+        /// De un literal obtiene el número de la enumeración correspondiente
+        /// </summary>
+        /// <param name="tipo_asociacion">Literal de la asociación.</param>
+        /// <returns></returns>
+        /// <exception cref="Exception">Excepción de asociación no encontrada.</exception>
         static public Enumeracion ObtenerTipoAsociacion(string tipo_asociacion)
         {
             switch (tipo_asociacion.ToUpper())
@@ -36,6 +45,12 @@ namespace transformador_mda.src.Dominio
             }
         }
 
+        /// <summary>
+        /// De una enumeración devuelve el texto asociado.
+        /// </summary>
+        /// <param name="tipo_asociacion">Enumeración con el tipo de asociación.</param>
+        /// <returns></returns>
+        /// <exception cref="Exception">Excepción de tipo de enumeración no soportada.</exception>
         static public string ObtenerNombreTipoAsociacion(Enumeracion tipo_asociacion)
         {
             switch (tipo_asociacion)

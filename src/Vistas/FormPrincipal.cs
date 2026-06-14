@@ -98,6 +98,16 @@ namespace transformador_mda.src.Vistas
         /// <param name="e">Argumentos asociados al evento.</param>
         private void buttonBuscarXMI_Click(object sender, EventArgs e)
         {
+            if (string.IsNullOrEmpty(textBoxRutaRaiz.Text) ||
+                string.IsNullOrEmpty(textBoxNombreProyecto.Text) ||
+                string.IsNullOrEmpty(textBoxNamespaceProyecto.Text))
+            {
+                MessageBox.Show("Para acceder a esta opción debe rellenar el resto de campos del formulario.",
+                    "Error",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+            }
+
             string rutaFichero = Files.GetFilePath("Buscar fichero XMI.",
                 "Archivos XMI (*.xmi) | *.xmi| Archivos XML (*.xml) | *.xml| Todos los archivos (*.*) | *.*");
             if (string.IsNullOrEmpty(rutaFichero))

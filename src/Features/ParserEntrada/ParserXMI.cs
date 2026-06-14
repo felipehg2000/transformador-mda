@@ -54,7 +54,7 @@ namespace transformador_mda.src.Features.ParserEntrada
             {
                 Id = CrearIdentificador.CrearGUID(),
                 Nombre = param_directorio_raiz,
-                Namespace = param_nombre,
+                Namespace = param_directorio_raiz + "." + param_nombre,
                 Clases = new List<Clase>()
             };
 
@@ -98,9 +98,21 @@ namespace transformador_mda.src.Features.ParserEntrada
         /// <returns>True si el formato es válido, false si no.</returns>
         protected override bool EsFormatoValido()
         {
-            if (_documento == null ||
-                _documento.Root == null ||
-                _documento.Root.Name.LocalName != "Model")
+            if (_documento == null || _documento.Root == null)
+                return false;
+
+            bool tieneRaizValida =
+                _documento.Root.Name.LocalName == "Model" ||
+                _documento.Root.Name.LocalName == "XMI";
+
+            if (!tieneRaizValida)
+                return false;
+
+            bool contieneModelo =
+                _documento.Root.Name.LocalName == "Model" ||
+                _documento.Descendants().Any(e => e.Name.LocalName == "Model");
+
+            if (!contieneModelo)
                 return false;
 
             bool contieneClavesSoportadas = _documento.Descendants().Any(e =>
@@ -263,12 +275,16 @@ namespace transformador_mda.src.Features.ParserEntrada
             if (string.IsNullOrEmpty(nombre))
                 return;
 
+            EnumVisibilidad visibilidad = EnumVisibilidad.PUBLICO;
+            if (_clave_actual != ClavesSoportadasXMI.Enumeracion.PARAMETRO)
+                visibilidad = Visibilidad.ObtenerEnumeracion(_elemento_actual.Attribute("visibility")?.Value);
+
             Elemento elemento = new Elemento
             {
                 Id = id,
                 Nombre = nombre,
                 Tipo = ObtenerTipo(_elemento_actual),
-                Visibilidad = EnumVisibilidad.PUBLICO,
+                Visibilidad = visibilidad,
                 TipoElemento = _clave_actual == ClavesSoportadasXMI.Enumeracion.ATRIBUTO
                     ? TiposElementos.Enumeracion.ATRIBUTO
                     : TiposElementos.Enumeracion.PARAMETRO
@@ -354,11 +370,18 @@ namespace transformador_mda.src.Features.ParserEntrada
             {
                 List<string> clasesRelacionadas = ObtenerClasesRelacionadasAsociacion(_elemento_actual);
 
-                if (clasesRelacionadas.Count < 2)
-                    return;
+                //if (clasesRelacionadas.Count < 2)
+                //    return;
 
-                asociacion.ClaseOrigen = clasesRelacionadas[0];
-                asociacion.ClaseDestino = clasesRelacionadas[1];
+                if (clasesRelacionadas.Count == 1)
+                {
+                    asociacion.ClaseDestino = clasesRelacionadas[0];
+                }
+                else
+                {
+                    asociacion.ClaseOrigen = clasesRelacionadas[0];
+                    asociacion.ClaseDestino = clasesRelacionadas[1];
+                }
             }
 
             _proyecto.Directorios.LastOrDefault()?.Clases.LastOrDefault()?.Asociaciones.Add(asociacion);
@@ -497,34 +520,76 @@ namespace transformador_mda.src.Features.ParserEntrada
         {
             List<string> ret_resultado = new List<string>();
 
+            if (param_elemento == null)
+                return ret_resultado;
+
+            string memberEnd = param_elemento.Attribute("memberEnd")?.Value;
+
+            if (!string.IsNullOrWhiteSpace(memberEnd))
+            {
+                string[] idsExtremos = memberEnd.Split(
+                    new char[] { ' ' },
+                    StringSplitOptions.RemoveEmptyEntries);
+
+                foreach (string idExtremo in idsExtremos)
+                {
+                    XElement extremo = _documento
+                        .Descendants()
+                        .FirstOrDefault(e => ObtenerId(e) == idExtremo);
+
+                    if (extremo == null)
+                        continue;
+
+                    string idClase = ObtenerIdClaseDesdeExtremo(extremo);
+
+                    if (!string.IsNullOrWhiteSpace(idClase) &&
+                        !ret_resultado.Contains(idClase))
+                    {
+                        ret_resultado.Add(idClase);
+                    }
+                }
+            }
+
             foreach (XElement extremo in param_elemento.Descendants())
             {
-                if (extremo.Name.LocalName != "ownedEnd" &&
-                    extremo.Name.LocalName != "memberEnd")
+                if (extremo.Name.LocalName != "ownedEnd")
                     continue;
 
-                string referenciaTipo = extremo.Attribute("type")?.Value;
+                string idClase = ObtenerIdClaseDesdeExtremo(extremo);
 
-                if (string.IsNullOrWhiteSpace(referenciaTipo))
-                    referenciaTipo = extremo.Attribute("href")?.Value;
-
-                if (!string.IsNullOrWhiteSpace(referenciaTipo) &&
-                    referenciaTipo.Contains("#"))
+                if (!string.IsNullOrWhiteSpace(idClase) &&
+                    !ret_resultado.Contains(idClase))
                 {
-                    referenciaTipo = referenciaTipo.Substring(
-                        referenciaTipo.LastIndexOf("#") + 1);
-                }
-
-                string nombreClase = ObtenerNombreElementoPorId(referenciaTipo);
-
-                if (!string.IsNullOrWhiteSpace(nombreClase) &&
-                    !ret_resultado.Contains(nombreClase))
-                {
-                    ret_resultado.Add(nombreClase);
+                    ret_resultado.Add(idClase);
                 }
             }
 
             return ret_resultado;
+        }
+
+        /// <summary>
+        /// Método encargado de obtener los ids de dos clases según su asociación
+        /// </summary>
+        /// <param name="param_extremo">Elemento del que obtener el identificador.</param>
+        /// <returns>Listado de los identificadores asociados a una relación.</returns>
+        private string ObtenerIdClaseDesdeExtremo(XElement param_extremo)
+        {
+            if (param_extremo == null)
+                return string.Empty;
+
+            string referenciaTipo = param_extremo.Attribute("type")?.Value;
+
+            if (string.IsNullOrWhiteSpace(referenciaTipo))
+                referenciaTipo = param_extremo.Attribute("href")?.Value;
+
+            if (!string.IsNullOrWhiteSpace(referenciaTipo) &&
+                referenciaTipo.Contains("#"))
+            {
+                referenciaTipo = referenciaTipo.Substring(
+                    referenciaTipo.LastIndexOf("#") + 1);
+            }
+
+            return referenciaTipo ?? string.Empty;
         }
 
         #endregion
