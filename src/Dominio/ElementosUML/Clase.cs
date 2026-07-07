@@ -1,33 +1,13 @@
 ﻿using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
-namespace transformador_mda.src.Dominio
+namespace transformador_mda.src.Dominio.ElementosUML
 {
     /// <summary>
     /// Objeto en el que almacenar toda la información relativa a una clase (toda la información que ofrece el documento XMI)
     /// </summary>
-    public class Clase
+    public class Clase : ElementoVisible
     {
-        /// <summary>
-        /// Identificador único de la clase.
-        /// </summary>
-        public string Id { get; set; }
-
-        /// <summary>
-        /// Almacena el nombre de la clase.
-        /// </summary>
-        public string Nombre { get; set; }
-
-        /// <summary>
-        /// Almacena el tipo de visibilidad de la clase
-        /// </summary>
-        public EnumVisibilidad Visibilidad { get; set; }
-
-        /// <summary>
-        /// Almacena el tipo de clase
-        /// </summary>
-        public TiposClases.Enumeracion TipoClase { get; set; }
-
         /// <summary>
         /// Listado con los atributos y parámetros de la clase.
         /// </summary>
@@ -47,12 +27,8 @@ namespace transformador_mda.src.Dominio
         /// Constructor de la clase, inicializa atributos a vacío.
         /// </summary>
         [JsonConstructor]
-        public Clase()
+        public Clase() : base()
         {
-            Id = string.Empty;
-            Nombre = string.Empty;
-            Visibilidad = EnumVisibilidad.NULO;
-            TipoClase = TiposClases.Enumeracion.NULO;
             Elementos = new List<Elemento>();
             Metodos = new List<Metodo>();
             Asociaciones = new List<Asociacion>();

@@ -1,28 +1,13 @@
 ﻿using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
-namespace transformador_mda.src.Dominio
+namespace transformador_mda.src.Dominio.ElementosUML
 {
     /// <summary>
     /// Clase para almacenar la información sobre la estructura completa del proyecto a generar
     /// </summary>
-    public class ProyectoBase
+    public class ProyectoBase : ElementoBase
     {
-        /// <summary>
-        /// Identificador único del proyecto.
-        /// </summary>
-        public string Id { get; set; }
-
-        /// <summary>
-        /// Nombre del proyecto
-        /// </summary>
-        public string Nombre { get; set; }
-
-        /// <summary>
-        /// Directorio raíz del proyecto, a partir del cual se generará toda la estructura de directorios y archivos.
-        /// </summary>
-        public string DirectorioRaiz { get; set; }
-
         /// <summary>
         /// Lista de directorios
         /// </summary>
@@ -32,11 +17,8 @@ namespace transformador_mda.src.Dominio
         /// Constructor de la clase, inicializa atributos a vacío.
         /// </summary>
         [JsonConstructor]
-        public ProyectoBase()
+        public ProyectoBase() : base()
         {
-            Id = string.Empty;
-            Nombre = string.Empty;
-            DirectorioRaiz = string.Empty;
             Directorios = new List<Directorio>();
         }
 
