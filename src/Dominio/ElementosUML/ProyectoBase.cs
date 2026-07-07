@@ -19,6 +19,7 @@ namespace transformador_mda.src.Dominio.ElementosUML
         [JsonConstructor]
         public ProyectoBase() : base()
         {
+            Tipo = EnumTipoElemento.PROYECTO;
             Directorios = new List<Directorio>();
         }
 

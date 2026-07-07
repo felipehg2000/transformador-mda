@@ -6,11 +6,13 @@
     public enum EnumTipoElemento
     {
         NO_DEFINIDO = 0,
-        CLASE = 1,
-        ATRIBUTO = 2,
-        METODO = 3,
-        PARAMETRO = 4,
-        ASOCIACION = 5
+        PROYECTO = 1,
+        DIRECTORIO = 2,
+        CLASE = 3,
+        ATRIBUTO = 4,
+        METODO = 5,
+        PARAMETRO = 6,
+        ASOCIACION = 7
     }
 
     /// <summary>

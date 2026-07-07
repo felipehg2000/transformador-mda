@@ -9,6 +9,7 @@ namespace transformador_mda.src.Dominio.ElementosUML
         [JsonConstructor]
         public Parametro() : base()
         {
+            Tipo = EnumTipoElemento.PARAMETRO;
             Tipado = string.Empty;
         }
     }

@@ -28,6 +28,7 @@ namespace transformador_mda.src.Dominio.ElementosUML
         [JsonConstructor]
         public Asociacion() : base() 
         {
+            Tipo = EnumTipoElemento.ASOCIACION;
             TipoAsociacion = EnumTipoAsociacion.NO_DEFINIDA;
             IdClaseOrigen = string.Empty;
             IdClaseDestino = string.Empty;

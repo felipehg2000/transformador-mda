@@ -8,7 +8,8 @@ namespace transformador_mda.src.Dominio.ElementosUML
 
         [JsonConstructor]
         public Atributo() : base()
-        { 
+        {
+            Tipo = EnumTipoElemento.ATRIBUTO;
             Tipado = string.Empty;
         }
     }

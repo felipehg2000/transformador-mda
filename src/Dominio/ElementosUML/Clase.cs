@@ -9,9 +9,14 @@ namespace transformador_mda.src.Dominio.ElementosUML
     public class Clase : ElementoVisible
     {
         /// <summary>
+        /// Tipo de clase (clase, interfaz, enumeración, etc.)
+        /// </summary>
+        public EnumTiposClases TipoClase { get; set; }
+
+        /// <summary>
         /// Listado con los atributos y parámetros de la clase.
         /// </summary>
-        public List<Elemento> Elementos { get; set; }
+        public List<Atributo> Atributos { get; set; }
 
         /// <summary>
         /// Almacena información sobre los métodos
@@ -29,19 +34,21 @@ namespace transformador_mda.src.Dominio.ElementosUML
         [JsonConstructor]
         public Clase() : base()
         {
-            Elementos = new List<Elemento>();
+            Tipo = EnumTipoElemento.CLASE;
+            TipoClase = EnumTiposClases.NO_DEFINIDA;
+            Atributos = new List<Atributo>();
             Metodos = new List<Metodo>();
             Asociaciones = new List<Asociacion>();
         }
 
         /// <summary>
-        /// Método para obtener un elemento de la clase a través de su identificador único.
+        /// Método para obtener un atributo de la clase a través de su identificador único.
         /// </summary>
-        /// <param name="param_id">Identificador del elemento a buscar.</param>
-        /// <returns>El elemento encontrado o null si no existe.</returns>
-        public Elemento ObtenerElementoPorId(string param_id)
+        /// <param name="param_id">Identificador del atributo a buscar.</param>
+        /// <returns>El atributo encontrado o null si no existe.</returns>
+        public Atributo ObtenerAtributoPorId(string param_id)
         {
-            return Elementos.Find(elemento => elemento.Id == param_id);
+            return Atributos.Find(atributo => atributo.Id == param_id);
         }
 
         /// <summary>

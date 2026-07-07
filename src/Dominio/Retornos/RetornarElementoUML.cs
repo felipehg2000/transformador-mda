@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using transformador_mda.src.Dominio.ElementosUML;
 
 namespace transformador_mda.src.Dominio.Retornos
 {
@@ -12,7 +8,7 @@ namespace transformador_mda.src.Dominio.Retornos
 
         public RetornarElementoUML(bool param_exito, 
             string param_texto_usuario, 
-            Elemento param_elemento, 
+            ElementoBase param_elemento, 
             string param_texto_desarrollador = null) : 
             base(param_exito, 
                 param_texto_usuario, 

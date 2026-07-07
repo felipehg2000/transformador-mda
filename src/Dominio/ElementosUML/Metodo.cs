@@ -16,7 +16,7 @@ namespace transformador_mda.src.Dominio.ElementosUML
         /// <summary>
         /// Parámetros asociados al método.
         /// </summary>
-        public List<Elemento> Parametros { get; set; }
+        public List<Parametro> Parametros { get; set; }
 
         /// <summary>
         /// Constructor de la clase, inicializa atributos.
@@ -24,18 +24,19 @@ namespace transformador_mda.src.Dominio.ElementosUML
         [JsonConstructor]
         public Metodo() : base()
         {
+            Tipo = EnumTipoElemento.METODO;
             TipoRetorno = string.Empty;
-            Parametros = new List<Elemento>();
+            Parametros = new List<Parametro>();
         }
 
         /// <summary>
-        /// Busca un elemento dentro de la lista de parámetros por su identificador.
+        /// Busca un parámetro dentro de la lista de parámetros por su identificador.
         /// </summary>
-        /// <param name="param_id">Identificador del elemento a buscar.</param>
-        /// <returns>El elemento encontrado o null si no existe.</returns>
-        public Elemento BuscarElementoPorId(string param_id)
+        /// <param name="param_id">Identificador del parámetro a buscar.</param>
+        /// <returns>El parámetro encontrado o null si no existe.</returns>
+        public Parametro BuscarParametroPorId(string param_id)
         {
-            return Parametros.Find(elemento => elemento.Id == param_id);
+            return Parametros.Find(parametro => parametro.Id == param_id);
         }
     }
 }
