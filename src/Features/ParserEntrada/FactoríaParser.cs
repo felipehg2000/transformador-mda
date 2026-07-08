@@ -15,7 +15,7 @@ namespace transformador_mda.src.Features.ParserEntrada
         /// <returns>Instancia del parser de entrada correspondiente.</returns>
         /// <exception cref="ArgumentNullException">Se lanza cuando el tipo de fichero de entrada es nulo.</exception>
         /// <exception cref="ArgumentException">Se lanza cuando el tipo de fichero de entrada no está soportado.</exception>
-        public static IParserEntrada CrearParser(Configuracion param_configuracion)
+        public static ParserUMLBase CrearParser(Configuracion param_configuracion)
         {
             switch (param_configuracion.TipoFicheroEntrada)
             {

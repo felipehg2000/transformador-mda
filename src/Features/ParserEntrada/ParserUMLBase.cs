@@ -1,11 +1,11 @@
-﻿using transformador_mda.src.Dominio;
+﻿using transformador_mda.src.Dominio.ElementosUML;
 
 namespace transformador_mda.src.Features.ParserEntrada
 {
     /// <summary>
     /// Método padre para habilitar el polimorfismo e implementar el patrón factory de parsers.
     /// </summary>
-    public abstract class IParserEntrada
+    public abstract class ParserUMLBase
     {
         /// <summary>
         /// Ruta del fichero a procesar.
@@ -16,7 +16,7 @@ namespace transformador_mda.src.Features.ParserEntrada
         /// Constructor, inicializa atributos.
         /// </summary>
         /// <param name="param_ruta_fichero">Ruta del fichero a parsear</param>
-        public IParserEntrada(string param_ruta_fichero)
+        public ParserUMLBase(string param_ruta_fichero)
         {
             _ruta_fichero = param_ruta_fichero;
         }
@@ -44,28 +44,39 @@ namespace transformador_mda.src.Features.ParserEntrada
         protected abstract void ProcesarElemento();
 
         /// <summary>
-        /// Método encargado de procesar los directorios
+        /// Método para procesar un directorio, se llama desde ProcesarElemento si el elemento es un directorio.
         /// </summary>
-        protected abstract void ProcesarPaquete();
+        /// <returns>Objeto de tipo Directorio con los datos del directorio</returns>
+        protected abstract Directorio ProcesarDirectorio();
 
         /// <summary>
-        /// Método encargado de procesar las clases
+        /// Método para procesar una clase, se llama desde ProcesarElemento si el elemento es una clase.
         /// </summary>
-        protected abstract void ProcesarClase();
+        /// <returns>Objeto de tipo Clase con los datos de la clase</returns>
+        protected abstract Clase ProcesarClase();
 
         /// <summary>
-        /// Método encargado de procesar los atributos, parámetros y propiedades.
+        /// Método para procesar un atributo, se llama desde ProcesarElemento si el elemento es un atributo.
         /// </summary>
-        protected abstract void ProcesarAtributoParametro();
+        /// <returns>Objeto de tipo Atributo con los datos del atributo.</returns>
+        protected abstract Atributo ProcesarAtributo();
 
         /// <summary>
-        /// Método encargado de procesar los métodos.
+        /// Método para procesar un método, se llama desde ProcesarElemento si el elemento es un método.
         /// </summary>
-        protected abstract void ProcesarMetodo();
+        /// <returns>Objeto de tipo Metodo con los datos del método.</returns>
+        protected abstract Metodo ProcesarMetodo();
 
         /// <summary>
-        /// Método encargado de procesar las asociaciones.
+        /// Método para procesar un parámetro, se llama desde ProcesarElemento si el elemento es un parámetro.
         /// </summary>
-        protected abstract void ProcesarAsociacion();
+        /// <returns>Objeto de tipo Parametro con los datos del parámetro.</returns>
+        protected abstract Parametro ProcesarParametro();
+
+        /// <summary>
+        /// Método para procesar una asociación, se llama desde ProcesarElemento si el elemento es una asociación.
+        /// </summary>
+        /// <returns>Objeto de tipo Asociacion con los datos de la asociación.</returns>
+        protected abstract Asociacion ProcesarAsociacion();
     }
 }

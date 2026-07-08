@@ -10,7 +10,7 @@ namespace transformador_mda.src.Features.ParserEntrada
     /// <summary>
     /// Clase encargada de parsear un fichero XMI y construir un modelo de proyecto a partir de su contenido.
     /// </summary>
-    public class ParserXMI : IParserEntrada
+    public class ParserXMI : ParserUMLBase
     {
         #region "Atributos"
 

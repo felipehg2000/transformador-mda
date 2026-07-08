@@ -45,7 +45,7 @@ namespace transformador_mda.src.Controladores
         {
             Configuracion.RutaFicheroEntrada = param_ruta_fichero;
 
-            IParserEntrada parser = FactoríaParser.CrearParser(Configuracion);
+            ParserUMLBase parser = FactoríaParser.CrearParser(Configuracion);
             if (parser == null)
                 return false;
 
