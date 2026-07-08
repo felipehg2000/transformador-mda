@@ -2,8 +2,9 @@
 using System.Linq;
 using System.Xml.Linq;
 using System.Collections.Generic;
-using transformador_mda.src.Dominio;
+using transformador_mda.src.Dominio.Retornos;
 using transformador_mda.src.Features.CrearIds;
+using transformador_mda.src.Dominio.ElementosUML;
 
 namespace transformador_mda.src.Features.ParserEntrada
 {
@@ -41,20 +42,18 @@ namespace transformador_mda.src.Features.ParserEntrada
         /// <summary>
         /// Constructor de la clase, inicializa atributos.
         /// </summary>
-        /// <param name="param_directorio_raiz">Directorio raíz del proyecto.</param>
         /// <param name="param_nombre">Nombre del proyecto.</param>
         /// <param name="param_ruta_fichero">Ruta del fichero XMI.</param>
-        public ParserXMI(string param_directorio_raiz, string param_nombre, string param_ruta_fichero) : base(param_ruta_fichero)
+        public ParserXMI(string param_nombre, string param_ruta_fichero) : base(param_ruta_fichero)
         {
             _proyecto = new ProyectoBase();
-            _proyecto.DirectorioRaiz = param_directorio_raiz;
             _proyecto.Nombre = param_nombre;
 
             Directorio directorio = new Directorio()
             {
+                Tipo = EnumTipoElemento.DIRECTORIO,
                 Id = CrearIdentificador.CrearGUID(),
-                Nombre = param_directorio_raiz,
-                Namespace = param_directorio_raiz + "." + param_nombre,
+                Namespace = param_nombre,
                 Clases = new List<Clase>()
             };
 
@@ -66,26 +65,28 @@ namespace transformador_mda.src.Features.ParserEntrada
         #region "Métodos públicos"
 
         /// <summary>
-        /// Método principal de la clase, comprueba datos e inicia el proceso de lectura.
+        /// Lee el fichero XMI y construye un modelo de proyecto a partir de su contenido.
         /// </summary>
-        /// <returns>Datos del fichero XMI leído.</returns>
-        /// <exception cref="Exception">Errores con el XMI que se quiere procesar.</exception>
-        public override ProyectoBase Parsear()
+        /// <returns>Objeto de tipo RetornoElementoUML con información del proceso de lectura y errores, si los hubiera.</returns>
+        public override RetornoElementoUML Parsear()
         {
             if (string.IsNullOrEmpty(_ruta_fichero))
-                throw new Exception("El fichero no puede ser vacío.");
+                return new RetornoElementoUML(false,
+                    "Ruta del fichero XMI no especificada.",
+                    null);
 
             _documento = XDocument.Load(_ruta_fichero);
-
             if (_documento == null)
-                throw new Exception("No se pudo cargar el documento XMI.");
+                return new RetornoElementoUML(false,
+                    "No se pudo cargar el documento XMI.",
+                    null);
 
             if (!EsFormatoValido())
-                throw new Exception("El formato del documento XMI no es válido.");
+                return new RetornoElementoUML(false,
+                    "El formato del documento XMI no es válido.",
+                    null);
 
-            LeerFichero();
-
-            return _proyecto;
+            return LeerFichero();
         }
 
         #endregion
@@ -128,23 +129,26 @@ namespace transformador_mda.src.Features.ParserEntrada
         /// <summary>
         /// Método para leer el fichero XMI abierto. Lee línea por línea y comprueba si la clave es procesable por el generador.
         /// </summary>
-        protected override void LeerFichero()
+        protected override RetornoElementoUML LeerFichero()
         {
+            throw new NotImplementedException();
+
+            RetornoElementoUML ret_resultado = new RetornoElementoUML();
             foreach (var elemento in _documento.Descendants())
             {
                 string clave = elemento.Name.LocalName;
 
                 if (clave == "packagedElement")
                 {
-                    string tipoXmi = elemento
+                    string tipo_xmi = elemento
                         .Attributes()
                         .FirstOrDefault(a => a.Name.LocalName == "type")
                         ?.Value;
 
-                    if (string.IsNullOrEmpty(tipoXmi))
+                    if (string.IsNullOrEmpty(tipo_xmi))
                         continue;
 
-                    clave += $" xmi:type=\"{tipoXmi}\"";
+                    clave += $" xmi:type=\"{tipo_xmi}\"";
                 }
 
                 _clave_actual = ClavesSoportadasXMI.ObtenerEnumClave(clave);
@@ -156,6 +160,127 @@ namespace transformador_mda.src.Features.ParserEntrada
                 ProcesarElemento();
             }
         }
+
+        protected override RetornoElementoUML ProcesarElemento()
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override RetornoElementoUML ProcesarDirectorio()
+        {
+            throw new NotImplementedException();
+
+        }
+
+        protected override RetornoElementoUML ProcesarClase()
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override RetornoElementoUML ProcesarAtributo()
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override RetornoElementoUML ProcesarMetodo()
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override RetornoElementoUML ProcesarParametro()
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override RetornoElementoUML ProcesarAsociacion()
+        {
+            throw new NotImplementedException();
+        }
+
+        #endregion
+
+        #region "Métodos estáticos"
+
+        /// <summary>
+        /// Obtiene el id de una línea XMI.
+        /// </summary>
+        /// <param name="param_elemento">Línea XMI a procesar para buscar el identificador.</param>
+        /// <returns>Identificador si existe cadena vacía si no se encuentra.</returns>
+        static public string ObtenerID(XElement param_elemento)
+        {
+            return param_elemento
+                .Attributes()
+                .FirstOrDefault(a => a.Name.LocalName == "id")
+                ?.Value;
+        }
+
+        /// <summary>
+        /// Obtiene el nombre de una línea XMI.
+        /// </summary>
+        /// <param name="param_elemento">Línea XMI a procesar para buscar el nombre.</param>
+        /// <returns>Nombre si existe cadena vacía si no se encuentra.</returns>
+        static public string ObtenerNombre(XElement param_elemento)
+        {
+            return param_elemento
+                .Attributes()
+                .FirstOrDefault(a => a.Name.LocalName == "name")
+                ?.Value;
+        }
+
+        /// <summary>
+        /// Busca un elemento en el documento XMI por su identificador.
+        /// </summary>
+        /// <param name="param_documento">Documento XMI donde buscar el elemento.</param>
+        /// <param name="param_id">Identificador del elemento a buscar.</param>
+        /// <returns>Elemento si se encuentra, null si no se encuentra.</returns>
+        static public XElement BuscarElementoPorID(XDocument param_documento, string param_id)
+        {
+            if (param_documento == null || string.IsNullOrWhiteSpace(param_id))
+                return null;
+
+            return param_documento
+                .Descendants()
+                .FirstOrDefault(e => e.Attribute("id")?.Value == param_id);
+        }
+
+        /// <summary>
+        /// Busca un elemento en el documento XMI por su clave.
+        /// </summary>
+        /// <param name="param_documento">Documento XMI donde buscar el elemento.</param>
+        /// <param name="param_clave">Clave del elemento a buscar.</param>
+        /// <returns>Elemento si se encuentra, null si no se encuentra.</returns>
+        static public XElement BuscarElementoPorClave(XDocument param_documento, string param_clave)
+        {
+            if (param_documento == null || string.IsNullOrWhiteSpace(param_clave))
+                return null;
+
+            return param_documento
+                .Descendants()
+                .FirstOrDefault(e => e.Name.LocalName == param_clave);
+        }
+
+        /// <summary>
+        /// Busca un elemento en el documento XMI por su nombre.
+        /// </summary>
+        /// <param name="param_documento">Documento XMI donde buscar el elemento.</param>
+        /// <param name="param_nombre">Nombre del elemento a buscar.</param>
+        /// <returns>Elemento si se encuentra, null si no se encuentra.</returns>
+        static public XElement BuscarElementoPorNombre(XDocument param_documento, string param_nombre)
+        {
+            if (param_documento == null || string.IsNullOrWhiteSpace(param_nombre))
+                return null;
+
+            return param_documento
+                .Descendants()
+                .FirstOrDefault(e => e.Attribute("name")?.Value == param_nombre);
+        }
+
+        #endregion
+
+        #region "Métodos Anteriores"
+        /*
+        #region "Métodos protegidos"
+
 
         /// <summary>
         /// Procesa el tipo de clave que se ha leido y redirige al método que lo procesa.
@@ -392,19 +517,6 @@ namespace transformador_mda.src.Features.ParserEntrada
         #region "Métodos privados"
 
         /// <summary>
-        /// Obtiene el id de una línea XMI.
-        /// </summary>
-        /// <param name="param_elemento">Línea XMI a procesar para buscar el identificador.</param>
-        /// <returns>Identificador si existe cadena vacía si no se encuentra.</returns>
-        private string ObtenerId(XElement param_elemento)
-        {
-            return param_elemento
-                .Attributes()
-                .FirstOrDefault(a => a.Name.LocalName == "id")
-                ?.Value;
-        }
-
-        /// <summary>
         /// Obtiene el tipo de atributo o parámetro del elemento que se está procesando.
         /// </summary>
         /// <param name="param_elemento">Elemento que se está procesando.</param>
@@ -443,23 +555,6 @@ namespace transformador_mda.src.Features.ParserEntrada
             }
 
             return "object";
-        }
-
-        /// <summary>
-        /// Pasado un identificador devuelve el nombre de un elemento del fichero XMI.
-        /// </summary>
-        /// <param name="param_id">Identificador asociado al nombre a buscar.</param>
-        /// <returns>Nombre de un elemento.</returns>
-        private string ObtenerNombreElementoPorId(string param_id)
-        {
-            if (string.IsNullOrWhiteSpace(param_id))
-                return string.Empty;
-
-            XElement elemento = _documento
-                .Descendants()
-                .FirstOrDefault(e => ObtenerId(e) == param_id);
-
-            return elemento?.Attribute("name")?.Value ?? string.Empty;
         }
 
         /// <summary>
@@ -593,5 +688,79 @@ namespace transformador_mda.src.Features.ParserEntrada
         }
 
         #endregion
+        */
+        #endregion "Métodos Anteriores"
+    }
+
+    static public class ClavesSoportadasXMI
+    {
+
+        /// <summary>
+        /// Enumeración que define las claves soportadas en el proceso de lectura del ficheros XMI.
+        /// </summary>
+        public enum Enumeracion
+        {
+            NULO = 0,
+            CLASE = 1,
+            ASOCIACION = 2,
+            PAQUETE = 3,
+            ATRIBUTO = 4,
+            METODO = 5,
+            PARAMETRO = 6,
+            HERENCIA = 7,
+        }
+
+        /// <summary>
+        /// Método que devuelve la clave asociada a un valor de la enumeración.
+        /// </summary>
+        /// <param name="param_enum_clave">Valor de la enumeración para el cual se desea obtener la clave.</param>
+        /// <returns>Clave asociada al valor de la enumeración.</returns>
+        /// <exception cref="ArgumentException">Se lanza si el valor de la enumeración no está soportado.</exception>
+        static public string ObtenerClave(Enumeracion param_enum_clave)
+        {
+            switch (param_enum_clave)
+            {
+                case Enumeracion.CLASE:
+                    return "packagedElement xmi:type=\"uml:Class\"";
+                case Enumeracion.ASOCIACION:
+                    return "packagedElement xmi:type=\"uml:Association\"";
+                case Enumeracion.PAQUETE:
+                    return "packagedElement xmi:type=\"uml:Package\"";
+                case Enumeracion.ATRIBUTO:
+                    return "ownedAttribute";
+                case Enumeracion.METODO:
+                    return "ownedOperation";
+                case Enumeracion.PARAMETRO:
+                    return "ownedParameter";
+                case Enumeracion.HERENCIA:
+                    return "generalization";
+                default:
+                    throw new ArgumentException("Valor de enum no soportado");
+            }
+        }
+
+        /// <summary>
+        /// Método que devuelve el valor de la enumeración asociado a una clave.
+        /// </summary>
+        /// <param name="param_clave">Clave para la cual se desea obtener el valor de la enumeración.</param>
+        /// <returns>Valor de la enumeración asociado a la clave.</returns>
+        static public Enumeracion ObtenerEnumClave(string param_clave)
+        {
+            if (param_clave == "packagedElement xmi:type=\"uml:Class\"")
+                return Enumeracion.CLASE;
+            else if (param_clave == "packagedElement xmi:type=\"uml:Association\"")
+                return Enumeracion.ASOCIACION;
+            else if (param_clave == "packagedElement xmi:type=\"uml:Package\"")
+                return Enumeracion.PAQUETE;
+            else if (param_clave == "ownedAttribute")
+                return Enumeracion.ATRIBUTO;
+            else if (param_clave == "ownedOperation")
+                return Enumeracion.METODO;
+            else if (param_clave == "ownedParameter")
+                return Enumeracion.PARAMETRO;
+            else if (param_clave == "generalization")
+                return Enumeracion.HERENCIA;
+            return Enumeracion.NULO;
+        }
     }
 }

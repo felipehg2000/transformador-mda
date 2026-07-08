@@ -90,8 +90,8 @@
     <Compile Include="src\Dominio\ElementosUML\Metodo.cs" />
     <Compile Include="src\Dominio\ElementosUML\ProyectoBase.cs" />
     <Compile Include="src\Dominio\Enumeraciones.cs" />
-    <Compile Include="src\Dominio\Retornos\RetornarConfiguracion.cs" />
-    <Compile Include="src\Dominio\Retornos\RetornarElementoUML.cs" />
+    <Compile Include="src\Dominio\Retornos\RetornoConfiguracion.cs" />
+    <Compile Include="src\Dominio\Retornos\RetornoElementoUML.cs" />
     <Compile Include="src\Dominio\Retornos\RetornoBase.cs" />
     <Compile Include="src\Features\GestionConfiguracion\DAO.cs" />
     <Compile Include="src\Features\ExploradorFicheros\Files.cs" />
@@ -109,9 +109,8 @@
     <Compile Include="src\Features\GenerarSalida\FactoriaSalida.cs" />
     <Compile Include="src\Features\GenerarSalida\GenerarSalidaBase.cs" />
     <Compile Include="src\Features\GenerarSalida\Plantillas\PlantillasC_Sharp.cs" />
-    <Compile Include="src\Features\ParserEntrada\TipoClavesXMI.cs" />
     <Compile Include="src\Features\ParserEntrada\FactoríaParser.cs" />
-    <Compile Include="src\Features\ParserEntrada\IParserEntrada.cs" />
+    <Compile Include="src\Features\ParserEntrada\ParserUMLBase.cs" />
     <Compile Include="src\Features\ParserEntrada\ParserXMI.cs" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

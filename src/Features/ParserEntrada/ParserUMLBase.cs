@@ -1,4 +1,5 @@
 ﻿using transformador_mda.src.Dominio.ElementosUML;
+using transformador_mda.src.Dominio.Retornos;
 
 namespace transformador_mda.src.Features.ParserEntrada
 {
@@ -24,8 +25,8 @@ namespace transformador_mda.src.Features.ParserEntrada
         /// <summary>
         /// Método principal para los descendientes. Se llama a este método para hacer el análisis sintáctico.
         /// </summary>
-        /// <returns>Objeto de tipo ProyectoBase con los datos del documento si todo ha ido bien o null si ha fallado algo.</returns>
-        public abstract ProyectoBase Parsear();
+        /// <returns>Objeto de tipo RetornoElementoUML con información del proceso de lectura y errores, si los hubiera.</returns>
+        public abstract RetornoElementoUML Parsear();
 
         /// <summary>
         /// Método para comprobar si un archivo es procesable o no.
@@ -36,47 +37,49 @@ namespace transformador_mda.src.Features.ParserEntrada
         /// <summary>
         /// Método para hacer el bucle de lectura, recorre elemento a elemento, comprueba si el elemento es procesable y si lo es llama a ProcesarElemento.
         /// </summary>
-        protected abstract void LeerFichero();
+        /// <returns>Objeto de tipo RetornoElementoUML con información del proceso de lectura y errores, si los hubiera.</returns>
+        protected abstract RetornoElementoUML LeerFichero();
 
         /// <summary>
         /// Factoría clásica, según el método que se vaya a procesar toma la decisión de qué función debe ser ejecutada.
         /// </summary>
-        protected abstract void ProcesarElemento();
+        /// <returns>Objeto de tipo RetornoElementoUML con información del proceso de lectura y errores, si los hubiera.</returns>
+        protected abstract RetornoElementoUML ProcesarElemento();
 
         /// <summary>
         /// Método para procesar un directorio, se llama desde ProcesarElemento si el elemento es un directorio.
         /// </summary>
-        /// <returns>Objeto de tipo Directorio con los datos del directorio</returns>
-        protected abstract Directorio ProcesarDirectorio();
+        /// <returns>Objeto de tipo RetornoElementoUML con información del proceso de lectura y errores, si los hubiera.</returns>
+        protected abstract RetornoElementoUML ProcesarDirectorio();
 
         /// <summary>
         /// Método para procesar una clase, se llama desde ProcesarElemento si el elemento es una clase.
         /// </summary>
-        /// <returns>Objeto de tipo Clase con los datos de la clase</returns>
-        protected abstract Clase ProcesarClase();
+        /// <returns>Objeto de tipo RetornoElementoUML con información del proceso de lectura y errores, si los hubiera.</returns>
+        protected abstract RetornoElementoUML ProcesarClase();
 
         /// <summary>
         /// Método para procesar un atributo, se llama desde ProcesarElemento si el elemento es un atributo.
         /// </summary>
-        /// <returns>Objeto de tipo Atributo con los datos del atributo.</returns>
-        protected abstract Atributo ProcesarAtributo();
+        /// <returns>Objeto de tipo RetornoElementoUML con información del proceso de lectura y errores, si los hubiera.</returns>
+        protected abstract RetornoElementoUML ProcesarAtributo();
 
         /// <summary>
         /// Método para procesar un método, se llama desde ProcesarElemento si el elemento es un método.
         /// </summary>
-        /// <returns>Objeto de tipo Metodo con los datos del método.</returns>
-        protected abstract Metodo ProcesarMetodo();
+        /// <returns>Objeto de tipo RetornoElementoUML con información del proceso de lectura y errores, si los hubiera.</returns>
+        protected abstract RetornoElementoUML ProcesarMetodo();
 
         /// <summary>
         /// Método para procesar un parámetro, se llama desde ProcesarElemento si el elemento es un parámetro.
         /// </summary>
-        /// <returns>Objeto de tipo Parametro con los datos del parámetro.</returns>
-        protected abstract Parametro ProcesarParametro();
+        /// <returns>Objeto de tipo RetornoElementoUML con información del proceso de lectura y errores, si los hubiera.</returns>
+        protected abstract RetornoElementoUML ProcesarParametro();
 
         /// <summary>
         /// Método para procesar una asociación, se llama desde ProcesarElemento si el elemento es una asociación.
         /// </summary>
-        /// <returns>Objeto de tipo Asociacion con los datos de la asociación.</returns>
-        protected abstract Asociacion ProcesarAsociacion();
+        /// <returns>Objeto de tipo RetornoElementoUML con información del proceso de lectura y errores, si los hubiera.</returns>
+        protected abstract RetornoElementoUML ProcesarAsociacion();
     }
 }

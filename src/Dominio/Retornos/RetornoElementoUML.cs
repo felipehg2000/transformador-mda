@@ -6,7 +6,7 @@ namespace transformador_mda.src.Dominio.Retornos
     /// <summary>
     /// Representa el retorno de una operación que devuelve un elemento UML.
     /// </summary>
-    public class RetornarElementoUML : RetornoBase
+    public class RetornoElementoUML : RetornoBase
     {
         /// <summary>
         /// Establce el elemento UML que se devuelve como resultado de la operación.
@@ -16,12 +16,20 @@ namespace transformador_mda.src.Dominio.Retornos
         /// <summary>
         /// Constructor, inicializa atributos a vacío.
         /// </summary>
+        [JsonConstructor]
+        public RetornoElementoUML() : base()
+        {
+            Elemento = new ElementoBase();
+        }
+
+        /// <summary>
+        /// Constructor, inicializa atributos a vacío.
+        /// </summary>
         /// <param name="param_exito">True si la operación fue exitosa, false en caso contrario</param>
         /// <param name="param_texto_usuario">Mensaje para el usuario</param>
         /// <param name="param_elemento">Elemento UML que se devuelve</param>
         /// <param name="param_texto_desarrollador">Mensaje para el desarrollador</param>
-        [JsonConstructor]
-        public RetornarElementoUML(bool param_exito, 
+        public RetornoElementoUML(bool param_exito, 
             string param_texto_usuario, 
             ElementoBase param_elemento, 
             string param_texto_desarrollador = null) : 

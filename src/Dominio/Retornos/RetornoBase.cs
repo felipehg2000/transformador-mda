@@ -25,6 +25,17 @@ namespace transformador_mda.src.Dominio.Retornos
         /// <summary>
         /// Constructor, inicializa atributos a vacío.
         /// </summary>
+        [JsonConstructor]
+        public RetornoBase()
+        {
+            Exito = false;
+            TextoUsuario = string.Empty;
+            TextoDesarrollador = string.Empty;
+        }
+
+        /// <summary>
+        /// Constructor, inicializa atributos a vacío.
+        /// </summary>
         /// <param name="param_exito">Indica si la operación fue exitosa</param>
         /// <param name="param_texto_usuario">Mensaje para el usuario</param>
         /// <param name="param_texto_desarrollador">Mensaje para el desarrollador</param>
