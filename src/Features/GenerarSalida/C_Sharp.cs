@@ -1,7 +1,8 @@
 ﻿using System.IO;
 using System.Collections.Generic;
-using transformador_mda.src.Dominio;
+using transformador_mda.src.Dominio.ElementosUML;
 using transformador_mda.src.Features.GenerarSalida.Plantillas;
+using System;
 
 namespace transformador_mda.src.Features.GenerarSalida
 {
@@ -34,9 +35,6 @@ namespace transformador_mda.src.Features.GenerarSalida
             if (_proyecto == null)
                 return false;
 
-            if (string.IsNullOrWhiteSpace(_proyecto.DirectorioRaiz))
-                return false;
-
             foreach (var directorio in _proyecto.Directorios)
             {
                 if (directorio == null)
@@ -67,15 +65,9 @@ namespace transformador_mda.src.Features.GenerarSalida
             if (_directorio_actual.Clases == null || _directorio_actual.Clases.Count == 0)
                 return;
 
-            string ruta_directorio = _proyecto.DirectorioRaiz;
+            throw new NotImplementedException("Falta por meter la ruta de destino del código, generar el path.");
 
-            if (!string.IsNullOrWhiteSpace(_directorio_actual.Nombre) &&
-                _directorio_actual.Nombre != _proyecto.DirectorioRaiz)
-            {
-                ruta_directorio = Path.Combine(_proyecto.DirectorioRaiz, _directorio_actual.Nombre);
-            }
-
-            Directory.CreateDirectory(ruta_directorio);
+            //Directory.CreateDirectory(ruta_directorio);
 
             foreach (var clase in _directorio_actual.Clases)
             {
@@ -86,11 +78,11 @@ namespace transformador_mda.src.Features.GenerarSalida
 
                 string contenido = GenerarCodigoClase();
 
-                string ruta_fichero = Path.Combine(
-                    ruta_directorio,
-                    clase.Nombre + ".cs");
+                //string ruta_fichero = Path.Combine(
+                //    ruta_directorio,
+                //    clase.Nombre + ".cs");
 
-                File.WriteAllText(ruta_fichero, contenido);
+                //File.WriteAllText(ruta_fichero, contenido);
             }
         }
 
@@ -103,24 +95,20 @@ namespace transformador_mda.src.Features.GenerarSalida
             if (_clase_actual == null)
                 return string.Empty;
 
-            string atributos = GenerarElementos(
-                _clase_actual.Elementos.FindAll(e =>
-                    e.TipoElemento != TiposElementos.Enumeracion.PARAMETRO &&
-                    e.Visibilidad == EnumVisibilidad.PUBLICO));
+            string atributos = GenerarAtributos(
+                _clase_actual.Atributos.FindAll(a => a.Visibilidad == EnumTipoVisibilidad.PUBLICO));
 
-            string propiedades = GenerarElementos(
-                _clase_actual.Elementos.FindAll(e =>
-                    e.TipoElemento != TiposElementos.Enumeracion.PARAMETRO &&
-                    e.Visibilidad != EnumVisibilidad.PUBLICO));
+            string propiedades = GenerarAtributos(
+                _clase_actual.Atributos.FindAll(a => a.Visibilidad == EnumTipoVisibilidad.PRIVADO));
 
             string metodosPublicos = GenerarMetodos(
-                _clase_actual.Metodos.FindAll(m => m.Visibilidad == EnumVisibilidad.PUBLICO));
+                _clase_actual.Metodos.FindAll(m => m.Visibilidad == EnumTipoVisibilidad.PUBLICO));
 
             string metodosProtegidos = GenerarMetodos(
-                _clase_actual.Metodos.FindAll(m => m.Visibilidad == EnumVisibilidad.PROTEGIDO));
+                _clase_actual.Metodos.FindAll(m => m.Visibilidad == EnumTipoVisibilidad.PROTEGIDO));
 
             string metodosPrivados = GenerarMetodos(
-                _clase_actual.Metodos.FindAll(m => m.Visibilidad == EnumVisibilidad.PRIVADO));
+                _clase_actual.Metodos.FindAll(m => m.Visibilidad == EnumTipoVisibilidad.PRIVADO));
 
             string textoNamespace = _proyecto.Nombre + "." + _directorio_actual.Namespace;
 
@@ -130,7 +118,8 @@ namespace transformador_mda.src.Features.GenerarSalida
 
             ret_texto = ret_texto.Replace("{Relaciones}", GenerarReferencias());
             ret_texto = ret_texto.Replace("{Namespace}", textoNamespace);
-            ret_texto = ret_texto.Replace("{Visibilidad}", Visibilidad.ObtenerVisibilidad(_clase_actual.Visibilidad));
+            throw new NotImplementedException("Faltan los métodos de conversión de visibilidad de XMI.");
+            //ret_texto = ret_texto.Replace("{Visibilidad}", Visibilidad.ObtenerVisibilidad(_clase_actual.Visibilidad));
             ret_texto = ret_texto.Replace("{TipoClase}", ObtenerTextoTipoClase(_clase_actual));
             ret_texto = ret_texto.Replace("{NombreClase}", _clase_actual.Nombre);
             ret_texto = ret_texto.Replace("{Herencia}", herencia);
@@ -151,35 +140,56 @@ namespace transformador_mda.src.Features.GenerarSalida
         /// </remarks>
         /// <param name="param_elementos">Listado de elementos cuyo código hay que generar.</param>
         /// <returns>Código de los elementos pasados por parámetros.</returns>
-        protected override string GenerarElementos(List<Elemento> param_elementos)
+        protected override string GenerarAtributos(List<Atributo> param_elementos)
         {
             if (param_elementos == null || param_elementos.Count == 0)
                 return string.Empty;
 
             string ret_texto = string.Empty;
 
-            foreach (var elemento in param_elementos)
+            foreach (Atributo elemento in param_elementos)
             {
                 if (elemento == null)
                     continue;
 
-                if (elemento.TipoElemento == TiposElementos.Enumeracion.PARAMETRO)
-                    continue;
-
-                if (elemento.Visibilidad == EnumVisibilidad.PUBLICO)
+                if (elemento.Visibilidad == EnumTipoVisibilidad.PUBLICO)
                 {
                     ret_texto += "\t\t\tpublic " + elemento.Tipo + " " + elemento.Nombre + " { get; set; }\n";
                 }
                 else
                 {
-                    ret_texto += "\t\t\t" +
-                        Visibilidad.ObtenerVisibilidad(elemento.Visibilidad) + " " +
-                        elemento.Tipo + " " +
-                        elemento.Nombre + ";\n";
+                    throw new NotImplementedException();
                 }
             }
 
             return ret_texto;
+        }
+
+
+        /// <summary>
+        /// Genera el código para los parámetros de un método.
+        /// </summary>
+        /// <param name="param_parametros">Listado de parámetros de un método.</param>
+        /// <returns>Código de los parámetros pasados por parámetro.</returns>
+        protected override string GenerarParametros(List<Parametro> param_parametros)
+        {
+            if (param_parametros == null || param_parametros.Count == 0)
+                return string.Empty;
+
+            List<string> parametros = new List<string>();
+
+            foreach (var parametro in param_parametros)
+            {
+                if (parametro == null)
+                    continue;
+
+                if (parametro.Tipo != EnumTipoElemento.PARAMETRO)
+                    continue;
+
+                parametros.Add(parametro.Tipo + " " + parametro.Nombre);
+            }
+
+            return string.Join(", ", parametros);
         }
 
         /// <summary>
@@ -201,7 +211,8 @@ namespace transformador_mda.src.Features.GenerarSalida
 
                 string textoMetodo = PlantillasC_Sharp.Metodo;
 
-                textoMetodo = textoMetodo.Replace("{Visibilidad}", Visibilidad.ObtenerVisibilidad(metodo.Visibilidad));
+                throw new NotImplementedException("Faltan los métodos de conversión de visibilidad de XMI.");
+                //textoMetodo = textoMetodo.Replace("{Visibilidad}", Visibilidad.ObtenerVisibilidad(metodo.Visibilidad));
                 textoMetodo = textoMetodo.Replace("{TipoRetorno}", metodo.TipoRetorno.Trim());
                 textoMetodo = textoMetodo.Replace("{NombreMetodo}", metodo.Nombre);
                 textoMetodo = textoMetodo.Replace("{Parametros}", GenerarParametros(metodo.Parametros));
@@ -217,32 +228,6 @@ namespace transformador_mda.src.Features.GenerarSalida
         #region "Métodos privados"
 
         /// <summary>
-        /// Genera el código para los parámetros de un método.
-        /// </summary>
-        /// <param name="param_parametros">Listado de parámetros de un método.</param>
-        /// <returns>Código de los parámetros pasados por parámetro.</returns>
-        private string GenerarParametros(List<Elemento> param_parametros)
-        {
-            if (param_parametros == null || param_parametros.Count == 0)
-                return string.Empty;
-
-            List<string> parametros = new List<string>();
-
-            foreach (var parametro in param_parametros)
-            {
-                if (parametro == null)
-                    continue;
-
-                if (parametro.TipoElemento != TiposElementos.Enumeracion.PARAMETRO)
-                    continue;
-
-                parametros.Add(parametro.Tipo + " " + parametro.Nombre);
-            }
-
-            return string.Join(", ", parametros);
-        }
-
-        /// <summary>
         /// Genera la herencia de una clase para la definición de la clase.
         /// </summary>
         /// <returns>Código de la dependencia de una clase hijo sobre los datos de su clase padre.</returns>
@@ -252,12 +237,12 @@ namespace transformador_mda.src.Features.GenerarSalida
                 return string.Empty;
 
             Asociacion asociacion_tmp = _clase_actual.Asociaciones
-                .Find(a => a.TipoAsociacion == TiposAsociaciones.Enumeracion.HERENCIA);
+                .Find(a => a.TipoAsociacion == EnumTipoAsociacion.HERENCIA);
 
             if (asociacion_tmp == null)
                 return string.Empty;
 
-            string id_clase_origen = asociacion_tmp.ClaseOrigen;
+            string id_clase_origen = asociacion_tmp.IdClaseOrigen;
 
             foreach (var directorio in _proyecto.Directorios)
             {
@@ -280,8 +265,9 @@ namespace transformador_mda.src.Features.GenerarSalida
         /// <returns>Tipo de clase en lenguaje C#</returns>
         private string ObtenerTextoTipoClase(Clase param_clase)
         {
-            string tipo = TiposClases.ObtenerTexto(param_clase.TipoClase);
-
+            throw new NotImplementedException("Faltan los métodos de conversión de tipos de XMI.");
+            //string tipo = EnumTiposClases.ObtenerTexto(param_clase.TipoClase);
+            string tipo = string.Empty;
             if (tipo == "uml:Class")
                 return "class";
 
@@ -313,10 +299,10 @@ namespace transformador_mda.src.Features.GenerarSalida
             {
                 string idClaseRelacionada;
 
-                if (asociacion.ClaseOrigen == _clase_actual.Id)
-                    idClaseRelacionada = asociacion.ClaseDestino;
+                if (asociacion.IdClaseOrigen == _clase_actual.Id)
+                    idClaseRelacionada = asociacion.IdClaseDestino;
                 else
-                    idClaseRelacionada = asociacion.ClaseOrigen;
+                    idClaseRelacionada = asociacion.IdClaseOrigen;
 
                 Directorio directorioClaseRelacionada = null;
 

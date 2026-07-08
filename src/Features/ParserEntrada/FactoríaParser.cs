@@ -20,8 +20,7 @@ namespace transformador_mda.src.Features.ParserEntrada
             switch (param_configuracion.TipoFicheroEntrada)
             {
                 case EnumTipoFicheroEntrada.XMI:
-                    return new ParserXMI(param_configuracion.Proyecto.DirectorioRaiz,
-                        param_configuracion.Proyecto.Nombre,
+                    return new ParserXMI(param_configuracion.Proyecto.Nombre,
                         param_configuracion.RutaFicheroEntrada);
                 case EnumTipoFicheroEntrada.NULO:
                     throw new ArgumentNullException($"El tipo de fichero de entrada no puede ser nulo.");

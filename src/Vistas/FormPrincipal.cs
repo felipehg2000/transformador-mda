@@ -70,7 +70,7 @@ namespace transformador_mda.src.Vistas
             else if (!resultado)
                 return;
 
-            textBoxRutaRaiz.Text = _controlador.Configuracion.Proyecto.DirectorioRaiz;
+            textBoxRutaRaiz.Text = "Ya no se usa, quitar cuando se modifiquen las interfaces.";
             textBoxNombreProyecto.Text = _controlador.Configuracion.Proyecto.Nombre;
             textBoxNamespaceProyecto.Text = _controlador.Configuracion.Proyecto.Nombre;
             textBoxRutaXMI.Text = _controlador.Configuracion.RutaFicheroEntrada;
@@ -113,7 +113,6 @@ namespace transformador_mda.src.Vistas
             if (string.IsNullOrEmpty(rutaFichero))
                 return;
 
-            _controlador.Configuracion.Proyecto.DirectorioRaiz = textBoxRutaRaiz.Text;
             _controlador.Configuracion.Proyecto.Nombre = textBoxNombreProyecto.Text;
 
             bool resultado = _controlador.LeerFichero(rutaFichero);
