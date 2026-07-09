@@ -12,7 +12,8 @@
         ATRIBUTO = 4,       /// <summary> Tipo de elemento atributo </summary>
         METODO = 5,         /// <summary> Tipo de elemento método </summary>
         PARAMETRO = 6,      /// <summary> Tipo de elemento parámetro </summary>
-        ASOCIACION = 7      /// <summary> Tipo de elemento asociación </summary>
+        RETORNO = 7,
+        ASOCIACION = 8      /// <summary> Tipo de elemento asociación </summary>
     }
 
     /// <summary>
@@ -50,5 +51,19 @@
         PRIVADO = 2,        /// <summary> Tipo de visibilidad privada </summary>
         PROTEGIDO = 3,      /// <summary> Tipo de visibilidad protegida </summary>
         INTERNA = 4         /// <summary> Tipo de visibilidad interna </summary>
+    }
+
+    public enum EnumTipoDato
+    {
+        NO_DEFINIDO = 0,    /// <summary> Tipo de dato no definido </summary>
+        ENTERO = 1,         /// <summary> Tipo de dato entero </summary>
+        FLOTANTE = 2,       /// <summary> Tipo de dato flotante </summary>
+        DOBLE = 3,          /// <summary> Tipo de dato doble </summary>
+        BOOLEANO = 4,       /// <summary> Tipo de dato booleano </summary>
+        CARACTER = 5,       /// <summary> Tipo de dato carácter </summary>
+        CADENA = 6,         /// <summary> Tipo de dato cadena </summary>
+        LARGO = 7,
+        CORTO = 8,
+        BYTE = 9
     }
 }

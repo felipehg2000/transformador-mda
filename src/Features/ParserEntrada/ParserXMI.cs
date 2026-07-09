@@ -1,10 +1,14 @@
 ﻿using System;
-using System.Linq;
-using System.Xml.Linq;
 using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Windows.Forms;
+using System.Xml.Linq;
+using transformador_mda.src.Dominio.ElementosUML;
 using transformador_mda.src.Dominio.Retornos;
 using transformador_mda.src.Features.CrearIds;
-using transformador_mda.src.Dominio.ElementosUML;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.ToolTip;
+using static transformador_mda.src.Features.ParserEntrada.ClavesSoportadasXMI;
 
 namespace transformador_mda.src.Features.ParserEntrada
 {
@@ -71,20 +75,14 @@ namespace transformador_mda.src.Features.ParserEntrada
         public override RetornoElementoUML Parsear()
         {
             if (string.IsNullOrEmpty(_ruta_fichero))
-                return new RetornoElementoUML(false,
-                    "Ruta del fichero XMI no especificada.",
-                    null);
+                return new RetornoElementoUML(false, "Ruta del fichero XMI no especificada.", null);
 
             _documento = XDocument.Load(_ruta_fichero);
             if (_documento == null)
-                return new RetornoElementoUML(false,
-                    "No se pudo cargar el documento XMI.",
-                    null);
-
+                return new RetornoElementoUML(false, "No se pudo cargar el documento XMI.", null);
+            
             if (!EsFormatoValido())
-                return new RetornoElementoUML(false,
-                    "El formato del documento XMI no es válido.",
-                    null);
+                return new RetornoElementoUML(false, "El formato del documento XMI no es válido.", null);
 
             return LeerFichero();
         }
@@ -97,7 +95,7 @@ namespace transformador_mda.src.Features.ParserEntrada
         /// Comprueba si el formato del fichero abierto corresponde con el formato XMI que el generador lee.
         /// </summary>
         /// <returns>True si el formato es válido, false si no.</returns>
-        protected override bool EsFormatoValido()
+        protected bool EsFormatoValido()
         {
             if (_documento == null || _documento.Root == null)
                 return false;
@@ -127,72 +125,226 @@ namespace transformador_mda.src.Features.ParserEntrada
         }
 
         /// <summary>
-        /// Método para leer el fichero XMI abierto. Lee línea por línea y comprueba si la clave es procesable por el generador.
+        /// Método para leer el fichero XMI, busca los elementos principales y busca su cierre para procesar el contenido de este.
         /// </summary>
-        protected override RetornoElementoUML LeerFichero()
+        protected RetornoElementoUML LeerFichero()
         {
-            throw new NotImplementedException();
+            XElement modelo = _documento.Descendants().FirstOrDefault(e => e.Name.LocalName == "Model");
+            if (modelo == null)
+                return new RetornoElementoUML(false, 
+                    "No se ha podido procesar el documento correctamente.", 
+                    null,
+                    "No se encontró el elemento 'Model' en el documento XMI.");
 
-            RetornoElementoUML ret_resultado = new RetornoElementoUML();
-            foreach (var elemento in _documento.Descendants())
+            foreach (XElement hijo in ObtenerHijosProcesables(modelo))
             {
-                string clave = elemento.Name.LocalName;
+                _elemento_actual = hijo;
+                _clave_actual = ClavesSoportadasXMI.ObtenerEnumClave(ObtenerClaveXMI(hijo));
 
-                if (clave == "packagedElement")
-                {
-                    string tipo_xmi = elemento
-                        .Attributes()
-                        .FirstOrDefault(a => a.Name.LocalName == "type")
-                        ?.Value;
+                RetornoElementoUML resultado = ProcesarElemento();
+                if (!resultado.Exito)
+                    return resultado;
+                
+                if (resultado.Elemento is Directorio directorio)
+                    _proyecto.Directorios.Add(directorio);
+                else if (resultado.Elemento is Clase clase)
+                    _proyecto.Directorios.FirstOrDefault()?.Clases.Add(clase);
 
-                    if (string.IsNullOrEmpty(tipo_xmi))
-                        continue;
+            } 
 
-                    clave += $" xmi:type=\"{tipo_xmi}\"";
-                }
+            return new RetornoElementoUML(true, "Fichero XMI leído correctamente.", _proyecto);
+        }
 
-                _clave_actual = ClavesSoportadasXMI.ObtenerEnumClave(clave);
+        /// <summary>
+        /// Procesa el tipo de clave que se ha leido y redirige al método que lo procesa.
+        /// </summary>
+        /// <param name="param_es_subdirectorio">Indica si el elemento que se está procesando es un subdirectorio.</param>
+        /// <exception cref="Exception">No se reconoce el elemento de la enumeración..</exception>
+        /// <returns>True si el elemento se procesa correctamente, false en caso contrario.</returns>
+        protected RetornoElementoUML ProcesarElemento()
+        {
+            RetornoElementoUML retorno = new RetornoElementoUML();
+            switch (_clave_actual)
+            {
+                case ClavesSoportadasXMI.Enumeracion.PAQUETE:
+                    retorno = ProcesarDirectorio();
+                    break;
 
-                if (_clave_actual == ClavesSoportadasXMI.Enumeracion.NULO)
-                    continue;
+                case ClavesSoportadasXMI.Enumeracion.CLASE:
+                    retorno = ProcesarClase();
+                    break;
 
-                _elemento_actual = elemento;
-                ProcesarElemento();
+                case ClavesSoportadasXMI.Enumeracion.ATRIBUTO:
+                    retorno = ProcesarAtributo();
+                    break;
+
+                case ClavesSoportadasXMI.Enumeracion.PARAMETRO:
+                    retorno = ProcesarParametro();
+                    break;
+
+                case ClavesSoportadasXMI.Enumeracion.METODO:
+                    retorno = ProcesarMetodo();
+                    break;
+
+                case ClavesSoportadasXMI.Enumeracion.ASOCIACION:
+                   // retorno = ProcesarAsociacion();
+                    break;
+
+                case ClavesSoportadasXMI.Enumeracion.HERENCIA:
+                    retorno = ProcesarHerencia();
+                    break;
+
+                default:
+                    throw new Exception("Clave no soportada: " + _clave_actual);
             }
+
+            return retorno;
         }
 
-        protected override RetornoElementoUML ProcesarElemento()
+        protected RetornoElementoUML ProcesarDirectorio()
+        {
+            Directorio nuevo_nodo = new Directorio()
+            {
+                Id = ObtenerID(_elemento_actual),
+                Nombre = ObtenerNombre(_elemento_actual),
+                Comentario = "",
+                Tipo = EnumTipoElemento.DIRECTORIO,
+
+                Namespace = _elemento_actual.Attribute("name")?.Value ?? "DirectorioSinNombre",
+                Subdirectorios = new List<Directorio>(),
+                Clases = new List<Clase>()
+            };
+
+            foreach (XElement hijo in ObtenerHijosProcesables(_elemento_actual))
+            {
+                _elemento_actual = hijo;
+                _clave_actual = ClavesSoportadasXMI.ObtenerEnumClave(ObtenerClaveXMI(hijo));
+                
+                RetornoElementoUML resultado = ProcesarElemento();
+                if (!resultado.Exito)
+                    return resultado;
+
+                if (resultado.Elemento is Directorio subdirectorio)
+                    nuevo_nodo.Subdirectorios.Add(subdirectorio);
+                else if (resultado.Elemento is Clase clase)
+                    nuevo_nodo.Clases.Add(clase);
+            }
+
+            return new RetornoElementoUML() { Exito = true, Elemento = nuevo_nodo };
+        }
+
+        protected RetornoElementoUML ProcesarClase()
+        {
+            EnumTiposClases tipo_clase = EnumTiposClases.NO_DEFINIDA;
+            string clave_xmi = ObtenerClaveXMI(_elemento_actual);
+            if (clave_xmi == "packagedElement xmi:type=\"uml:Class\"")
+                tipo_clase = EnumTiposClases.CLASE;
+            else if (clave_xmi == "packagedElement xmi:type=\"uml:Enumeration\"")
+                tipo_clase = EnumTiposClases.ENUMERACION;
+            else
+                return new RetornoElementoUML(false, 
+                    "No se ha podido procesar el documento XMI", null, 
+                    "Tipo de clase no soportado: " + clave_xmi);
+
+            Clase nuevo_nodo = new Clase()
+            {
+                Id = ObtenerID(_elemento_actual),
+                Nombre = ObtenerNombre(_elemento_actual),
+                Comentario = "",
+                Tipo = EnumTipoElemento.CLASE,
+                Visibilidad = ObtenerVisibilidad(_elemento_actual),
+
+                TipoClase = tipo_clase,
+                Atributos = new List<Atributo>(),
+                Metodos = new List<Metodo>(),
+                Asociaciones = new List<Asociacion>()
+            };
+
+            foreach (XElement hijo in ObtenerHijosProcesables(_elemento_actual))
+            {
+                _elemento_actual = hijo;
+                _clave_actual = ClavesSoportadasXMI.ObtenerEnumClave(ObtenerClaveXMI(hijo));
+
+                RetornoElementoUML resultado = ProcesarElemento();
+                if (!resultado.Exito)
+                    return resultado;
+                if (resultado.Elemento is Atributo atributo)
+                    nuevo_nodo.Atributos.Add(atributo);
+                else if (resultado.Elemento is Metodo metodo)
+                    nuevo_nodo.Metodos.Add(metodo);
+                else if (resultado.Elemento is Asociacion asociacion)
+                    nuevo_nodo.Asociaciones.Add(asociacion);
+            }
+
+            return new RetornoElementoUML() { Exito = true, Elemento = nuevo_nodo };    
+        }
+
+        protected RetornoElementoUML ProcesarAtributo()
+        {
+            Atributo nuevo_nodo = new Atributo()
+            {
+                Id = ObtenerID(_elemento_actual),
+                Nombre = ObtenerNombre(_elemento_actual),
+                Comentario = "",
+                Tipo = EnumTipoElemento.ATRIBUTO,
+                TipoDato = ObtenerTipoDeDato(_elemento_actual),
+                Visibilidad = ObtenerVisibilidad(_elemento_actual)
+            };  
+
+            return new RetornoElementoUML() { Exito = true, Elemento = nuevo_nodo };
+        }
+
+        protected RetornoElementoUML ProcesarMetodo()
+        {
+            Metodo nuevo_nodo = new Metodo()
+            {
+                Id = ObtenerID(_elemento_actual),
+                Nombre = ObtenerNombre(_elemento_actual),
+                Comentario = "",
+                Tipo = EnumTipoElemento.METODO,
+                Visibilidad = ObtenerVisibilidad(_elemento_actual),
+                Parametros = new List<Parametro>()
+            };
+
+            foreach (XElement hijo in ObtenerHijosProcesables(_elemento_actual))
+            {
+                _elemento_actual = hijo;
+                _clave_actual = ClavesSoportadasXMI.ObtenerEnumClave(ObtenerClaveXMI(hijo));
+
+                RetornoElementoUML resultado = ProcesarElemento();
+                if (!resultado.Exito)
+                    return resultado;
+
+                if (resultado.Elemento.Tipo == EnumTipoElemento.PARAMETRO)
+                    nuevo_nodo.Parametros.Add((Parametro)resultado.Elemento);
+                else if (resultado.Elemento.Tipo == EnumTipoElemento.RETORNO)
+                    nuevo_nodo.TipoRetorno = ((Parametro)resultado.Elemento).TipoDato;
+            }
+
+            return new RetornoElementoUML() { Exito = true, Elemento = nuevo_nodo };
+        }
+
+        protected RetornoElementoUML ProcesarParametro()
+        {
+            Parametro nuevo_nodo = new Parametro()
+            {
+                Id = ObtenerID(_elemento_actual),
+                Nombre = ObtenerNombre(_elemento_actual),
+                Comentario = "",
+                TipoDato = ObtenerTipoDeDato(_elemento_actual),
+                Tipo = _elemento_actual.Attributes().FirstOrDefault(a => a.Name.LocalName == "direction")?.Value == "return" ? 
+                    EnumTipoElemento.RETORNO : EnumTipoElemento.PARAMETRO
+            };
+
+            return new RetornoElementoUML() { Exito = true, Elemento = nuevo_nodo };
+        }
+
+        protected RetornoElementoUML ProcesarAsociacion()
         {
             throw new NotImplementedException();
         }
 
-        protected override RetornoElementoUML ProcesarDirectorio()
-        {
-            throw new NotImplementedException();
-
-        }
-
-        protected override RetornoElementoUML ProcesarClase()
-        {
-            throw new NotImplementedException();
-        }
-
-        protected override RetornoElementoUML ProcesarAtributo()
-        {
-            throw new NotImplementedException();
-        }
-
-        protected override RetornoElementoUML ProcesarMetodo()
-        {
-            throw new NotImplementedException();
-        }
-
-        protected override RetornoElementoUML ProcesarParametro()
-        {
-            throw new NotImplementedException();
-        }
-
-        protected override RetornoElementoUML ProcesarAsociacion()
+        protected RetornoElementoUML ProcesarHerencia()
         {
             throw new NotImplementedException();
         }
@@ -200,6 +352,29 @@ namespace transformador_mda.src.Features.ParserEntrada
         #endregion
 
         #region "Métodos estáticos"
+
+        /// <summary>
+        /// Pasado un elemento XMI devuelve la clave que lo identifica, por ejemplo "packagedElement xmi:type=\"uml:Class\"".
+        /// </summary>
+        /// <param name="param_elemento">Elemento XMI del cual obtener la clave.</param>
+        /// <returns>Clave del elemento.</returns>
+        static public string ObtenerClaveXMI(XElement param_elemento)
+        {
+            string ret_clave = param_elemento.Name.LocalName;
+            if (ret_clave != "packagedElement")
+            {
+                return ret_clave;
+            }
+
+            string tipoXmi = param_elemento.Attributes().FirstOrDefault(a => a.Name.LocalName == "type")?.Value;
+            if (string.IsNullOrEmpty(tipoXmi))
+            {
+                return string.Empty;
+            }
+
+            ret_clave += $" xmi:type=\"{tipoXmi}\"";
+            return ret_clave;
+        }
 
         /// <summary>
         /// Obtiene el id de una línea XMI.
@@ -275,421 +450,121 @@ namespace transformador_mda.src.Features.ParserEntrada
                 .FirstOrDefault(e => e.Attribute("name")?.Value == param_nombre);
         }
 
-        #endregion
-
-        #region "Métodos Anteriores"
-        /*
-        #region "Métodos protegidos"
-
-
-        /// <summary>
-        /// Procesa el tipo de clave que se ha leido y redirige al método que lo procesa.
-        /// </summary>
-        /// <exception cref="Exception">No se reconoce el elemento de la enumeración..</exception>
-        protected override void ProcesarElemento()
+        static public IEnumerable<XElement> ObtenerHijosProcesables(XElement param_elemento_padre)
         {
-            switch (_clave_actual)
+            if (param_elemento_padre == null)
+                yield break;
+
+            foreach (XElement hijo in param_elemento_padre.Elements())
             {
-                case ClavesSoportadasXMI.Enumeracion.PAQUETE:
-                    ProcesarPaquete();
-                    break;
-
-                case ClavesSoportadasXMI.Enumeracion.CLASE:
-                    ProcesarClase();
-                    break;
-
-                case ClavesSoportadasXMI.Enumeracion.ATRIBUTO:
-                case ClavesSoportadasXMI.Enumeracion.PARAMETRO:
-                    ProcesarAtributoParametro();
-                    break;
-
-                case ClavesSoportadasXMI.Enumeracion.METODO:
-                    ProcesarMetodo();
-                    break;
-
-                case ClavesSoportadasXMI.Enumeracion.ASOCIACION:
-                case ClavesSoportadasXMI.Enumeracion.HERENCIA:
-                    ProcesarAsociacion();
-                    break;
-
-                default:
-                    throw new Exception("Clave no soportada: " + _clave_actual);
-            }
-        }
-
-        /// <summary>
-        /// Procesa un directorio concreto.
-        /// </summary>
-        protected override void ProcesarPaquete()
-        {
-            if (_elemento_actual == null)
-                return;
-
-            string id = ObtenerId(_elemento_actual);
-            if (string.IsNullOrEmpty(id))
-                return;
-
-            string nombre = _elemento_actual.Attribute("name")?.Value;
-            if (string.IsNullOrWhiteSpace(nombre))
-                return;
-
-            Directorio directorio = new Directorio
-            {
-                Id = id,
-                Nombre = nombre,
-                Namespace = nombre.Replace(" ", "_").ToLower(),
-                Clases = new List<Clase>()
-            };
-
-            _proyecto.Directorios.Add(directorio);
-        }
-
-        /// <summary>
-        /// Procesa una clase concreta.
-        /// </summary>
-        protected override void ProcesarClase()
-        {
-            if (_elemento_actual == null)
-                return;
-
-            string id = ObtenerId(_elemento_actual);
-            if (string.IsNullOrEmpty(id))
-                return;
-
-            string nombre = _elemento_actual.Attribute("name")?.Value;
-            if (string.IsNullOrWhiteSpace(nombre))
-                return;
-
-            string tipoXmi = _elemento_actual
-                .Attributes()
-                .FirstOrDefault(a => a.Name.LocalName == "type")
-                ?.Value;
-
-            Clase clase = new Clase
-            {
-                Id = id,
-                Nombre = nombre,
-                Visibilidad = EnumVisibilidad.PUBLICO,
-                TipoClase = TiposClases.ObtenerEnumeracion(
-                    tipoXmi,
-                    _elemento_actual.Attribute("isAbstract")?.Value == "true"),
-                Elementos = new List<Elemento>(),
-                Metodos = new List<Metodo>(),
-                Asociaciones = new List<Asociacion>()
-            };
-
-            _proyecto.Directorios.LastOrDefault()?.Clases.Add(clase);
-        }
-
-        /// <summary>
-        /// Procesa un atributo o parámetro conncreto.
-        /// </summary>
-        protected override void ProcesarAtributoParametro()
-        {
-            if (_elemento_actual == null)
-                return;
-
-            if (_elemento_actual.Attribute("direction")?.Value == "return")
-                return;
-
-            string id = ObtenerId(_elemento_actual);
-            if (string.IsNullOrEmpty(id))
-                return;
-
-            string nombre = _elemento_actual.Attribute("name")?.Value;
-            if (string.IsNullOrEmpty(nombre))
-                return;
-
-            EnumVisibilidad visibilidad = EnumVisibilidad.PUBLICO;
-            if (_clave_actual != ClavesSoportadasXMI.Enumeracion.PARAMETRO)
-                visibilidad = Visibilidad.ObtenerEnumeracion(_elemento_actual.Attribute("visibility")?.Value);
-
-            Elemento elemento = new Elemento
-            {
-                Id = id,
-                Nombre = nombre,
-                Tipo = ObtenerTipo(_elemento_actual),
-                Visibilidad = visibilidad,
-                TipoElemento = _clave_actual == ClavesSoportadasXMI.Enumeracion.ATRIBUTO
-                    ? TiposElementos.Enumeracion.ATRIBUTO
-                    : TiposElementos.Enumeracion.PARAMETRO
-            };
-
-            if (elemento.TipoElemento == TiposElementos.Enumeracion.ATRIBUTO)
-                _proyecto.Directorios.LastOrDefault()?.Clases.LastOrDefault()?.Elementos.Add(elemento);
-            else
-                _proyecto.Directorios.LastOrDefault()?.Clases.LastOrDefault()?.Metodos.LastOrDefault()?.Parametros.Add(elemento);
-        }
-
-        /// <summary>
-        /// Procesa un método concreto.
-        /// </summary>
-        protected override void ProcesarMetodo()
-        {
-            if (_elemento_actual == null)
-                return;
-
-            string id = ObtenerId(_elemento_actual);
-            if (string.IsNullOrEmpty(id))
-                return;
-
-            string nombre = _elemento_actual.Attribute("name")?.Value;
-            if (string.IsNullOrWhiteSpace(nombre))
-                return;
-
-            XElement parametroRetorno = _elemento_actual
-                .Elements()
-                .FirstOrDefault(e =>
-                    e.Name.LocalName == "ownedParameter" &&
-                    e.Attribute("direction")?.Value == "return");
-
-            string tipoRetorno = parametroRetorno != null
-                ? ObtenerTipo(parametroRetorno)
-                : "void";
-
-            Metodo metodo = new Metodo
-            {
-                Id = id,
-                Nombre = nombre,
-                TipoRetorno = tipoRetorno,
-                Visibilidad = Visibilidad.ObtenerEnumeracion(_elemento_actual.Attribute("visibility")?.Value)
-            };
-
-            _proyecto.Directorios.LastOrDefault()?.Clases.LastOrDefault()?.Metodos.Add(metodo);
-        }
-
-        /// <summary>
-        /// Procesa una asociación concreta.
-        /// </summary>
-        protected override void ProcesarAsociacion()
-        {
-            if (_elemento_actual == null)
-                return;
-
-            string tipo_xmi = _elemento_actual
-                .Attributes()
-                .FirstOrDefault(a => a.Name.LocalName == "type")
-                ?.Value;
-
-            bool esHerencia = _elemento_actual.Name.LocalName == "generalization";
-
-            string id = ObtenerId(_elemento_actual);
-            if (string.IsNullOrEmpty(id))
-                return;
-
-            Asociacion asociacion = new Asociacion();
-
-            if (esHerencia)
-                asociacion.TipoAsociacion = TiposAsociaciones.Enumeracion.HERENCIA;
-            else
-                asociacion.TipoAsociacion = TiposAsociaciones.ObtenerTipoAsociacion(tipo_xmi);
-
-            asociacion.Id = id;
-
-            if (esHerencia)
-            {
-                asociacion.ClaseOrigen = _elemento_actual.Attribute("general")?.Value;
-                asociacion.ClaseDestino = _proyecto.Directorios.LastOrDefault()?.Clases.LastOrDefault()?.Id;
-            }
-            else
-            {
-                List<string> clasesRelacionadas = ObtenerClasesRelacionadasAsociacion(_elemento_actual);
-
-                //if (clasesRelacionadas.Count < 2)
-                //    return;
-
-                if (clasesRelacionadas.Count == 1)
-                {
-                    asociacion.ClaseDestino = clasesRelacionadas[0];
-                }
-                else
-                {
-                    asociacion.ClaseOrigen = clasesRelacionadas[0];
-                    asociacion.ClaseDestino = clasesRelacionadas[1];
-                }
-            }
-
-            _proyecto.Directorios.LastOrDefault()?.Clases.LastOrDefault()?.Asociaciones.Add(asociacion);
-        }
-
-        #endregion
-
-        #region "Métodos privados"
-
-        /// <summary>
-        /// Obtiene el tipo de atributo o parámetro del elemento que se está procesando.
-        /// </summary>
-        /// <param name="param_elemento">Elemento que se está procesando.</param>
-        /// <returns>Tipado del elemento.</returns>
-        private string ObtenerTipo(XElement param_elemento)
-        {
-            if (param_elemento == null)
-                return "object";
-
-            string tipo = param_elemento.Attribute("type")?.Value;
-
-            if (!string.IsNullOrWhiteSpace(tipo))
-            {
-                string nombreTipo = ObtenerNombreElementoPorId(tipo);
-
-                if (!string.IsNullOrWhiteSpace(nombreTipo))
-                    return NormalizarTipoCSharp(nombreTipo);
-
-                return NormalizarTipoCSharp(tipo);
-            }
-
-            XElement nodoTipo = param_elemento
-                .Elements()
-                .FirstOrDefault(e => e.Name.LocalName == "type");
-
-            string href = nodoTipo?.Attribute("href")?.Value;
-
-            if (!string.IsNullOrWhiteSpace(href))
-            {
-                int posicionAlmohadilla = href.LastIndexOf('#');
-
-                if (posicionAlmohadilla >= 0)
-                    href = href.Substring(posicionAlmohadilla + 1);
-
-                return NormalizarTipoCSharp(href);
-            }
-
-            return "object";
-        }
-
-        /// <summary>
-        /// Según los tipados que devuelve el fichero XMI, transformarlos en tipos adecuados para C#
-        /// </summary>
-        /// <param name="param_tipo"></param>
-        /// <returns></returns>
-        private string NormalizarTipoCSharp(string param_tipo)
-        {
-            if (string.IsNullOrWhiteSpace(param_tipo))
-                return "object";
-
-            switch (param_tipo.ToLower())
-            {
-                case "string":
-                    return "string";
-
-                case "integer":
-                case "int":
-                    return "int";
-
-                case "boolean":
-                case "bool":
-                    return "bool";
-
-                case "float":
-                    return "float";
-
-                case "double":
-                    return "double";
-
-                case "decimal":
-                    return "decimal";
-
-                case "long":
-                    return "long";
-
-                case "short":
-                    return "short";
-
-                case "byte":
-                    return "byte";
-
-                case "char":
-                    return "char";
-
-                default:
-                    return param_tipo;
-            }
-        }
-
-        /// <summary>
-        /// Devuelve las clases que están relacionadas por una asociación.
-        /// </summary>
-        /// <param name="param_elemento">Elemento de asociación a procesar.</param>
-        /// <returns>Lista de strings con los nombres de las clases asociadas.</returns>
-        private List<string> ObtenerClasesRelacionadasAsociacion(XElement param_elemento)
-        {
-            List<string> ret_resultado = new List<string>();
-
-            if (param_elemento == null)
-                return ret_resultado;
-
-            string memberEnd = param_elemento.Attribute("memberEnd")?.Value;
-
-            if (!string.IsNullOrWhiteSpace(memberEnd))
-            {
-                string[] idsExtremos = memberEnd.Split(
-                    new char[] { ' ' },
-                    StringSplitOptions.RemoveEmptyEntries);
-
-                foreach (string idExtremo in idsExtremos)
-                {
-                    XElement extremo = _documento
-                        .Descendants()
-                        .FirstOrDefault(e => ObtenerId(e) == idExtremo);
-
-                    if (extremo == null)
-                        continue;
-
-                    string idClase = ObtenerIdClaseDesdeExtremo(extremo);
-
-                    if (!string.IsNullOrWhiteSpace(idClase) &&
-                        !ret_resultado.Contains(idClase))
-                    {
-                        ret_resultado.Add(idClase);
-                    }
-                }
-            }
-
-            foreach (XElement extremo in param_elemento.Descendants())
-            {
-                if (extremo.Name.LocalName != "ownedEnd")
+                string clave = ObtenerClaveXMI(hijo);
+                if (ClavesSoportadasXMI.ObtenerEnumClave(clave) == ClavesSoportadasXMI.Enumeracion.NULO)
                     continue;
 
-                string idClase = ObtenerIdClaseDesdeExtremo(extremo);
-
-                if (!string.IsNullOrWhiteSpace(idClase) &&
-                    !ret_resultado.Contains(idClase))
-                {
-                    ret_resultado.Add(idClase);
-                }
+                yield return hijo;
             }
-
-            return ret_resultado;
         }
 
-        /// <summary>
-        /// Método encargado de obtener los ids de dos clases según su asociación
-        /// </summary>
-        /// <param name="param_extremo">Elemento del que obtener el identificador.</param>
-        /// <returns>Listado de los identificadores asociados a una relación.</returns>
-        private string ObtenerIdClaseDesdeExtremo(XElement param_extremo)
+        static public EnumTipoVisibilidad ObtenerVisibilidad(XElement param_elemento)
         {
-            if (param_extremo == null)
-                return string.Empty;
+            string visibilidad = param_elemento.Attribute("visibility")?.Value;
+            if (string.IsNullOrEmpty(visibilidad))
+                return EnumTipoVisibilidad.NO_DEFINIDA;
 
-            string referenciaTipo = param_extremo.Attribute("type")?.Value;
+            return ObtenerTipoVisibilidad(visibilidad);
+        }
 
-            if (string.IsNullOrWhiteSpace(referenciaTipo))
-                referenciaTipo = param_extremo.Attribute("href")?.Value;
+        static public EnumTipoDato ObtenerTipoDeDato(XElement param_elemento)
+        {
+            string tipo_dato = param_elemento.Attribute("href")?.Value;
+            if (string.IsNullOrEmpty(tipo_dato))
+                return EnumTipoDato.NO_DEFINIDO;
 
-            if (!string.IsNullOrWhiteSpace(referenciaTipo) &&
-                referenciaTipo.Contains("#"))
-            {
-                referenciaTipo = referenciaTipo.Substring(
-                    referenciaTipo.LastIndexOf("#") + 1);
-            }
-
-            return referenciaTipo ?? string.Empty;
+            return ObtenerTipoDato(tipo_dato);
         }
 
         #endregion
-        */
-        #endregion "Métodos Anteriores"
+
+        #region "Transformacion de enumeraciones"
+        
+        static public EnumTipoAsociacion ObtenerTipoAsociacion(string tipo_asociacion)
+        {
+            switch (tipo_asociacion.ToUpper())
+            {
+                case "UML:ASSOCIATION":
+                    return EnumTipoAsociacion.ASOCIACION;
+                case "SHARED":
+                    return EnumTipoAsociacion.AGREGACION;
+                case "COMPOSITE":
+                    return EnumTipoAsociacion.COMPOSICION;
+                case "GENERALIZATION":
+                    return EnumTipoAsociacion.HERENCIA;
+                case "UML:DEPENDENCY":
+                    return EnumTipoAsociacion.DEPENDENCIA;
+                default:
+                    return EnumTipoAsociacion.NO_DEFINIDA;
+            }
+        }
+
+        static public EnumTiposClases ObtenerTipoClase(string param_tipo_clase, bool param_es_abstracto)
+        {
+            switch (param_tipo_clase)
+            {
+                case "uml:Class":
+                    return param_es_abstracto ? EnumTiposClases.CLASE_ABSTRACTA : EnumTiposClases.CLASE;
+                case "uml:Interface":
+                    return EnumTiposClases.INTERFAZ;
+                case "uml:Enumeration":
+                    return EnumTiposClases.ENUMERACION;
+                default:
+                    return EnumTiposClases.NO_DEFINIDA;
+            }
+        }
+
+        static public EnumTipoVisibilidad ObtenerTipoVisibilidad(string param_visibilidad)
+        {
+            switch (param_visibilidad)
+            {
+                case "public":
+                    return EnumTipoVisibilidad.PUBLICO;
+                case "private":
+                    return EnumTipoVisibilidad.PRIVADO;
+                case "protected":
+                    return EnumTipoVisibilidad.PROTEGIDO;
+                case "internal":
+                    return EnumTipoVisibilidad.INTERNA;
+                default:
+                    return EnumTipoVisibilidad.NO_DEFINIDA;
+            }
+        }
+
+        static public EnumTipoDato ObtenerTipoDato(string param_tipo_dato)
+        {
+            switch (param_tipo_dato)
+            {
+                case "pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#Integer":
+                    return EnumTipoDato.ENTERO;
+                case "pathmap://UML_LIBRARIES/EcorePrimitiveTypes.library.uml#EFloat":
+                    return EnumTipoDato.FLOTANTE;
+                case "pathmap://UML_LIBRARIES/EcorePrimitiveTypes.library.uml#ELong":
+                    return EnumTipoDato.LARGO;
+                case "pathmap://UML_LIBRARIES/EcorePrimitiveTypes.library.uml#EShort":
+                    return EnumTipoDato.CORTO;
+                case "pathmap://UML_LIBRARIES/EcorePrimitiveTypes.library.uml#EDouble":
+                    return EnumTipoDato.DOBLE;
+                case "pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#Boolean":
+                    return EnumTipoDato.BOOLEANO;
+                case "pathmap://UML_LIBRARIES/EcorePrimitiveTypes.library.uml#EChar":
+                    return EnumTipoDato.CARACTER;
+                case "pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#String":
+                    return EnumTipoDato.CADENA;
+                case "pathmap://UML_LIBRARIES/EcorePrimitiveTypes.library.uml#EByte":
+                    return EnumTipoDato.BYTE;
+                default:
+                    return EnumTipoDato.NO_DEFINIDO;
+            }
+        }
+        #endregion
     }
 
     static public class ClavesSoportadasXMI
@@ -746,7 +621,9 @@ namespace transformador_mda.src.Features.ParserEntrada
         /// <returns>Valor de la enumeración asociado a la clave.</returns>
         static public Enumeracion ObtenerEnumClave(string param_clave)
         {
-            if (param_clave == "packagedElement xmi:type=\"uml:Class\"")
+            if (param_clave == "packagedElement xmi:type=\"uml:Class\"" || 
+                param_clave == "packagedElement xmi:type=\"uml:Enumeration\"" || 
+                param_clave == "packagedElement xmi:type=\"uml:Interface\"")
                 return Enumeracion.CLASE;
             else if (param_clave == "packagedElement xmi:type=\"uml:Association\"")
                 return Enumeracion.ASOCIACION;

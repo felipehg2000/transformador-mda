@@ -213,7 +213,7 @@ namespace transformador_mda.src.Features.GenerarSalida
 
                 throw new NotImplementedException("Faltan los métodos de conversión de visibilidad de XMI.");
                 //textoMetodo = textoMetodo.Replace("{Visibilidad}", Visibilidad.ObtenerVisibilidad(metodo.Visibilidad));
-                textoMetodo = textoMetodo.Replace("{TipoRetorno}", metodo.TipoRetorno.Trim());
+                //textoMetodo = textoMetodo.Replace("{TipoRetorno}", metodo.TipoRetorno.Trim());
                 textoMetodo = textoMetodo.Replace("{NombreMetodo}", metodo.Nombre);
                 textoMetodo = textoMetodo.Replace("{Parametros}", GenerarParametros(metodo.Parametros));
 

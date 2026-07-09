@@ -28,6 +28,7 @@ namespace transformador_mda.src.Features.ParserEntrada
         /// <returns>Objeto de tipo RetornoElementoUML con información del proceso de lectura y errores, si los hubiera.</returns>
         public abstract RetornoElementoUML Parsear();
 
+        /*
         /// <summary>
         /// Método para comprobar si un archivo es procesable o no.
         /// </summary>
@@ -43,8 +44,9 @@ namespace transformador_mda.src.Features.ParserEntrada
         /// <summary>
         /// Factoría clásica, según el método que se vaya a procesar toma la decisión de qué función debe ser ejecutada.
         /// </summary>
+        /// <param name="param_es_subdirectorio">Indica si el elemento es un subdirectorio o no.</param>
         /// <returns>Objeto de tipo RetornoElementoUML con información del proceso de lectura y errores, si los hubiera.</returns>
-        protected abstract RetornoElementoUML ProcesarElemento();
+        protected abstract bool ProcesarElemento(bool param_es_subdirectorio = false);
 
         /// <summary>
         /// Método para procesar un directorio, se llama desde ProcesarElemento si el elemento es un directorio.
@@ -81,5 +83,6 @@ namespace transformador_mda.src.Features.ParserEntrada
         /// </summary>
         /// <returns>Objeto de tipo RetornoElementoUML con información del proceso de lectura y errores, si los hubiera.</returns>
         protected abstract RetornoElementoUML ProcesarAsociacion();
+        */
     }
 }

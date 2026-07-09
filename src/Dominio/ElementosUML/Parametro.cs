@@ -8,9 +8,9 @@ namespace transformador_mda.src.Dominio.ElementosUML
     public class Parametro : ElementoBase
     {
         /// <summary>
-        /// Indica el tipo de dato del parámetro (por ejemplo, int, string, etc.).
+        /// Indica el tipo de dato del parámetro.
         /// </summary>
-        public string TipoDato { get; set; }
+        public EnumTipoDato TipoDato { get; set; }
 
         /// <summary>
         /// Constructor de la clase, incializa atributos.
@@ -19,7 +19,7 @@ namespace transformador_mda.src.Dominio.ElementosUML
         public Parametro() : base()
         {
             Tipo = EnumTipoElemento.PARAMETRO;
-            TipoDato = string.Empty;
+            TipoDato = EnumTipoDato.NO_DEFINIDO;
         }
     }
 }

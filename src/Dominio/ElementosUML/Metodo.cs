@@ -11,7 +11,7 @@ namespace transformador_mda.src.Dominio.ElementosUML
         /// <summary>
         /// Tipo de dato que retorna el método (bool, int, void...)
         /// </summary>
-        public string TipoRetorno { get; set; }
+        public EnumTipoDato TipoRetorno { get; set; }
 
         /// <summary>
         /// Parámetros asociados al método.
@@ -25,7 +25,7 @@ namespace transformador_mda.src.Dominio.ElementosUML
         public Metodo() : base()
         {
             Tipo = EnumTipoElemento.METODO;
-            TipoRetorno = string.Empty;
+            TipoRetorno = EnumTipoDato.NO_DEFINIDO;
             Parametros = new List<Parametro>();
         }
 

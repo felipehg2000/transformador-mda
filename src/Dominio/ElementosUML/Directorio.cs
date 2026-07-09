@@ -21,7 +21,7 @@ namespace transformador_mda.src.Dominio.ElementosUML
         /// <summary>
         /// Subdirectorios que engloba el directorio.
         /// </summary>
-        public List<Directorio> SubDirectorios { get; set; }
+        public List<Directorio> Subdirectorios { get; set; }
 
         /// <summary>
         /// Constructor de la clase, inicializa atributos a vacío.
@@ -31,7 +31,7 @@ namespace transformador_mda.src.Dominio.ElementosUML
         {
             Tipo = EnumTipoElemento.DIRECTORIO;
             Namespace = string.Empty;
-            SubDirectorios = new List<Directorio>();
+            Subdirectorios = new List<Directorio>();
             Clases = new List<Clase>();
         }
 
@@ -42,7 +42,7 @@ namespace transformador_mda.src.Dominio.ElementosUML
         /// <returns>El subdirectorio encontrado o null si no existe.</returns>
         public Directorio ObtenerDirectorioPorID(string param_id)
         {
-            return SubDirectorios.Find(directorio => directorio.Id == param_id);
+            return Subdirectorios.Find(directorio => directorio.Id == param_id);
         }
 
         /// <summary>

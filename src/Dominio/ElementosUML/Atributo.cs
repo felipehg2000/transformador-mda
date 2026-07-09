@@ -8,9 +8,9 @@ namespace transformador_mda.src.Dominio.ElementosUML
     public class Atributo : ElementoVisible
     {
         /// <summary>
-        /// Indica el tipo de dato del atributo (por ejemplo, int, string, etc.).
+        /// Indica el tipo de dato de un atributo.
         /// </summary>
-        public string TipoDato { get; set; }
+        public EnumTipoDato TipoDato { get; set; }
 
         /// <summary>
         /// Constructor de la clase, incializa atributos.
@@ -19,7 +19,7 @@ namespace transformador_mda.src.Dominio.ElementosUML
         public Atributo() : base()
         {
             Tipo = EnumTipoElemento.ATRIBUTO;
-            TipoDato = string.Empty;
+            TipoDato = EnumTipoDato.NO_DEFINIDO;
         }
     }
 }
