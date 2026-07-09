@@ -12,8 +12,9 @@
         ATRIBUTO = 4,       /// <summary> Tipo de elemento atributo </summary>
         METODO = 5,         /// <summary> Tipo de elemento método </summary>
         PARAMETRO = 6,      /// <summary> Tipo de elemento parámetro </summary>
-        RETORNO = 7,
-        ASOCIACION = 8      /// <summary> Tipo de elemento asociación </summary>
+        RETORNO = 7,        /// <summary> Tipo de elemento parámetro de tipo retorno de un método. </summary>
+        LITERAL = 8,        /// <summary> Tipo de elemento literal (para enumeraciones) </summary>
+        ASOCIACION = 9      /// <summary> Tipo de elemento asociación </summary>
     }
 
     /// <summary>

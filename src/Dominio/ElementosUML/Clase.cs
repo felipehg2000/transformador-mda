@@ -24,6 +24,11 @@ namespace transformador_mda.src.Dominio.ElementosUML
         public List<Metodo> Metodos { get; set; }
 
         /// <summary>
+        /// Almacena información sobre los literales de las clases (si es una enumeración)
+        /// </summary>
+        public List<ElementoBase> Literales { get; set; }
+
+        /// <summary>
         /// Almacena información sobre las asociaciones de esta clase con otras.
         /// </summary>
         public List<Asociacion> Asociaciones { get; set; }
@@ -39,6 +44,7 @@ namespace transformador_mda.src.Dominio.ElementosUML
             Atributos = new List<Atributo>();
             Metodos = new List<Metodo>();
             Asociaciones = new List<Asociacion>();
+            Literales = new List<ElementoBase>();
         }
 
         /// <summary>
@@ -69,6 +75,16 @@ namespace transformador_mda.src.Dominio.ElementosUML
         public Asociacion ObtenerAsociacionPorId(string param_id)
         {
             return Asociaciones.Find(asociacion => asociacion.Id == param_id);
+        }
+
+        /// <summary>
+        /// Método para obtener un literal de una enumeración a través de su identificador único.
+        /// </summary>
+        /// <param name="param_id">Identificador del literal a buscar.</param>
+        /// <returns>El literal encontrado o null si no existe.</returns>
+        public ElementoBase ObtenerLiteralPorId(string param_id)
+        {
+            return Literales.Find(literal => literal.Id == param_id);
         }
     }
 }

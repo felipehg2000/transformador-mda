@@ -194,6 +194,10 @@ namespace transformador_mda.src.Features.ParserEntrada
                     retorno = ProcesarHerencia();
                     break;
 
+                case ClavesSoportadasXMI.Enumeracion.LITERAL:
+                    retorno = ProcesarLiteral();
+                    break;
+
                 default:
                     throw new Exception("Clave no soportada: " + _clave_actual);
             }
@@ -257,7 +261,8 @@ namespace transformador_mda.src.Features.ParserEntrada
                 TipoClase = tipo_clase,
                 Atributos = new List<Atributo>(),
                 Metodos = new List<Metodo>(),
-                Asociaciones = new List<Asociacion>()
+                Asociaciones = new List<Asociacion>(),
+                Literales = new List<ElementoBase>()
             };
 
             foreach (XElement hijo in ObtenerHijosProcesables(_elemento_actual))
@@ -274,6 +279,8 @@ namespace transformador_mda.src.Features.ParserEntrada
                     nuevo_nodo.Metodos.Add(metodo);
                 else if (resultado.Elemento is Asociacion asociacion)
                     nuevo_nodo.Asociaciones.Add(asociacion);
+                else if (resultado.Elemento is ElementoBase literal)
+                    nuevo_nodo.Literales.Add(literal);
             }
 
             return new RetornoElementoUML() { Exito = true, Elemento = nuevo_nodo };    
@@ -337,6 +344,19 @@ namespace transformador_mda.src.Features.ParserEntrada
             };
 
             return new RetornoElementoUML() { Exito = true, Elemento = nuevo_nodo };
+        }
+
+        protected RetornoElementoUML ProcesarLiteral()
+        {
+            ElementoBase nuevo_literal = new ElementoBase()
+            {
+                Id = ObtenerID(_elemento_actual),
+                Nombre = ObtenerNombre(_elemento_actual),
+                Tipo = EnumTipoElemento.LITERAL,
+                Comentario = ""
+            };
+
+            return new RetornoElementoUML() { Exito = true, Elemento = nuevo_literal };
         }
 
         protected RetornoElementoUML ProcesarAsociacion()
@@ -583,6 +603,7 @@ namespace transformador_mda.src.Features.ParserEntrada
             METODO = 5,
             PARAMETRO = 6,
             HERENCIA = 7,
+            LITERAL = 8
         }
 
         /// <summary>
@@ -609,6 +630,8 @@ namespace transformador_mda.src.Features.ParserEntrada
                     return "ownedParameter";
                 case Enumeracion.HERENCIA:
                     return "generalization";
+                case Enumeracion.LITERAL:
+                    return "ownedLiteral";
                 default:
                     throw new ArgumentException("Valor de enum no soportado");
             }
@@ -621,8 +644,8 @@ namespace transformador_mda.src.Features.ParserEntrada
         /// <returns>Valor de la enumeración asociado a la clave.</returns>
         static public Enumeracion ObtenerEnumClave(string param_clave)
         {
-            if (param_clave == "packagedElement xmi:type=\"uml:Class\"" || 
-                param_clave == "packagedElement xmi:type=\"uml:Enumeration\"" || 
+            if (param_clave == "packagedElement xmi:type=\"uml:Class\"" ||
+                param_clave == "packagedElement xmi:type=\"uml:Enumeration\"" ||
                 param_clave == "packagedElement xmi:type=\"uml:Interface\"")
                 return Enumeracion.CLASE;
             else if (param_clave == "packagedElement xmi:type=\"uml:Association\"")
@@ -637,6 +660,8 @@ namespace transformador_mda.src.Features.ParserEntrada
                 return Enumeracion.PARAMETRO;
             else if (param_clave == "generalization")
                 return Enumeracion.HERENCIA;
+            else if (param_clave == "ownedLiteral")
+                return Enumeracion.LITERAL;
             return Enumeracion.NULO;
         }
     }
