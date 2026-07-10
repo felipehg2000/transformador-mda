@@ -1,15 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
-using System.Runtime.CompilerServices;
-using System.Windows.Forms;
 using System.Xml.Linq;
-using transformador_mda.src.Dominio.ElementosUML;
+using System.Collections.Generic;
 using transformador_mda.src.Dominio.Retornos;
 using transformador_mda.src.Features.CrearIds;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.ToolTip;
-using static transformador_mda.src.Features.ParserEntrada.ClavesSoportadasXMI;
+using transformador_mda.src.Dominio.ElementosUML;
 
 namespace transformador_mda.src.Features.ParserEntrada
 {
@@ -126,8 +121,9 @@ namespace transformador_mda.src.Features.ParserEntrada
         }
 
         /// <summary>
-        /// Método para leer el fichero XMI, busca los elementos principales y busca su cierre para procesar el contenido de este.
+        /// Método principal de lectura del fichero. Procesa el subconjunto de claves legibles y los lee de manera recursiva.
         /// </summary>
+        /// <returns>Objeto de tipo RetornoElementoUML con información del proceso y, si todo ha funcionado bien con el objeto ProyectoBase con la información del XMI.</returns>
         protected RetornoElementoUML LeerFichero()
         {
             XElement modelo = _documento.Descendants().FirstOrDefault(e => e.Name.LocalName == "Model");
@@ -150,7 +146,6 @@ namespace transformador_mda.src.Features.ParserEntrada
                     _proyecto.Directorios.Add(directorio);
                 else if (resultado.Elemento is Clase clase)
                     _proyecto.Directorios.FirstOrDefault()?.Clases.Add(clase);
-
             } 
 
             return new RetornoElementoUML(true, "Fichero XMI leído correctamente.", _proyecto);
@@ -165,6 +160,7 @@ namespace transformador_mda.src.Features.ParserEntrada
         protected RetornoElementoUML ProcesarElemento()
         {
             RetornoElementoUML retorno = new RetornoElementoUML();
+            retorno.Exito = true;
             switch (_clave_actual)
             {
                 case ClavesSoportadasXMI.Enumeracion.PAQUETE:
@@ -192,7 +188,7 @@ namespace transformador_mda.src.Features.ParserEntrada
                     break;
 
                 case ClavesSoportadasXMI.Enumeracion.HERENCIA:
-                    retorno = ProcesarHerencia();
+                    //retorno = ProcesarHerencia();
                     break;
 
                 case ClavesSoportadasXMI.Enumeracion.LITERAL:
@@ -206,6 +202,10 @@ namespace transformador_mda.src.Features.ParserEntrada
             return retorno;
         }
 
+        /// <summary>
+        /// Método encargado de leer y extraer la información de los directorios, carga el objeto Directorio con todos sus descendientes y delega la carga de su propia instancia al objeto superior (el proyecto)
+        /// </summary>
+        /// <returns>Objeto de tipo RetornoElementoUML con información del proceso y, si todo ha funcionado bien con el objeto Directorio con información del XMI.</returns>
         protected RetornoElementoUML ProcesarDirectorio()
         {
             Directorio nuevo_nodo = new Directorio()
@@ -238,6 +238,10 @@ namespace transformador_mda.src.Features.ParserEntrada
             return new RetornoElementoUML() { Exito = true, Elemento = nuevo_nodo };
         }
 
+        /// <summary>
+        /// Método encargado de leer y extraer la información de las clases, carga el objeto Clase con todos sus descendientes y delega la carga de su propia instancia al objeto superior (el directorio o el proyecto)
+        /// </summary>
+        /// <returns>Objeto de tipo RetornoElementoUML con información del proceso y, si todo ha funcionado bien con el objeto Clase con información del XMI.</returns>
         protected RetornoElementoUML ProcesarClase()
         {
             EnumTiposClases tipo_clase = EnumTiposClases.NO_DEFINIDA;
@@ -246,9 +250,11 @@ namespace transformador_mda.src.Features.ParserEntrada
                 tipo_clase = EnumTiposClases.CLASE;
             else if (clave_xmi == "packagedElement xmi:type=\"uml:Enumeration\"")
                 tipo_clase = EnumTiposClases.ENUMERACION;
+            else if (clave_xmi == "packagedElement xmi:type=\"uml:Interface\"")
+                tipo_clase = EnumTiposClases.INTERFAZ;
             else
-                return new RetornoElementoUML(false, 
-                    "No se ha podido procesar el documento XMI", null, 
+                return new RetornoElementoUML(false,
+                    "No se ha podido procesar el documento XMI", null,
                     "Tipo de clase no soportado: " + clave_xmi);
 
             Clase nuevo_nodo = new Clase()
@@ -287,6 +293,10 @@ namespace transformador_mda.src.Features.ParserEntrada
             return new RetornoElementoUML() { Exito = true, Elemento = nuevo_nodo };    
         }
 
+        /// <summary>
+        /// Método encargado de leer y extraer la información de los atributos, carga el objeto Atributo y delega la carga de su propia instancia al objeto superior (el objeto Clase)
+        /// </summary>
+        /// <returns>Objeto de tipo RetornoElementoUML con información del proceso y, si todo ha funcionado bien con el objeto Atributo con información del XMI.</returns>
         protected RetornoElementoUML ProcesarAtributo()
         {
             Atributo nuevo_nodo = new Atributo()
@@ -302,6 +312,13 @@ namespace transformador_mda.src.Features.ParserEntrada
             return new RetornoElementoUML() { Exito = true, Elemento = nuevo_nodo };
         }
 
+        /// <summary>
+        /// Método encargado de leer y extraer la información de los métodos, carga el objeto Metodo con todos sus descendientes y delega la carga de su propia instancia al objeto superior (el objeto Clase)
+        /// </summary>
+        /// <remarks>
+        /// Comprueba si hay algún parametro de tipo return para no tratarlo como parámetro sino como tipo de dato de retorno.
+        /// </remarks>
+        /// <returns>Objeto de tipo RetornoElementoUML con información del proceso y, si todo ha funcionado bien con el objeto Metodo con información del XMI.</returns>
         protected RetornoElementoUML ProcesarMetodo()
         {
             Metodo nuevo_nodo = new Metodo()
@@ -332,6 +349,10 @@ namespace transformador_mda.src.Features.ParserEntrada
             return new RetornoElementoUML() { Exito = true, Elemento = nuevo_nodo };
         }
 
+        /// <summary>
+        /// Método encargado de leer y extraer la información de los parámetros, carga el objeto Parametro y delega la carga de su propia instncia al objeto superior (el objeto Método)
+        /// </summary>
+        /// <returns>Objeto de tipo RetornoElementoUML con información del proceso y, si todo ha funcionado bien con el objeto Parametro con información del XMI.</returns>
         protected RetornoElementoUML ProcesarParametro()
         {
             Parametro nuevo_nodo = new Parametro()
@@ -347,6 +368,10 @@ namespace transformador_mda.src.Features.ParserEntrada
             return new RetornoElementoUML() { Exito = true, Elemento = nuevo_nodo };
         }
 
+        /// <summary>
+        /// Método encargado de leer y extraer la información de los literales, carga el objeto ElementoBase y delega la carga de su propia instancia al objeto superior (el objeto Clase)
+        /// </summary>
+        /// <returns>Objeto de tipo RetornoElementoUML con información del proceso y, si todo ha funcionado bien con el objeto ElementoBase con información del XMI.</returns>
         protected RetornoElementoUML ProcesarLiteral()
         {
             ElementoBase nuevo_literal = new ElementoBase()
@@ -367,7 +392,11 @@ namespace transformador_mda.src.Features.ParserEntrada
 
         protected RetornoElementoUML ProcesarHerencia()
         {
-            throw new NotImplementedException();
+            Asociacion nueva_asociacion = new Asociacion()
+            {
+                Tipo = EnumTipoElemento.ASOCIACION,
+                Id = ObtenerID(_elemento_actual),
+            };
         }
 
         #endregion
@@ -423,6 +452,11 @@ namespace transformador_mda.src.Features.ParserEntrada
                 ?.Value;
         }
 
+        /// <summary>
+        /// Obtiene el texto de un comentario asociado al elemento pasado por parámetro.
+        /// </summary>
+        /// <param name="param_elemento">Elemento cuyo comentario hay que extraer.</param>
+        /// <returns>Texto del comentario asociado al elemento</returns>
         static public string ObtenerComentario(XElement param_elemento)
         {
             if (param_elemento == null)
@@ -432,7 +466,7 @@ namespace transformador_mda.src.Features.ParserEntrada
             if (comentario == null)
                 return string.Empty;
 
-            XElement cuerpo = param_elemento.Elements().FirstOrDefault(c => c.Name == "body");
+            XElement cuerpo = comentario.Elements().FirstOrDefault(c => c.Name == "body");
             return cuerpo?.Value ?? string.Empty;
         }
 
@@ -484,6 +518,11 @@ namespace transformador_mda.src.Features.ParserEntrada
                 .FirstOrDefault(e => e.Attribute("name")?.Value == param_nombre);
         }
 
+        /// <summary>
+        /// Devuelve un listado de los elementos procesables descendientes de un elemento pasado.
+        /// </summary>
+        /// <param name="param_elemento_padre">Elemento padre del que se extraerán los descendientes.</param>
+        /// <returns>Vector de elementos.</returns>
         static public IEnumerable<XElement> ObtenerHijosProcesables(XElement param_elemento_padre)
         {
             if (param_elemento_padre == null)
@@ -499,6 +538,11 @@ namespace transformador_mda.src.Features.ParserEntrada
             }
         }
 
+        /// <summary>
+        /// Obtiene el tipo de visibilidad asociado a un elemento pasado por parámetros.
+        /// </summary>
+        /// <param name="param_elemento">Elemento cuya visibilidad hay que extraer.</param>
+        /// <returns>Enumeración con la visibilidad leída.</returns>
         static public EnumTipoVisibilidad ObtenerVisibilidad(XElement param_elemento)
         {
             string visibilidad = param_elemento.Attribute("visibility")?.Value;
@@ -508,9 +552,18 @@ namespace transformador_mda.src.Features.ParserEntrada
             return ObtenerTipoVisibilidad(visibilidad);
         }
 
+        /// <summary>
+        /// Obtiene el tipo de dato asociado al elemento pasado por parámetro.
+        /// </summary>
+        /// <param name="param_elemento">Elemento cuyo tipo de dato hay que extraer.</param>
+        /// <returns>Enumeración con el tipo de dato.</returns>
         static public EnumTipoDato ObtenerTipoDeDato(XElement param_elemento)
         {
-            string tipo_dato = param_elemento.Attribute("href")?.Value;
+            XElement tipo = param_elemento.Elements().FirstOrDefault(e => e.Name == "type");
+            if (tipo == null)
+                return EnumTipoDato.NO_DEFINIDO;
+
+            string tipo_dato = tipo.Attribute("href")?.Value;
             if (string.IsNullOrEmpty(tipo_dato))
                 return EnumTipoDato.NO_DEFINIDO;
 
@@ -521,6 +574,11 @@ namespace transformador_mda.src.Features.ParserEntrada
 
         #region "Transformacion de enumeraciones"
         
+        /// <summary>
+        /// Traduce un texto de XMI de tipo de asociación a la enumeración soportada por la solución.
+        /// </summary>
+        /// <param name="tipo_asociacion">Texto en XMI del tipo de asociación que se está procesando.</param>
+        /// <returns>Enumeración con los tipos de asociaciones soportados por la solución.</returns>
         static public EnumTipoAsociacion ObtenerTipoAsociacion(string tipo_asociacion)
         {
             switch (tipo_asociacion.ToUpper())
@@ -540,6 +598,12 @@ namespace transformador_mda.src.Features.ParserEntrada
             }
         }
 
+        /// <summary>
+        /// Traduce un texto de XMI de tipo de clase a la enumeración soportada por la solución.
+        /// </summary>
+        /// <param name="param_tipo_clase">Texto en XMI del tipo de clase que se está procesando.</param>
+        /// <param name="param_es_abstracto">True si la clase es abstracta, false si no.</param>
+        /// <returns>Enumeración con los tipos de asociaciones soportados por la solución.</returns>
         static public EnumTiposClases ObtenerTipoClase(string param_tipo_clase, bool param_es_abstracto)
         {
             switch (param_tipo_clase)
@@ -555,6 +619,11 @@ namespace transformador_mda.src.Features.ParserEntrada
             }
         }
 
+        /// <summary>
+        /// Traduce un texto de XMI de tipo de visibilidad a la enumeración soportada por la solución.
+        /// </summary>
+        /// <param name="param_visibilidad">Texto en XMI del tipo de clase que se está procesando.</param>
+        /// <returns>Enumeración con los tipos de visibilidad soportados por la solución.</returns>
         static public EnumTipoVisibilidad ObtenerTipoVisibilidad(string param_visibilidad)
         {
             switch (param_visibilidad)
@@ -572,6 +641,11 @@ namespace transformador_mda.src.Features.ParserEntrada
             }
         }
 
+        /// <summary>
+        /// Traduce un texto de XMI de tipo de dato a la enumeración soportada por la solución.
+        /// </summary>
+        /// <param name="param_tipo_dato">Texto en XMI del tipo de clase que se está procesando.</param>
+        /// <returns>Enumeración con los tipos de datos soportados por la solción</returns>
         static public EnumTipoDato ObtenerTipoDato(string param_tipo_dato)
         {
             switch (param_tipo_dato)
@@ -601,54 +675,25 @@ namespace transformador_mda.src.Features.ParserEntrada
         #endregion
     }
 
+    /// <summary>
+    /// Clase para el control de las claves que el parser es capaz de procesar.
+    /// </summary>
     static public class ClavesSoportadasXMI
     {
-
         /// <summary>
         /// Enumeración que define las claves soportadas en el proceso de lectura del ficheros XMI.
         /// </summary>
         public enum Enumeracion
         {
-            NULO = 0,
-            CLASE = 1,
-            ASOCIACION = 2,
-            PAQUETE = 3,
-            ATRIBUTO = 4,
-            METODO = 5,
-            PARAMETRO = 6,
-            HERENCIA = 7,
-            LITERAL = 8
-        }
-
-        /// <summary>
-        /// Método que devuelve la clave asociada a un valor de la enumeración.
-        /// </summary>
-        /// <param name="param_enum_clave">Valor de la enumeración para el cual se desea obtener la clave.</param>
-        /// <returns>Clave asociada al valor de la enumeración.</returns>
-        /// <exception cref="ArgumentException">Se lanza si el valor de la enumeración no está soportado.</exception>
-        static public string ObtenerClave(Enumeracion param_enum_clave)
-        {
-            switch (param_enum_clave)
-            {
-                case Enumeracion.CLASE:
-                    return "packagedElement xmi:type=\"uml:Class\"";
-                case Enumeracion.ASOCIACION:
-                    return "packagedElement xmi:type=\"uml:Association\"";
-                case Enumeracion.PAQUETE:
-                    return "packagedElement xmi:type=\"uml:Package\"";
-                case Enumeracion.ATRIBUTO:
-                    return "ownedAttribute";
-                case Enumeracion.METODO:
-                    return "ownedOperation";
-                case Enumeracion.PARAMETRO:
-                    return "ownedParameter";
-                case Enumeracion.HERENCIA:
-                    return "generalization";
-                case Enumeracion.LITERAL:
-                    return "ownedLiteral";
-                default:
-                    throw new ArgumentException("Valor de enum no soportado");
-            }
+            NULO = 0,           ///<summary>Clave XMI no soportada por la solución.</summary>
+            CLASE = 1,          ///<summary>Clave XMI asociada a las Clases.</summary>
+            ASOCIACION = 2,     ///<summary>Clave XMI asociada a las asociaciones entre clases.</summary>
+            PAQUETE = 3,        ///<summary>Clave XMI asociada a los directorios y paquetes.</summary>
+            ATRIBUTO = 4,       ///<summary>Clave XMI asociada a los atributos.</summary>
+            METODO = 5,         ///<summary>Clave XMI asociada a los métodos</summary>
+            PARAMETRO = 6,      ///<summary>Clave XMI asociada a los parámetros de los métodos.</summary>
+            HERENCIA = 7,       ///<summary>Clave XMI asociada a las herencias.</summary>
+            LITERAL = 8,        ///<summary>Clave XMI asociada a los literales de las enumeraciones.</summary>
         }
 
         /// <summary>
