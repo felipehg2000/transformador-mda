@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Windows.Forms;
 using System.Xml.Linq;
@@ -211,7 +212,7 @@ namespace transformador_mda.src.Features.ParserEntrada
             {
                 Id = ObtenerID(_elemento_actual),
                 Nombre = ObtenerNombre(_elemento_actual),
-                Comentario = "",
+                Comentario = ObtenerComentario(_elemento_actual),
                 Tipo = EnumTipoElemento.DIRECTORIO,
 
                 Namespace = _elemento_actual.Attribute("name")?.Value ?? "DirectorioSinNombre",
@@ -254,7 +255,7 @@ namespace transformador_mda.src.Features.ParserEntrada
             {
                 Id = ObtenerID(_elemento_actual),
                 Nombre = ObtenerNombre(_elemento_actual),
-                Comentario = "",
+                Comentario = ObtenerComentario(_elemento_actual),
                 Tipo = EnumTipoElemento.CLASE,
                 Visibilidad = ObtenerVisibilidad(_elemento_actual),
 
@@ -292,7 +293,7 @@ namespace transformador_mda.src.Features.ParserEntrada
             {
                 Id = ObtenerID(_elemento_actual),
                 Nombre = ObtenerNombre(_elemento_actual),
-                Comentario = "",
+                Comentario = ObtenerComentario(_elemento_actual),
                 Tipo = EnumTipoElemento.ATRIBUTO,
                 TipoDato = ObtenerTipoDeDato(_elemento_actual),
                 Visibilidad = ObtenerVisibilidad(_elemento_actual)
@@ -307,7 +308,7 @@ namespace transformador_mda.src.Features.ParserEntrada
             {
                 Id = ObtenerID(_elemento_actual),
                 Nombre = ObtenerNombre(_elemento_actual),
-                Comentario = "",
+                Comentario = ObtenerComentario(_elemento_actual),
                 Tipo = EnumTipoElemento.METODO,
                 Visibilidad = ObtenerVisibilidad(_elemento_actual),
                 Parametros = new List<Parametro>()
@@ -337,7 +338,7 @@ namespace transformador_mda.src.Features.ParserEntrada
             {
                 Id = ObtenerID(_elemento_actual),
                 Nombre = ObtenerNombre(_elemento_actual),
-                Comentario = "",
+                Comentario = ObtenerComentario(_elemento_actual),
                 TipoDato = ObtenerTipoDeDato(_elemento_actual),
                 Tipo = _elemento_actual.Attributes().FirstOrDefault(a => a.Name.LocalName == "direction")?.Value == "return" ? 
                     EnumTipoElemento.RETORNO : EnumTipoElemento.PARAMETRO
@@ -353,7 +354,7 @@ namespace transformador_mda.src.Features.ParserEntrada
                 Id = ObtenerID(_elemento_actual),
                 Nombre = ObtenerNombre(_elemento_actual),
                 Tipo = EnumTipoElemento.LITERAL,
-                Comentario = ""
+                Comentario = ObtenerComentario(_elemento_actual)
             };
 
             return new RetornoElementoUML() { Exito = true, Elemento = nuevo_literal };
@@ -420,6 +421,19 @@ namespace transformador_mda.src.Features.ParserEntrada
                 .Attributes()
                 .FirstOrDefault(a => a.Name.LocalName == "name")
                 ?.Value;
+        }
+
+        static public string ObtenerComentario(XElement param_elemento)
+        {
+            if (param_elemento == null)
+                return string.Empty;
+
+            XElement comentario = param_elemento.Elements().FirstOrDefault(e => e.Name == "ownedComment");
+            if (comentario == null)
+                return string.Empty;
+
+            XElement cuerpo = param_elemento.Elements().FirstOrDefault(c => c.Name == "body");
+            return cuerpo?.Value ?? string.Empty;
         }
 
         /// <summary>
