@@ -35,6 +35,11 @@ namespace transformador_mda.src.Features.ParserEntrada
         /// </summary>
         private XElement _elemento_actual;
 
+        /// <summary>
+        /// Asociaciones declaradas a nivel de paquete. Se enlazan al final, cuando ya existen todas las clases.
+        /// </summary>
+        private List<Asociacion> _asociaciones_pendientes;
+
         #endregion
 
         #region "Constructor"
@@ -48,6 +53,7 @@ namespace transformador_mda.src.Features.ParserEntrada
         {
             _proyecto = new ProyectoBase();
             _proyecto.Nombre = param_nombre;
+            _asociaciones_pendientes = new List<Asociacion>();
 
             Directorio directorio = new Directorio()
             {
@@ -115,7 +121,8 @@ namespace transformador_mda.src.Features.ParserEntrada
                 e.Name.LocalName == "ownedAttribute" ||
                 e.Name.LocalName == "ownedOperation" ||
                 e.Name.LocalName == "ownedParameter" ||
-                e.Name.LocalName == "generalization");
+                e.Name.LocalName == "generalization" ||
+                e.Name.LocalName == "interfaceRealization");
 
             return contieneClavesSoportadas;
         }
@@ -146,7 +153,11 @@ namespace transformador_mda.src.Features.ParserEntrada
                     _proyecto.Directorios.Add(directorio);
                 else if (resultado.Elemento is Clase clase)
                     _proyecto.Directorios.FirstOrDefault()?.Clases.Add(clase);
+                else if (resultado.Elemento is Asociacion asociacion)
+                    _asociaciones_pendientes.Add(asociacion);
             } 
+
+            EnlazarAsociacionesPendientes();
 
             return new RetornoElementoUML(true, "Fichero XMI leído correctamente.", _proyecto);
         }
@@ -184,11 +195,11 @@ namespace transformador_mda.src.Features.ParserEntrada
                     break;
 
                 case ClavesSoportadasXMI.Enumeracion.ASOCIACION:
-                   // retorno = ProcesarAsociacion();
+                    retorno = ProcesarAsociacion();
                     break;
 
                 case ClavesSoportadasXMI.Enumeracion.HERENCIA:
-                    //retorno = ProcesarHerencia();
+                    retorno = ProcesarHerencia();
                     break;
 
                 case ClavesSoportadasXMI.Enumeracion.LITERAL:
@@ -233,6 +244,8 @@ namespace transformador_mda.src.Features.ParserEntrada
                     nuevo_nodo.Subdirectorios.Add(subdirectorio);
                 else if (resultado.Elemento is Clase clase)
                     nuevo_nodo.Clases.Add(clase);
+                else if (resultado.Elemento is Asociacion asociacion)
+                    _asociaciones_pendientes.Add(asociacion);
             }
 
             return new RetornoElementoUML() { Exito = true, Elemento = nuevo_nodo };
@@ -247,7 +260,7 @@ namespace transformador_mda.src.Features.ParserEntrada
             EnumTiposClases tipo_clase = EnumTiposClases.NO_DEFINIDA;
             string clave_xmi = ObtenerClaveXMI(_elemento_actual);
             if (clave_xmi == "packagedElement xmi:type=\"uml:Class\"")
-                tipo_clase = EnumTiposClases.CLASE;
+                tipo_clase = ObtenerTipoClase("uml:Class", ObtenerBooleano(_elemento_actual, "isAbstract"));
             else if (clave_xmi == "packagedElement xmi:type=\"uml:Enumeration\"")
                 tipo_clase = EnumTiposClases.ENUMERACION;
             else if (clave_xmi == "packagedElement xmi:type=\"uml:Interface\"")
@@ -387,16 +400,305 @@ namespace transformador_mda.src.Features.ParserEntrada
 
         protected RetornoElementoUML ProcesarAsociacion()
         {
-            throw new NotImplementedException();
+            string tipo_xmi = ObtenerTipoXMI(_elemento_actual);
+
+            switch (tipo_xmi)
+            {
+                case "uml:Association":
+                case "uml:AssociationClass":
+                    return ProcesarAsociacionBinaria();
+
+                case "uml:Dependency":
+                case "uml:Usage":
+                case "uml:Abstraction":
+                case "uml:Substitution":
+                    return ProcesarDependencia();
+
+                case "uml:Realization":
+                case "uml:InterfaceRealization":
+                    return ProcesarRealizacionInterfaz();
+
+                default:
+                    if (_elemento_actual.Name.LocalName == "interfaceRealization")
+                        return ProcesarRealizacionInterfaz();
+
+                    return new RetornoElementoUML(false,
+                        "No se ha podido procesar el documento XMI", null,
+                        "Tipo de asociación no soportado: " + tipo_xmi);
+            }
         }
 
         protected RetornoElementoUML ProcesarHerencia()
         {
+            XElement clase_hija = ObtenerClasePropietaria(_elemento_actual);
+
             Asociacion nueva_asociacion = new Asociacion()
             {
                 Tipo = EnumTipoElemento.ASOCIACION,
                 Id = ObtenerID(_elemento_actual),
+                Nombre = ObtenerNombre(_elemento_actual),
+                Comentario = ObtenerComentario(_elemento_actual),
+                TipoAsociacion = EnumTipoAsociacion.HERENCIA,
+                IdClaseOrigen = ObtenerReferencia(_elemento_actual, "general"),
+                IdClaseDestino = ObtenerID(clase_hija),
+                EsNavegableOrigen = true,
+                EsNavegableDestino = true
             };
+
+            return new RetornoElementoUML() { Exito = true, Elemento = nueva_asociacion };
+        }
+
+        #endregion
+
+        #region "Métodos privados para asociaciones"
+
+        /// <summary>
+        /// Lee asociaciones UML binarias de Modelio: asociación simple, dirigida, agregación y composición.
+        /// </summary>
+        private RetornoElementoUML ProcesarAsociacionBinaria()
+        {
+            List<ExtremoAsociacionXMI> extremos = ObtenerExtremosAsociacion(_elemento_actual);
+            if (extremos.Count < 2)
+                return new RetornoElementoUML(false,
+                    "No se ha podido procesar el documento XMI", null,
+                    "La asociación '" + ObtenerID(_elemento_actual) + "' no tiene suficientes extremos.");
+
+            ExtremoAsociacionXMI extremo_propiedad = extremos
+                .FirstOrDefault(e => !string.IsNullOrWhiteSpace(e.PropietarioClaseId));
+
+            ExtremoAsociacionXMI extremo_origen;
+            ExtremoAsociacionXMI extremo_destino;
+            string id_clase_origen;
+            string id_clase_destino;
+
+            if (extremo_propiedad != null)
+            {
+                extremo_origen = extremos.FirstOrDefault(e => e != extremo_propiedad &&
+                    e.ClaseId == extremo_propiedad.PropietarioClaseId) ?? extremo_propiedad;
+                extremo_destino = extremo_propiedad;
+                id_clase_origen = extremo_propiedad.PropietarioClaseId;
+                id_clase_destino = extremo_propiedad.ClaseId;
+            }
+            else
+            {
+                extremo_origen = extremos[0];
+                extremo_destino = extremos[1];
+                id_clase_origen = extremo_origen.ClaseId;
+                id_clase_destino = extremo_destino.ClaseId;
+            }
+
+            Asociacion nueva_asociacion = CrearAsociacionBase(EnumTipoAsociacion.ASOCIACION);
+            nueva_asociacion.TipoAsociacion = ObtenerTipoAsociacionDesdeExtremos(extremos);
+            nueva_asociacion.IdClaseOrigen = id_clase_origen ?? string.Empty;
+            nueva_asociacion.IdClaseDestino = id_clase_destino ?? string.Empty;
+            nueva_asociacion.MultiplicidadOrigen = ObtenerMultiplicidad(extremo_origen);
+            nueva_asociacion.MultiplicidadDestino = ObtenerMultiplicidad(extremo_destino);
+            nueva_asociacion.NombreRolOrigen = extremo_origen.NombreRol;
+            nueva_asociacion.NombreRolDestino = extremo_destino.NombreRol;
+            nueva_asociacion.EsNavegableOrigen = extremo_destino.EsNavegable;
+            nueva_asociacion.EsNavegableDestino = extremo_origen.EsNavegable;
+
+            return new RetornoElementoUML() { Exito = true, Elemento = nueva_asociacion };
+        }
+
+        /// <summary>
+        /// Lee dependencias, usos y abstracciones. En UML el cliente depende del proveedor.
+        /// </summary>
+        private RetornoElementoUML ProcesarDependencia()
+        {
+            Asociacion nueva_asociacion = CrearAsociacionBase(EnumTipoAsociacion.DEPENDENCIA);
+            nueva_asociacion.IdClaseOrigen = ObtenerPrimeraReferencia(_elemento_actual, "client");
+            nueva_asociacion.IdClaseDestino = ObtenerPrimeraReferencia(_elemento_actual, "supplier");
+            nueva_asociacion.EsNavegableOrigen = true;
+
+            return new RetornoElementoUML() { Exito = true, Elemento = nueva_asociacion };
+        }
+
+        /// <summary>
+        /// Lee realizaciones de interfaz. Para el generador se tratan como herencia hacia la interfaz.
+        /// </summary>
+        private RetornoElementoUML ProcesarRealizacionInterfaz()
+        {
+            Asociacion nueva_asociacion = CrearAsociacionBase(EnumTipoAsociacion.HERENCIA);
+            nueva_asociacion.IdClaseOrigen =
+                ObtenerPrimeraReferencia(_elemento_actual, "contract") ??
+                ObtenerPrimeraReferencia(_elemento_actual, "supplier");
+            nueva_asociacion.IdClaseDestino =
+                ObtenerPrimeraReferencia(_elemento_actual, "client") ??
+                ObtenerID(ObtenerClasePropietaria(_elemento_actual));
+            nueva_asociacion.EsNavegableOrigen = true;
+            nueva_asociacion.EsNavegableDestino = true;
+
+            return new RetornoElementoUML() { Exito = true, Elemento = nueva_asociacion };
+        }
+
+        private Asociacion CrearAsociacionBase(EnumTipoAsociacion param_tipo_asociacion)
+        {
+            return new Asociacion()
+            {
+                Tipo = EnumTipoElemento.ASOCIACION,
+                Id = ObtenerID(_elemento_actual),
+                Nombre = ObtenerNombre(_elemento_actual),
+                Comentario = ObtenerComentario(_elemento_actual),
+                TipoAsociacion = param_tipo_asociacion
+            };
+        }
+
+        private List<ExtremoAsociacionXMI> ObtenerExtremosAsociacion(XElement param_asociacion)
+        {
+            List<ExtremoAsociacionXMI> extremos = new List<ExtremoAsociacionXMI>();
+
+            foreach (string id_extremo in ObtenerReferencias(param_asociacion, "memberEnd"))
+            {
+                XElement elemento_extremo = BuscarElementoPorID(_documento, id_extremo);
+                if (elemento_extremo != null)
+                    extremos.Add(CrearExtremoAsociacion(elemento_extremo, param_asociacion));
+            }
+
+            foreach (XElement owned_end in param_asociacion.Elements().Where(e => e.Name.LocalName == "ownedEnd"))
+            {
+                string id_owned_end = ObtenerID(owned_end);
+                if (!extremos.Any(e => e.Id == id_owned_end))
+                    extremos.Add(CrearExtremoAsociacion(owned_end, param_asociacion));
+            }
+
+            return extremos
+                .Where(e => !string.IsNullOrWhiteSpace(e.ClaseId) || !string.IsNullOrWhiteSpace(e.PropietarioClaseId))
+                .ToList();
+        }
+
+        private ExtremoAsociacionXMI CrearExtremoAsociacion(XElement param_extremo, XElement param_asociacion)
+        {
+            string id_extremo = ObtenerID(param_extremo);
+            XElement clase_propietaria = ObtenerClasePropietaria(param_extremo);
+            bool esta_en_navegables = ObtenerReferencias(param_asociacion, "navigableOwnedEnd").Contains(id_extremo);
+
+            return new ExtremoAsociacionXMI()
+            {
+                Id = id_extremo,
+                ClaseId = ObtenerReferencia(param_extremo, "type"),
+                PropietarioClaseId = ObtenerID(clase_propietaria),
+                NombreRol = ObtenerNombre(param_extremo),
+                Agregacion = ObtenerAtributo(param_extremo, "aggregation"),
+                LimiteInferior = ObtenerValorHijo(param_extremo, "lowerValue"),
+                LimiteSuperior = ObtenerValorHijo(param_extremo, "upperValue"),
+                EsNavegable = esta_en_navegables ||
+                    ObtenerBooleano(param_extremo, "isNavigable") ||
+                    (param_extremo.Name.LocalName == "ownedAttribute" && clase_propietaria != null)
+            };
+        }
+
+        private EnumTipoAsociacion ObtenerTipoAsociacionDesdeExtremos(List<ExtremoAsociacionXMI> param_extremos)
+        {
+            if (param_extremos.Any(e => e.Agregacion == "composite"))
+                return EnumTipoAsociacion.COMPOSICION;
+
+            if (param_extremos.Any(e => e.Agregacion == "shared"))
+                return EnumTipoAsociacion.AGREGACION;
+
+            return EnumTipoAsociacion.ASOCIACION;
+        }
+
+        private string ObtenerMultiplicidad(ExtremoAsociacionXMI param_extremo)
+        {
+            if (param_extremo == null)
+                return string.Empty;
+
+            string inferior = param_extremo.LimiteInferior;
+            string superior = param_extremo.LimiteSuperior;
+
+            if (string.IsNullOrWhiteSpace(inferior) && string.IsNullOrWhiteSpace(superior))
+                return string.Empty;
+
+            if (string.IsNullOrWhiteSpace(superior))
+                return inferior;
+
+            if (string.IsNullOrWhiteSpace(inferior) || inferior == superior)
+                return superior;
+
+            return inferior + ".." + superior;
+        }
+
+        private void EnlazarAsociacionesPendientes()
+        {
+            foreach (Asociacion asociacion in _asociaciones_pendientes)
+            {
+                Clase clase_origen = ObtenerClasePorId(asociacion.IdClaseOrigen);
+                Clase clase_destino = ObtenerClasePorId(asociacion.IdClaseDestino);
+
+                AgregarAsociacionAClase(clase_origen, asociacion);
+                AgregarAsociacionAClase(clase_destino, asociacion);
+            }
+        }
+
+        private void AgregarAsociacionAClase(Clase param_clase, Asociacion param_asociacion)
+        {
+            if (param_clase == null || param_asociacion == null)
+                return;
+
+            if (param_clase.Asociaciones.Any(a => a.Id == param_asociacion.Id))
+                return;
+
+            param_clase.Asociaciones.Add(param_asociacion);
+        }
+
+        private Clase ObtenerClasePorId(string param_id)
+        {
+            if (string.IsNullOrWhiteSpace(param_id))
+                return null;
+
+            foreach (Directorio directorio in _proyecto.Directorios)
+            {
+                Clase clase = ObtenerClasePorId(directorio, param_id);
+                if (clase != null)
+                    return clase;
+            }
+
+            return null;
+        }
+
+        private Clase ObtenerClasePorId(Directorio param_directorio, string param_id)
+        {
+            if (param_directorio == null)
+                return null;
+
+            Clase clase = param_directorio.Clases.FirstOrDefault(c => c.Id == param_id);
+            if (clase != null)
+                return clase;
+
+            foreach (Directorio subdirectorio in param_directorio.Subdirectorios)
+            {
+                clase = ObtenerClasePorId(subdirectorio, param_id);
+                if (clase != null)
+                    return clase;
+            }
+
+            return null;
+        }
+
+        private XElement ObtenerClasePropietaria(XElement param_elemento)
+        {
+            if (param_elemento == null)
+                return null;
+
+            return param_elemento
+                .Ancestors()
+                .FirstOrDefault(e =>
+                    EsTipoXMI(e, "uml:Class") ||
+                    EsTipoXMI(e, "uml:Interface") ||
+                    EsTipoXMI(e, "uml:Enumeration"));
+        }
+
+        private class ExtremoAsociacionXMI
+        {
+            public string Id { get; set; }
+            public string ClaseId { get; set; }
+            public string PropietarioClaseId { get; set; }
+            public string NombreRol { get; set; }
+            public string Agregacion { get; set; }
+            public string LimiteInferior { get; set; }
+            public string LimiteSuperior { get; set; }
+            public bool EsNavegable { get; set; }
         }
 
         #endregion
@@ -433,10 +735,13 @@ namespace transformador_mda.src.Features.ParserEntrada
         /// <returns>Identificador si existe cadena vacía si no se encuentra.</returns>
         static public string ObtenerID(XElement param_elemento)
         {
+            if (param_elemento == null)
+                return string.Empty;
+
             return param_elemento
                 .Attributes()
                 .FirstOrDefault(a => a.Name.LocalName == "id")
-                ?.Value;
+                ?.Value ?? string.Empty;
         }
 
         /// <summary>
@@ -446,10 +751,13 @@ namespace transformador_mda.src.Features.ParserEntrada
         /// <returns>Nombre si existe cadena vacía si no se encuentra.</returns>
         static public string ObtenerNombre(XElement param_elemento)
         {
+            if (param_elemento == null)
+                return string.Empty;
+
             return param_elemento
                 .Attributes()
                 .FirstOrDefault(a => a.Name.LocalName == "name")
-                ?.Value;
+                ?.Value ?? string.Empty;
         }
 
         /// <summary>
@@ -462,11 +770,11 @@ namespace transformador_mda.src.Features.ParserEntrada
             if (param_elemento == null)
                 return string.Empty;
 
-            XElement comentario = param_elemento.Elements().FirstOrDefault(e => e.Name == "ownedComment");
+            XElement comentario = param_elemento.Elements().FirstOrDefault(e => e.Name.LocalName == "ownedComment");
             if (comentario == null)
                 return string.Empty;
 
-            XElement cuerpo = comentario.Elements().FirstOrDefault(c => c.Name == "body");
+            XElement cuerpo = comentario.Elements().FirstOrDefault(c => c.Name.LocalName == "body");
             return cuerpo?.Value ?? string.Empty;
         }
 
@@ -483,7 +791,7 @@ namespace transformador_mda.src.Features.ParserEntrada
 
             return param_documento
                 .Descendants()
-                .FirstOrDefault(e => e.Attribute("id")?.Value == param_id);
+                .FirstOrDefault(e => ObtenerID(e) == param_id);
         }
 
         /// <summary>
@@ -545,7 +853,7 @@ namespace transformador_mda.src.Features.ParserEntrada
         /// <returns>Enumeración con la visibilidad leída.</returns>
         static public EnumTipoVisibilidad ObtenerVisibilidad(XElement param_elemento)
         {
-            string visibilidad = param_elemento.Attribute("visibility")?.Value;
+            string visibilidad = ObtenerAtributo(param_elemento, "visibility");
             if (string.IsNullOrEmpty(visibilidad))
                 return EnumTipoVisibilidad.NO_DEFINIDA;
 
@@ -559,15 +867,99 @@ namespace transformador_mda.src.Features.ParserEntrada
         /// <returns>Enumeración con el tipo de dato.</returns>
         static public EnumTipoDato ObtenerTipoDeDato(XElement param_elemento)
         {
-            XElement tipo = param_elemento.Elements().FirstOrDefault(e => e.Name == "type");
+            XElement tipo = param_elemento.Elements().FirstOrDefault(e => e.Name.LocalName == "type");
             if (tipo == null)
                 return EnumTipoDato.NO_DEFINIDO;
 
-            string tipo_dato = tipo.Attribute("href")?.Value;
+            string tipo_dato = ObtenerAtributo(tipo, "href");
             if (string.IsNullOrEmpty(tipo_dato))
                 return EnumTipoDato.NO_DEFINIDO;
 
             return ObtenerTipoDato(tipo_dato);
+        }
+
+        /// <summary>
+        /// Obtiene el valor de un atributo ignorando el namespace XML.
+        /// </summary>
+        static public string ObtenerAtributo(XElement param_elemento, string param_nombre_atributo)
+        {
+            if (param_elemento == null || string.IsNullOrWhiteSpace(param_nombre_atributo))
+                return string.Empty;
+
+            return param_elemento
+                .Attributes()
+                .FirstOrDefault(a => a.Name.LocalName == param_nombre_atributo)
+                ?.Value ?? string.Empty;
+        }
+
+        /// <summary>
+        /// Obtiene el xmi:type de un elemento ignorando el namespace XML.
+        /// </summary>
+        static public string ObtenerTipoXMI(XElement param_elemento)
+        {
+            return ObtenerAtributo(param_elemento, "type");
+        }
+
+        /// <summary>
+        /// Comprueba si un elemento tiene un xmi:type concreto.
+        /// </summary>
+        static public bool EsTipoXMI(XElement param_elemento, string param_tipo_xmi)
+        {
+            return ObtenerTipoXMI(param_elemento) == param_tipo_xmi;
+        }
+
+        /// <summary>
+        /// Obtiene la primera referencia de un atributo XMI que puede contener uno o varios ids separados por espacios.
+        /// </summary>
+        static public string ObtenerPrimeraReferencia(XElement param_elemento, string param_nombre_atributo)
+        {
+            return ObtenerReferencias(param_elemento, param_nombre_atributo).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Obtiene una referencia obligatoria. Si no existe devuelve cadena vacía.
+        /// </summary>
+        static public string ObtenerReferencia(XElement param_elemento, string param_nombre_atributo)
+        {
+            return ObtenerPrimeraReferencia(param_elemento, param_nombre_atributo) ?? string.Empty;
+        }
+
+        /// <summary>
+        /// Obtiene todas las referencias de un atributo XMI separadas por espacios.
+        /// </summary>
+        static public List<string> ObtenerReferencias(XElement param_elemento, string param_nombre_atributo)
+        {
+            string valor = ObtenerAtributo(param_elemento, param_nombre_atributo);
+            if (string.IsNullOrWhiteSpace(valor))
+                return new List<string>();
+
+            return valor
+                .Split(new[] { ' ', '\t', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries)
+                .ToList();
+        }
+
+        /// <summary>
+        /// Obtiene el valor de un hijo como lowerValue, upperValue o defaultValue.
+        /// </summary>
+        static public string ObtenerValorHijo(XElement param_elemento, string param_nombre_hijo)
+        {
+            XElement hijo = param_elemento?
+                .Elements()
+                .FirstOrDefault(e => e.Name.LocalName == param_nombre_hijo);
+
+            if (hijo == null)
+                return string.Empty;
+
+            return ObtenerAtributo(hijo, "value");
+        }
+
+        /// <summary>
+        /// Obtiene un atributo booleano XMI.
+        /// </summary>
+        static public bool ObtenerBooleano(XElement param_elemento, string param_nombre_atributo)
+        {
+            string valor = ObtenerAtributo(param_elemento, param_nombre_atributo);
+            return valor == "true" || valor == "1";
         }
 
         #endregion
@@ -592,7 +984,14 @@ namespace transformador_mda.src.Features.ParserEntrada
                 case "GENERALIZATION":
                     return EnumTipoAsociacion.HERENCIA;
                 case "UML:DEPENDENCY":
+                case "UML:USAGE":
+                case "UML:ABSTRACTION":
+                case "UML:SUBSTITUTION":
                     return EnumTipoAsociacion.DEPENDENCIA;
+                case "UML:REALIZATION":
+                case "UML:INTERFACEREALIZATION":
+                case "INTERFACEREALIZATION":
+                    return EnumTipoAsociacion.HERENCIA;
                 default:
                     return EnumTipoAsociacion.NO_DEFINIDA;
             }
@@ -707,7 +1106,15 @@ namespace transformador_mda.src.Features.ParserEntrada
                 param_clave == "packagedElement xmi:type=\"uml:Enumeration\"" ||
                 param_clave == "packagedElement xmi:type=\"uml:Interface\"")
                 return Enumeracion.CLASE;
-            else if (param_clave == "packagedElement xmi:type=\"uml:Association\"")
+            else if (param_clave == "packagedElement xmi:type=\"uml:Association\"" ||
+                param_clave == "packagedElement xmi:type=\"uml:AssociationClass\"")
+                return Enumeracion.ASOCIACION;
+            else if (param_clave == "packagedElement xmi:type=\"uml:Dependency\"" ||
+                param_clave == "packagedElement xmi:type=\"uml:Usage\"" ||
+                param_clave == "packagedElement xmi:type=\"uml:Abstraction\"" ||
+                param_clave == "packagedElement xmi:type=\"uml:Substitution\"" ||
+                param_clave == "packagedElement xmi:type=\"uml:Realization\"" ||
+                param_clave == "packagedElement xmi:type=\"uml:InterfaceRealization\"")
                 return Enumeracion.ASOCIACION;
             else if (param_clave == "packagedElement xmi:type=\"uml:Package\"")
                 return Enumeracion.PAQUETE;
@@ -719,6 +1126,8 @@ namespace transformador_mda.src.Features.ParserEntrada
                 return Enumeracion.PARAMETRO;
             else if (param_clave == "generalization")
                 return Enumeracion.HERENCIA;
+            else if (param_clave == "interfaceRealization")
+                return Enumeracion.ASOCIACION;
             else if (param_clave == "ownedLiteral")
                 return Enumeracion.LITERAL;
             return Enumeracion.NULO;
