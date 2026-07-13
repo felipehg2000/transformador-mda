@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Windows.Forms;
 using transformador_mda.src.Controladores;
+using transformador_mda.src.Dominio.Retornos;
 using transformador_mda.src.Features.ExploradorFicheros;
 
 namespace transformador_mda.src.Vistas
@@ -91,41 +92,22 @@ namespace transformador_mda.src.Vistas
             textBoxRutaRaiz.Text = rutaDirectorio;
         }
 
-        /// <summary>
-        /// Selecciona el directorio del XMI y hace el parser de este.
-        /// </summary>
-        /// <param name="sender">Componente que lanza el evento.</param>
-        /// <param name="e">Argumentos asociados al evento.</param>
+        
         private void buttonBuscarXMI_Click(object sender, EventArgs e)
         {
-            if (string.IsNullOrEmpty(textBoxRutaRaiz.Text) ||
-                string.IsNullOrEmpty(textBoxNombreProyecto.Text) ||
-                string.IsNullOrEmpty(textBoxNamespaceProyecto.Text))
+            RetornoMultiple retorno = _controlador.BuscarFichero();
+            if (!retorno.Exito)
             {
-                MessageBox.Show("Para acceder a esta opción debe rellenar el resto de campos del formulario.",
-                    "Error",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
-            }
-
-            string rutaFichero = Files.GetFilePath("Buscar fichero XMI.",
-                "Archivos XMI (*.xmi) | *.xmi| Archivos XML (*.xml) | *.xml| Todos los archivos (*.*) | *.*");
-            if (string.IsNullOrEmpty(rutaFichero))
-                return;
-
-            _controlador.Configuracion.Proyecto.Nombre = textBoxNombreProyecto.Text;
-
-            bool resultado = _controlador.LeerFichero(rutaFichero);
-            if (!resultado)
-            {
-                MessageBox.Show("Ha habido un error en la lecutra.",
+                MessageBox.Show(retorno.TextoUsuario,
                     "Error",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Error);
                 return;
             }
+            else if (retorno.Exito && retorno.Estado == RetornoMultiple.EnumEstado.CANCELADO_POR_USUARIO)
+                return;
 
-            textBoxRutaXMI.Text = rutaFichero;
+            textBoxRutaXMI.Text = _controlador.Configuracion.RutaFicheroEntrada;
         }
 
         /// <summary>

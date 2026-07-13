@@ -32,11 +32,12 @@
             this.panelInferior = new System.Windows.Forms.Panel();
             this.buttonGenerarSalida = new System.Windows.Forms.Button();
             this.panelCentral = new System.Windows.Forms.Panel();
+            this.buttonDirectorioRaiz = new System.Windows.Forms.Button();
+            this.buttonBuscarXMI = new System.Windows.Forms.Button();
             this.textBoxRutaXMI = new System.Windows.Forms.TextBox();
             this.RutaXMI = new System.Windows.Forms.Label();
             this.textBoxNamespaceProyecto = new System.Windows.Forms.TextBox();
             this.textBoxRutaRaiz = new System.Windows.Forms.TextBox();
-            this.labelRutaRaiz = new System.Windows.Forms.Label();
             this.labelNamespace = new System.Windows.Forms.Label();
             this.textBoxNombreProyecto = new System.Windows.Forms.TextBox();
             this.labelNombreProyecto = new System.Windows.Forms.Label();
@@ -44,8 +45,7 @@
             this.configuraciónToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.importarToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exportarToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.buttonBuscarXMI = new System.Windows.Forms.Button();
-            this.buttonDirectorioRaiz = new System.Windows.Forms.Button();
+            this.labelRutaRaiz = new System.Windows.Forms.Label();
             this.panelPrincipal.SuspendLayout();
             this.panelInferior.SuspendLayout();
             this.panelCentral.SuspendLayout();
@@ -103,6 +103,26 @@
             this.panelCentral.Size = new System.Drawing.Size(439, 294);
             this.panelCentral.TabIndex = 1;
             // 
+            // buttonDirectorioRaiz
+            // 
+            this.buttonDirectorioRaiz.Location = new System.Drawing.Point(406, 59);
+            this.buttonDirectorioRaiz.Name = "buttonDirectorioRaiz";
+            this.buttonDirectorioRaiz.Size = new System.Drawing.Size(20, 20);
+            this.buttonDirectorioRaiz.TabIndex = 10;
+            this.buttonDirectorioRaiz.Text = "🔎";
+            this.buttonDirectorioRaiz.UseVisualStyleBackColor = true;
+            this.buttonDirectorioRaiz.Click += new System.EventHandler(this.buttonDirectorioRaiz_Click);
+            // 
+            // buttonBuscarXMI
+            // 
+            this.buttonBuscarXMI.Location = new System.Drawing.Point(406, 209);
+            this.buttonBuscarXMI.Name = "buttonBuscarXMI";
+            this.buttonBuscarXMI.Size = new System.Drawing.Size(20, 20);
+            this.buttonBuscarXMI.TabIndex = 9;
+            this.buttonBuscarXMI.Text = "🔎";
+            this.buttonBuscarXMI.UseVisualStyleBackColor = true;
+            this.buttonBuscarXMI.Click += new System.EventHandler(this.buttonBuscarXMI_Click);
+            // 
             // textBoxRutaXMI
             // 
             this.textBoxRutaXMI.BackColor = System.Drawing.SystemColors.Info;
@@ -138,15 +158,6 @@
             this.textBoxRutaRaiz.Name = "textBoxRutaRaiz";
             this.textBoxRutaRaiz.Size = new System.Drawing.Size(376, 20);
             this.textBoxRutaRaiz.TabIndex = 4;
-            // 
-            // labelRutaRaiz
-            // 
-            this.labelRutaRaiz.AutoSize = true;
-            this.labelRutaRaiz.Location = new System.Drawing.Point(21, 43);
-            this.labelRutaRaiz.Name = "labelRutaRaiz";
-            this.labelRutaRaiz.Size = new System.Drawing.Size(106, 13);
-            this.labelRutaRaiz.TabIndex = 3;
-            this.labelRutaRaiz.Text = "Ruta raíz del proyect";
             // 
             // labelNamespace
             // 
@@ -196,36 +207,25 @@
             // importarToolStripMenuItem
             // 
             this.importarToolStripMenuItem.Name = "importarToolStripMenuItem";
-            this.importarToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.importarToolStripMenuItem.Size = new System.Drawing.Size(120, 22);
             this.importarToolStripMenuItem.Text = "Importar";
             this.importarToolStripMenuItem.Click += new System.EventHandler(this.importarToolStripMenuItem_Click);
             // 
             // exportarToolStripMenuItem
             // 
             this.exportarToolStripMenuItem.Name = "exportarToolStripMenuItem";
-            this.exportarToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.exportarToolStripMenuItem.Size = new System.Drawing.Size(120, 22);
             this.exportarToolStripMenuItem.Text = "Exportar";
             this.exportarToolStripMenuItem.Click += new System.EventHandler(this.exportarToolStripMenuItem_Click);
             // 
-            // buttonBuscarXMI
+            // labelRutaRaiz
             // 
-            this.buttonBuscarXMI.Location = new System.Drawing.Point(406, 209);
-            this.buttonBuscarXMI.Name = "buttonBuscarXMI";
-            this.buttonBuscarXMI.Size = new System.Drawing.Size(20, 20);
-            this.buttonBuscarXMI.TabIndex = 9;
-            this.buttonBuscarXMI.Text = "🔎";
-            this.buttonBuscarXMI.UseVisualStyleBackColor = true;
-            this.buttonBuscarXMI.Click += new System.EventHandler(this.buttonBuscarXMI_Click);
-            // 
-            // buttonDirectorioRaiz
-            // 
-            this.buttonDirectorioRaiz.Location = new System.Drawing.Point(406, 59);
-            this.buttonDirectorioRaiz.Name = "buttonDirectorioRaiz";
-            this.buttonDirectorioRaiz.Size = new System.Drawing.Size(20, 20);
-            this.buttonDirectorioRaiz.TabIndex = 10;
-            this.buttonDirectorioRaiz.Text = "🔎";
-            this.buttonDirectorioRaiz.UseVisualStyleBackColor = true;
-            this.buttonDirectorioRaiz.Click += new System.EventHandler(this.buttonDirectorioRaiz_Click);
+            this.labelRutaRaiz.AutoSize = true;
+            this.labelRutaRaiz.Location = new System.Drawing.Point(21, 43);
+            this.labelRutaRaiz.Name = "labelRutaRaiz";
+            this.labelRutaRaiz.Size = new System.Drawing.Size(106, 13);
+            this.labelRutaRaiz.TabIndex = 3;
+            this.labelRutaRaiz.Text = "Ruta raíz del proyect";
             // 
             // FormPrincipal
             // 
@@ -253,7 +253,6 @@
         private System.Windows.Forms.Panel panelPrincipal;
         private System.Windows.Forms.Panel panelInferior;
         private System.Windows.Forms.Panel panelCentral;
-        private System.Windows.Forms.Label labelRutaRaiz;
         private System.Windows.Forms.Label labelNamespace;
         private System.Windows.Forms.TextBox textBoxNombreProyecto;
         private System.Windows.Forms.Label labelNombreProyecto;
@@ -268,6 +267,7 @@
         private System.Windows.Forms.ToolStripMenuItem exportarToolStripMenuItem;
         private System.Windows.Forms.Button buttonDirectorioRaiz;
         private System.Windows.Forms.Button buttonBuscarXMI;
+        private System.Windows.Forms.Label labelRutaRaiz;
     }
 }
 

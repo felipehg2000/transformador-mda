@@ -1,4 +1,5 @@
-﻿using transformador_mda.src.Dominio;
+﻿using System;
+using transformador_mda.src.Dominio;
 using transformador_mda.src.Dominio.ElementosUML;
 using transformador_mda.src.Dominio.Retornos;
 using transformador_mda.src.Features.CrearIds;
@@ -38,28 +39,38 @@ namespace transformador_mda.src.Controladores
         #region "Métodos públicos"
 
         /// <summary>
-        /// Genera el parser correspondiente, llama a los métodos de lectura para rellenar los datos del Proyecto y rellena el resto de datos.
+        /// Permite seleccionar el fichero XMI y realiza el proceso de lectura.
         /// </summary>
-        /// <param name="param_nombre_proyecto">Nombre del proyecto a generar.</param>
-        /// <param name="param_directorio_raiz">Ruta del directorio raíz del proyecto.</param>
-        /// <returns>True si el proceso es correcto, false si hay algún fallo.</returns>
-        public bool LeerFichero(string param_ruta_fichero)
+        /// <returns>Objeto con información del proceso.</returns>
+        public RetornoMultiple BuscarFichero()
         {
-            Configuracion.RutaFicheroEntrada = param_ruta_fichero;
+            string extensiones_soportadas = string.Empty;
+            if (Configuracion.TipoFicheroEntrada == EnumTipoFicheroEntrada.NULO)
+                return new RetornoMultiple(false, 
+                    RetornoMultiple.EnumEstado.ERROR,
+                    "No se ha podido leer el fichero correctamente.",
+                    "El tipo de dato que define el formato del fichero de entrada no está definido.");
+            else if (Configuracion.TipoFicheroEntrada == EnumTipoFicheroEntrada.XMI)
+                extensiones_soportadas = "Archivos XMI (*.xmi) | *.xmi| Archivos XML (*.xml) | *.xml| Todos los archivos (*.*) | *.*";
+            
+            string ruta_fichero = Files.GetFilePath("Buscar fichero de entrada.", extensiones_soportadas);
+            if (string.IsNullOrEmpty(ruta_fichero))
+                return new RetornoMultiple(true,
+                    RetornoMultiple.EnumEstado.CANCELADO_POR_USUARIO,
+                    "Proceso cancelado por el usuario.");
 
-            ParserUMLBase parser = FactoríaParser.CrearParser(Configuracion);
-            if (parser == null)
-                return false;
+            RetornoMultiple ret_retorno = (RetornoMultiple)LeerFichero(ruta_fichero);
+            if (!ret_retorno.Exito)
+            {
+                ret_retorno.Estado = RetornoMultiple.EnumEstado.ERROR;
+                return ret_retorno;
+            }
 
-            RetornoElementoUML ret_resultado = parser.Parsear();
-            Configuracion.Proyecto = ret_resultado.Elemento as ProyectoBase;
-            if (Configuracion.Proyecto == null)
-                return false;
+            Configuracion.RutaFicheroEntrada = ruta_fichero;
 
-            Configuracion.Proyecto.Id = CrearIdentificador.CrearGUID();
-
-            return true;
-        }
+            ret_retorno.Estado = RetornoMultiple.EnumEstado.CORRECTO;
+            return ret_retorno;
+        }      
 
         /// <summary>
         /// Genera el generador correspondiente y llama al método de escritura.
@@ -101,6 +112,40 @@ namespace transformador_mda.src.Controladores
 
             Configuracion = DAO.Importar(nombre_fichero);
             return true;
+        }
+
+        #endregion
+
+        #region "Métodos privados"
+
+        /// <summary>
+        /// Genera el parser según el tipo de formato de entrada y carga el objeto con los datos del fichero.
+        /// </summary>
+        /// <param name="param_ruta_fichero">Ruta del fichero XMI</param>
+        /// <returns>Objeto de tipo RetornoBase con información del proceso.</returns>
+        private RetornoBase LeerFichero(string param_ruta_fichero)
+        {
+            Configuracion.RutaFicheroEntrada = param_ruta_fichero;
+
+            ParserUMLBase parser = FactoríaParser.CrearParser(Configuracion);
+            if (parser == null)
+                return new RetornoBase(false,
+                    "No se ha podido leer el fichero correctamente.",
+                    "No se ha creado el parser correctamente.");
+
+            RetornoElementoUML ret_resultado = parser.Parsear();
+            if (!ret_resultado.Exito)
+                return ret_resultado;
+
+            Configuracion.Proyecto = ret_resultado.Elemento as ProyectoBase;
+            if (Configuracion.Proyecto == null)
+                return new RetornoBase(false,
+                    "No se ha podido leer el fichero correctamente.",
+                    "El proyecto está vacío, la lectura ha sido correcta pero no se han leido datos y el objeto Proyecto está vacío.");
+
+            Configuracion.Proyecto.Id = CrearIdentificador.CrearGUID();
+
+            return new RetornoBase(true, "El fichero se ha leido correctamente.");
         }
 
         #endregion
