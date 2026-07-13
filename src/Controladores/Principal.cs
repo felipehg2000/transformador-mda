@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using transformador_mda.src.Dominio;
 using transformador_mda.src.Dominio.ElementosUML;
 using transformador_mda.src.Dominio.Retornos;
@@ -73,16 +74,21 @@ namespace transformador_mda.src.Controladores
         }      
 
         /// <summary>
-        /// Genera el generador correspondiente y llama al método de escritura.
+        /// Muestra el selector de directorios y, si el proyecto no está nombrado coge el nombre del directorio como nombre del proyecto.
         /// </summary>
-        /// <returns>True si el proceso es correcto, false si no.</returns>
-        public bool EscribirArtefactos()
+        /// <returns>Objeto con información del proceso.</returns>
+        public RetornoMultiple BuscarDirectorioRaiz()
         {
-            GenerarSalidaBase generador = FactoriaSalida.CrearGenerarSalida(Configuracion);
-            if (generador == null)
-                return false;
+            string ruta_directorio = Folder.GetFolderPath("Seleccione el directorio raíz del proyecto...");
+            if (string.IsNullOrEmpty(ruta_directorio))
+                return new RetornoMultiple(true, RetornoMultiple.EnumEstado.CANCELADO_POR_USUARIO, "Operación cancelada por el usuario.");
 
-            return generador.GenerarSalida();
+            Configuracion.RutaRaiz = ruta_directorio;
+
+            if (string.IsNullOrEmpty(Configuracion.Proyecto.Nombre))
+                Configuracion.Proyecto.Nombre = Path.GetFileName(ruta_directorio);
+
+            return new RetornoMultiple(true, RetornoMultiple.EnumEstado.CORRECTO, "Directorio seleccionado correctamente.");
         }
 
         /// <summary>

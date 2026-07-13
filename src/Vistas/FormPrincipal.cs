@@ -43,7 +43,7 @@ namespace transformador_mda.src.Vistas
         /// <param name="e">Argumentos asociados al evento.</param>
         private void exportarToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            _controlador.Configuracion.RutaFicheroEntrada = textBoxRutaXMI.Text;
+            _controlador.Configuracion.RutaFicheroEntrada = textBoxRutaFicheroDeEntrada.Text;
 
             if (_controlador.ExportarConfiguracion())
                 MessageBox.Show("Fichero exportado correctamente.",
@@ -73,27 +73,43 @@ namespace transformador_mda.src.Vistas
 
             textBoxRutaRaiz.Text = "Ya no se usa, quitar cuando se modifiquen las interfaces.";
             textBoxNombreProyecto.Text = _controlador.Configuracion.Proyecto.Nombre;
-            textBoxNamespaceProyecto.Text = _controlador.Configuracion.Proyecto.Nombre;
-            textBoxRutaXMI.Text = _controlador.Configuracion.RutaFicheroEntrada;
+            textBoxRutaFicheroDeEntrada.Text = _controlador.Configuracion.RutaFicheroEntrada;
 
         }
 
         /// <summary>
-        /// Abre el explorador de directorios y rellena el textBox de ruta raíz con el directorio seleccionado.
+        /// Abre el explorador de directorios y rellena el textBox de ruta raíz con el directorio seleccionado, si no hay nombre de proyecto se coge el nombre del directorio.
         /// </summary>
         /// <param name="sender">Componente que lanza el evento.</param>
         /// <param name="e">Argumentos asociados al evento.</param>
         private void buttonDirectorioRaiz_Click(object sender, EventArgs e)
         {
-            string rutaDirectorio = Folder.GetFolderPath("Seleccione el directorio raíz del proyecto...");
-            if (string.IsNullOrEmpty(rutaDirectorio))
+            RetornoMultiple retorno = _controlador.BuscarDirectorioRaiz();
+            if (retorno.Estado == RetornoMultiple.EnumEstado.CANCELADO_POR_USUARIO)
                 return;
 
-            textBoxRutaRaiz.Text = rutaDirectorio;
+            textBoxRutaRaiz.Text = _controlador.Configuracion.RutaRaiz;
+
+            if (textBoxNombreProyecto.Text != _controlador.Configuracion.Proyecto.Nombre)
+                textBoxNombreProyecto.Text = _controlador.Configuracion.Proyecto.Nombre;
         }
 
-        
-        private void buttonBuscarXMI_Click(object sender, EventArgs e)
+        /// <summary>
+        /// Carga el nombre del proyecto en el objeto de configuración.
+        /// </summary>
+        /// <param name="sender">Componente que lanza el evento.</param>
+        /// <param name="e">Argumentos asociados al evento.</param>
+        private void textBoxNombreProyecto_TextChanged(object sender, EventArgs e)
+        {
+            _controlador.Configuracion.Proyecto.Nombre = textBoxNombreProyecto.Text;
+        }
+
+        /// <summary>
+        /// Llama al método que selecciona el archivo de entrada y lo procesa.
+        /// </summary>
+        /// <param name="sender">Componente que lanza el evento.</param>
+        /// <param name="e">Argumentos asociados al evento.</param>
+        private void buttonBuscarFicheroDeEntrada_Click(object sender, EventArgs e)
         {
             RetornoMultiple retorno = _controlador.BuscarFichero();
             if (!retorno.Exito)
@@ -107,51 +123,33 @@ namespace transformador_mda.src.Vistas
             else if (retorno.Exito && retorno.Estado == RetornoMultiple.EnumEstado.CANCELADO_POR_USUARIO)
                 return;
 
-            textBoxRutaXMI.Text = _controlador.Configuracion.RutaFicheroEntrada;
-        }
-
-        /// <summary>
-        /// Reutiliza el nombre del proyecto para el espacio de nombres a usar
-        /// </summary>
-        /// <param name="sender">Componente que lanza el evento.</param>
-        /// <param name="e">Argumentos asociados al evento.</param>
-        private void textBoxNombreProyecto_TextChanged(object sender, EventArgs e)
-        {
-            string texto = textBoxNombreProyecto.Text;
-            textBoxNamespaceProyecto.Text = texto;
-        }
-
-        /// <summary>
-        /// Comprueba si todos los datos están rellenos, llama al método para generar la salida y muestra mensajes de resultado por pantalla.
-        /// </summary>
-        /// <param name="sender">Componente que lanza el evento.</param>
-        /// <param name="e">Argumentos asociados al evento.</param>
-        private void buttonGenerarSalida_Click(object sender, EventArgs e)
-        {
-            if (string.IsNullOrEmpty(textBoxRutaRaiz.Text) ||
-                string.IsNullOrEmpty(textBoxNombreProyecto.Text) ||
-                string.IsNullOrEmpty(textBoxNamespaceProyecto.Text) ||
-                string.IsNullOrEmpty(textBoxRutaXMI.Text))
-            {
-                MessageBox.Show("Falta información necesaria para la generación de código, rellene todos los campos del formulario.",
-                    "Error",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
-                return;
-            }
-
-            if (_controlador.EscribirArtefactos())
-                MessageBox.Show("Artefactos software generados correctamente.",
-                    "Información",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Information);
-            else
-                MessageBox.Show("Ha ocurrido un error en la generación de código.",
-                    "Error",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
+            textBoxRutaFicheroDeEntrada.Text = _controlador.Configuracion.RutaFicheroEntrada;
         }
 
         #endregion
+
+
+        #region "Métodos privados"
+
+        private void ActivarBotonContinuar()
+        {
+            if (string.IsNullOrEmpty(textBoxRutaRaiz.Text) &&
+                string.IsNullOrEmpty(textBoxNombreProyecto.Text) &&
+                string.IsNullOrEmpty(textBoxRutaFicheroDeEntrada.Text))
+            {
+                buttonContinuar.Enabled = false;
+            }
+            else
+            {
+                buttonContinuar.Enabled = true;
+            }
+        }
+
+        #endregion
+
+        private void buttonContinuar_Click(object sender, EventArgs e)
+        {
+
+        }
     }
 }

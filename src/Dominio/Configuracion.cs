@@ -34,6 +34,11 @@ namespace transformador_mda.src.Dominio
         public string RutaFicheroEntrada { get; set; }
 
         /// <summary>
+        /// Ruta del directorio donde se generará la estructura leida del diagrama.
+        /// </summary>
+        public string RutaRaiz { get; set; }
+
+        /// <summary>
         /// Constructor de la clase, inicializa atributos a vacío.
         /// </summary>
         [JsonConstructor]
@@ -44,6 +49,7 @@ namespace transformador_mda.src.Dominio
             TipoSalida = EnumTipoSalida.C_SHARP;
             Proyecto = new ProyectoBase();
             RutaFicheroEntrada = string.Empty;
+            RutaRaiz = string.Empty;
         }
     }
 }
