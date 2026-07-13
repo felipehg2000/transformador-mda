@@ -398,6 +398,10 @@ namespace transformador_mda.src.Features.ParserEntrada
             return new RetornoElementoUML() { Exito = true, Elemento = nuevo_literal };
         }
 
+        /// <summary>
+        /// Método encargado de leer y extraer la información de las asociaciones, carga el objeto Asociacion y delega la carga de su propia instancia al objeto superior.
+        /// </summary>
+        /// <returns>Objeto de tipo RetornoElementoUML con información del proceso y, si todo ha funcionado bien con el objeto Asociacion con información del XMI.</returns>
         protected RetornoElementoUML ProcesarAsociacion()
         {
             string tipo_xmi = ObtenerTipoXMI(_elemento_actual);
@@ -428,6 +432,10 @@ namespace transformador_mda.src.Features.ParserEntrada
             }
         }
 
+        /// <summary>
+        /// Método encargado de leer y extraer la información de las asociaciones, carga el objeto Asociacion y delega la carga de su propia instancia al objeto superior.
+        /// </summary>
+        /// <returns>Objeto de tipo RetornoElementoUML con información del proceso y, si todo ha funcionado bien con el objeto Asociacion con información del XMI.</returns>
         protected RetornoElementoUML ProcesarHerencia()
         {
             XElement clase_hija = ObtenerClasePropietaria(_elemento_actual);
@@ -455,6 +463,7 @@ namespace transformador_mda.src.Features.ParserEntrada
         /// <summary>
         /// Lee asociaciones UML binarias de Modelio: asociación simple, dirigida, agregación y composición.
         /// </summary>
+        /// <returns>Objeto de tipo RetornoElementoUML con información del proceso y, si todo ha funcionado bien con el objeto Asociacion con información de una asociación binaria.</returns>
         private RetornoElementoUML ProcesarAsociacionBinaria()
         {
             List<ExtremoAsociacionXMI> extremos = ObtenerExtremosAsociacion(_elemento_actual);
@@ -503,7 +512,8 @@ namespace transformador_mda.src.Features.ParserEntrada
 
         /// <summary>
         /// Lee dependencias, usos y abstracciones. En UML el cliente depende del proveedor.
-        /// </summary>
+        /// </summary
+        /// <returns>Objeto de tipo RetornoElementoUML con información del proceso y, si todo ha funcionado bien con el objeto Asociacion con información de una asociación de dependencia.</returns>
         private RetornoElementoUML ProcesarDependencia()
         {
             Asociacion nueva_asociacion = CrearAsociacionBase(EnumTipoAsociacion.DEPENDENCIA);
@@ -517,6 +527,7 @@ namespace transformador_mda.src.Features.ParserEntrada
         /// <summary>
         /// Lee realizaciones de interfaz. Para el generador se tratan como herencia hacia la interfaz.
         /// </summary>
+        /// <returns>Objeto de tipo RetornoElementoUML con información del proceso y, si todo ha funcionado bien con el objeto Asociacion con información de una asociación de interfaz.</returns>
         private RetornoElementoUML ProcesarRealizacionInterfaz()
         {
             Asociacion nueva_asociacion = CrearAsociacionBase(EnumTipoAsociacion.HERENCIA);
@@ -532,6 +543,11 @@ namespace transformador_mda.src.Features.ParserEntrada
             return new RetornoElementoUML() { Exito = true, Elemento = nueva_asociacion };
         }
 
+        /// <summary>
+        /// Genera el tipo de dato Asociacion con la información de una asociación básica.
+        /// </summary>
+        /// <param name="param_tipo_asociacion">Tipo de asociación que se va a instanciar.</param>
+        /// <returns>Objeto de tipo Asociaciion</returns>
         private Asociacion CrearAsociacionBase(EnumTipoAsociacion param_tipo_asociacion)
         {
             return new Asociacion()
@@ -544,6 +560,11 @@ namespace transformador_mda.src.Features.ParserEntrada
             };
         }
 
+        /// <summary>
+        /// Método encargado de obtener la clase extremo de la asociación que se está procesando.
+        /// </summary>
+        /// <param name="param_asociacion">Elemento de tipo asociación que se está procesando.</param>
+        /// <returns>Listado con los extremos de una asociación.</returns>
         private List<ExtremoAsociacionXMI> ObtenerExtremosAsociacion(XElement param_asociacion)
         {
             List<ExtremoAsociacionXMI> extremos = new List<ExtremoAsociacionXMI>();
@@ -567,6 +588,12 @@ namespace transformador_mda.src.Features.ParserEntrada
                 .ToList();
         }
 
+        /// <summary>
+        /// Genera un objeto de tipo extremo para una asociación.
+        /// </summary>
+        /// <param name="param_extremo">Elemento extremo de una asociación.</param>
+        /// <param name="param_asociacion">Objeto con la información de la asociación.</param>
+        /// <returns>Objeto con la información de un extremo de la asociación.</returns>
         private ExtremoAsociacionXMI CrearExtremoAsociacion(XElement param_extremo, XElement param_asociacion)
         {
             string id_extremo = ObtenerID(param_extremo);
@@ -588,6 +615,11 @@ namespace transformador_mda.src.Features.ParserEntrada
             };
         }
 
+        /// <summary>
+        /// Según el tipo de asociación se devuelve un literal de una enumeración u otro.
+        /// </summary>
+        /// <param name="param_extremos">Listado de extremos de una asociación.</param>
+        /// <returns>Literal de una enumeración que identifica el tipo de esta.</returns>
         private EnumTipoAsociacion ObtenerTipoAsociacionDesdeExtremos(List<ExtremoAsociacionXMI> param_extremos)
         {
             if (param_extremos.Any(e => e.Agregacion == "composite"))
@@ -599,6 +631,11 @@ namespace transformador_mda.src.Features.ParserEntrada
             return EnumTipoAsociacion.ASOCIACION;
         }
 
+        /// <summary>
+        /// Método encargado de buscar la multiplicidad de una asociación.
+        /// </summary>
+        /// <param name="param_extremo">Extremo de la asociación sobre el que hay que buscar la multiplicidad.</param>
+        /// <returns>Multiplicidad leida.</returns>
         private string ObtenerMultiplicidad(ExtremoAsociacionXMI param_extremo)
         {
             if (param_extremo == null)
@@ -619,6 +656,9 @@ namespace transformador_mda.src.Features.ParserEntrada
             return inferior + ".." + superior;
         }
 
+        /// <summary>
+        /// Método encargado de enlazar las asociaciones con sus extremos.
+        /// </summary>
         private void EnlazarAsociacionesPendientes()
         {
             foreach (Asociacion asociacion in _asociaciones_pendientes)
@@ -631,6 +671,11 @@ namespace transformador_mda.src.Features.ParserEntrada
             }
         }
 
+        /// <summary>
+        /// Añade una asociación a una clase concreta.
+        /// </summary>
+        /// <param name="param_clase">Clase padre de la asociación.</param>
+        /// <param name="param_asociacion">Asociación que unir a la clase.</param>
         private void AgregarAsociacionAClase(Clase param_clase, Asociacion param_asociacion)
         {
             if (param_clase == null || param_asociacion == null)
@@ -642,6 +687,11 @@ namespace transformador_mda.src.Features.ParserEntrada
             param_clase.Asociaciones.Add(param_asociacion);
         }
 
+        /// <summary>
+        /// Método encargado de recorrer todos los directorios en busca de una clase según el id de la clase.
+        /// </summary>
+        /// <param name="param_id">Identificador de la clase a buscar.</param>
+        /// <returns>Objeto de tipo clase con la información de la clase buscada</returns>
         private Clase ObtenerClasePorId(string param_id)
         {
             if (string.IsNullOrWhiteSpace(param_id))
@@ -657,6 +707,12 @@ namespace transformador_mda.src.Features.ParserEntrada
             return null;
         }
 
+        /// <summary>
+        /// Según un identificador dado busca la clase que tenga dicho identificador
+        /// </summary>
+        /// <param name="param_directorio">Directorio sobre el que hay que buscar la clase</param>
+        /// <param name="param_id">Identificador de la clase a buscar</param>
+        /// <returns>Clase con id pasado por parametro o null si no se encuentra.</returns>
         private Clase ObtenerClasePorId(Directorio param_directorio, string param_id)
         {
             if (param_directorio == null)
@@ -676,6 +732,11 @@ namespace transformador_mda.src.Features.ParserEntrada
             return null;
         }
 
+        /// <summary>
+        /// Busca y obtiene la clase propietaria de una asociación.
+        /// </summary>
+        /// <param name="param_elemento">Elemento del XMI sobre el que hay que buscar quien es el padre de la asociación.</param>
+        /// <returns>Elemento padre de la asociación que se está procesando.</returns>
         private XElement ObtenerClasePropietaria(XElement param_elemento)
         {
             if (param_elemento == null)
@@ -689,6 +750,9 @@ namespace transformador_mda.src.Features.ParserEntrada
                     EsTipoXMI(e, "uml:Enumeration"));
         }
 
+        /// <summary>
+        /// DTO con la información de un extremo de una asociación.
+        /// </summary>
         private class ExtremoAsociacionXMI
         {
             public string Id { get; set; }
