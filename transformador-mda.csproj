@@ -93,6 +93,7 @@
     <Compile Include="src\Dominio\Retornos\RetornoConfiguracion.cs" />
     <Compile Include="src\Dominio\Retornos\RetornoElementoUML.cs" />
     <Compile Include="src\Dominio\Retornos\RetornoBase.cs" />
+    <Compile Include="src\Dominio\Retornos\RetornoMultiple.cs" />
     <Compile Include="src\Features\GestionConfiguracion\DAO.cs" />
     <Compile Include="src\Features\ExploradorFicheros\Files.cs" />
     <Compile Include="src\Features\ExploradorFicheros\Folder.cs" />
