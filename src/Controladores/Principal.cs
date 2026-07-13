@@ -1,4 +1,6 @@
 ﻿using transformador_mda.src.Dominio;
+using transformador_mda.src.Dominio.ElementosUML;
+using transformador_mda.src.Dominio.Retornos;
 using transformador_mda.src.Features.CrearIds;
 using transformador_mda.src.Features.ExploradorFicheros;
 using transformador_mda.src.Features.GenerarSalida;
@@ -45,11 +47,12 @@ namespace transformador_mda.src.Controladores
         {
             Configuracion.RutaFicheroEntrada = param_ruta_fichero;
 
-            IParserEntrada parser = FactoríaParser.CrearParser(Configuracion);
+            ParserUMLBase parser = FactoríaParser.CrearParser(Configuracion);
             if (parser == null)
                 return false;
 
-            Configuracion.Proyecto = parser.Parsear();
+            RetornoElementoUML ret_resultado = parser.Parsear();
+            Configuracion.Proyecto = ret_resultado.Elemento as ProyectoBase;
             if (Configuracion.Proyecto == null)
                 return false;
 

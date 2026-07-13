@@ -1,6 +1,6 @@
 ﻿using System.IO;
 using System.Collections.Generic;
-using transformador_mda.src.Dominio;
+using transformador_mda.src.Dominio.ElementosUML;
 
 namespace transformador_mda.src.Features.GenerarSalida
 {
@@ -29,7 +29,7 @@ namespace transformador_mda.src.Features.GenerarSalida
         /// <summary>
         /// Elemento que se está procesando en el bucle que recorre la representación interna.
         /// </summary>
-        protected Elemento _elemento_actual;
+        protected ElementoBase _elemento_actual;
 
         /// <summary>
         /// Asociación que se está procesando en el bucle que recorre la representación interna.
@@ -47,33 +47,6 @@ namespace transformador_mda.src.Features.GenerarSalida
         public GenerarSalidaBase(ProyectoBase param_proyecto)
         {
             _proyecto = param_proyecto;
-        }
-
-        #endregion
-
-        #region "Métodos protegidos"
-
-        /// <summary>
-        /// Genera la estructura de directorios de un sistema.
-        /// </summary>
-        /// <returns>True si la estructura de directorios se generó correctamente, false en caso contrario.</returns>
-        protected bool GenerarEstructuraDirectorios()
-        {
-            if (_proyecto == null ||
-                string.IsNullOrEmpty(_proyecto.DirectorioRaiz))
-                return false;
-
-            if (!Directory.Exists(_proyecto.DirectorioRaiz))
-                Directory.CreateDirectory(_proyecto.DirectorioRaiz);
-
-            foreach (var directorio in _proyecto.Directorios)
-            {
-                var path = Path.Combine(_proyecto.DirectorioRaiz, directorio.Nombre);
-                if (!Directory.Exists(path))
-                    Directory.CreateDirectory(path);
-            }
-
-            return true;
         }
 
         #endregion
@@ -101,12 +74,9 @@ namespace transformador_mda.src.Features.GenerarSalida
         /// <returns>Código de la clase.</returns>
         protected abstract string GenerarCodigoClase();
 
-        /// <summary>
-        /// Método encargado de generar el código de los elementos que se añadirán a las clases.
-        /// </summary>
-        /// <param name="param_elementos">Elemento a generar.</param>
-        /// <returns>Código del elemento.</returns>
-        protected abstract string GenerarElementos(List<Elemento> param_elementos);
+        protected abstract string GenerarAtributos(List<Atributo> param_elementos);
+
+        protected abstract string GenerarParametros(List<Parametro> param_parametros);
 
         /// <summary>
         /// Método encargado de generar los métodos que se añadirán a la clase.

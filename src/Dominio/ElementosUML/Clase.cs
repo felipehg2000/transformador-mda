@@ -1,42 +1,32 @@
 ﻿using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
-namespace transformador_mda.src.Dominio
+namespace transformador_mda.src.Dominio.ElementosUML
 {
     /// <summary>
     /// Objeto en el que almacenar toda la información relativa a una clase (toda la información que ofrece el documento XMI)
     /// </summary>
-    public class Clase
+    public class Clase : ElementoVisible
     {
         /// <summary>
-        /// Identificador único de la clase.
+        /// Tipo de clase (clase, interfaz, enumeración, etc.)
         /// </summary>
-        public string Id { get; set; }
-
-        /// <summary>
-        /// Almacena el nombre de la clase.
-        /// </summary>
-        public string Nombre { get; set; }
-
-        /// <summary>
-        /// Almacena el tipo de visibilidad de la clase
-        /// </summary>
-        public EnumVisibilidad Visibilidad { get; set; }
-
-        /// <summary>
-        /// Almacena el tipo de clase
-        /// </summary>
-        public TiposClases.Enumeracion TipoClase { get; set; }
+        public EnumTiposClases TipoClase { get; set; }
 
         /// <summary>
         /// Listado con los atributos y parámetros de la clase.
         /// </summary>
-        public List<Elemento> Elementos { get; set; }
+        public List<Atributo> Atributos { get; set; }
 
         /// <summary>
         /// Almacena información sobre los métodos
         /// </summary>
         public List<Metodo> Metodos { get; set; }
+
+        /// <summary>
+        /// Almacena información sobre los literales de las clases (si es una enumeración)
+        /// </summary>
+        public List<ElementoBase> Literales { get; set; }
 
         /// <summary>
         /// Almacena información sobre las asociaciones de esta clase con otras.
@@ -47,25 +37,24 @@ namespace transformador_mda.src.Dominio
         /// Constructor de la clase, inicializa atributos a vacío.
         /// </summary>
         [JsonConstructor]
-        public Clase()
+        public Clase() : base()
         {
-            Id = string.Empty;
-            Nombre = string.Empty;
-            Visibilidad = EnumVisibilidad.NULO;
-            TipoClase = TiposClases.Enumeracion.NULO;
-            Elementos = new List<Elemento>();
+            Tipo = EnumTipoElemento.CLASE;
+            TipoClase = EnumTiposClases.NO_DEFINIDA;
+            Atributos = new List<Atributo>();
             Metodos = new List<Metodo>();
             Asociaciones = new List<Asociacion>();
+            Literales = new List<ElementoBase>();
         }
 
         /// <summary>
-        /// Método para obtener un elemento de la clase a través de su identificador único.
+        /// Método para obtener un atributo de la clase a través de su identificador único.
         /// </summary>
-        /// <param name="param_id">Identificador del elemento a buscar.</param>
-        /// <returns>El elemento encontrado o null si no existe.</returns>
-        public Elemento ObtenerElementoPorId(string param_id)
+        /// <param name="param_id">Identificador del atributo a buscar.</param>
+        /// <returns>El atributo encontrado o null si no existe.</returns>
+        public Atributo ObtenerAtributoPorId(string param_id)
         {
-            return Elementos.Find(elemento => elemento.Id == param_id);
+            return Atributos.Find(atributo => atributo.Id == param_id);
         }
 
         /// <summary>
@@ -86,6 +75,16 @@ namespace transformador_mda.src.Dominio
         public Asociacion ObtenerAsociacionPorId(string param_id)
         {
             return Asociaciones.Find(asociacion => asociacion.Id == param_id);
+        }
+
+        /// <summary>
+        /// Método para obtener un literal de una enumeración a través de su identificador único.
+        /// </summary>
+        /// <param name="param_id">Identificador del literal a buscar.</param>
+        /// <returns>El literal encontrado o null si no existe.</returns>
+        public ElementoBase ObtenerLiteralPorId(string param_id)
+        {
+            return Literales.Find(literal => literal.Id == param_id);
         }
     }
 }

@@ -1,23 +1,13 @@
 ﻿using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
-namespace transformador_mda.src.Dominio
+namespace transformador_mda.src.Dominio.ElementosUML
 {
     /// <summary>
     /// Clase para almacenar la información sobre un directorio.
     /// </summary>
-    public class Directorio
+    public class Directorio : ElementoBase
     {
-        /// <summary>
-        /// Identificador único del directorio.
-        /// </summary>
-        public string Id { get; set; }
-
-        /// <summary>
-        /// Nombre de la carpeta.
-        /// </summary>
-        public string Nombre { get; set; }
-
         /// <summary>
         /// Espacio de nombres asociado al directorio.
         /// </summary>
@@ -29,15 +19,30 @@ namespace transformador_mda.src.Dominio
         public List<Clase> Clases { get; set; }
 
         /// <summary>
+        /// Subdirectorios que engloba el directorio.
+        /// </summary>
+        public List<Directorio> Subdirectorios { get; set; }
+
+        /// <summary>
         /// Constructor de la clase, inicializa atributos a vacío.
         /// </summary>        
         [JsonConstructor]
-        public Directorio()
+        public Directorio() : base()
         {
-            Id = string.Empty;
-            Nombre = string.Empty;
+            Tipo = EnumTipoElemento.DIRECTORIO;
             Namespace = string.Empty;
+            Subdirectorios = new List<Directorio>();
             Clases = new List<Clase>();
+        }
+
+        /// <summary>
+        /// Obtiene un subdirectorio a partir de su identificador.
+        /// </summary>
+        /// <param name="param_id">Identificador del subdirectorio a buscar.</param>
+        /// <returns>El subdirectorio encontrado o null si no existe.</returns>
+        public Directorio ObtenerDirectorioPorID(string param_id)
+        {
+            return Subdirectorios.Find(directorio => directorio.Id == param_id);
         }
 
         /// <summary>
