@@ -28,8 +28,12 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.panelPrincipal = new System.Windows.Forms.Panel();
+            this.components = new System.ComponentModel.Container();
+            System.Windows.Forms.ImageList imageList;
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormPrincipal));
+            this.panelAbrirXMI = new System.Windows.Forms.Panel();
             this.panelInferior = new System.Windows.Forms.Panel();
+            this.buttonContinuar = new System.Windows.Forms.Button();
             this.panelCentral = new System.Windows.Forms.Panel();
             this.buttonDirectorioRaiz = new System.Windows.Forms.Button();
             this.buttonBuscarFicheroDeEntrada = new System.Windows.Forms.Button();
@@ -39,27 +43,44 @@
             this.labelRutaRaiz = new System.Windows.Forms.Label();
             this.textBoxNombreProyecto = new System.Windows.Forms.TextBox();
             this.labelNombreProyecto = new System.Windows.Forms.Label();
-            this.menuStrip1 = new System.Windows.Forms.MenuStrip();
+            this.treeViewEstructura = new System.Windows.Forms.TreeView();
+            this.menuStrip = new System.Windows.Forms.MenuStrip();
             this.configuraciónToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.importarToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exportarToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.buttonContinuar = new System.Windows.Forms.Button();
-            this.panelPrincipal.SuspendLayout();
+            this.importarDiagramaToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.importarXMIToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.panelPrincipal = new System.Windows.Forms.Panel();
+            this.panelIzquierdo = new System.Windows.Forms.Panel();
+            this.treeView = new System.Windows.Forms.TreeView();
+            this.textBoxBuscarComponente = new System.Windows.Forms.TextBox();
+            imageList = new System.Windows.Forms.ImageList(this.components);
+            this.panelAbrirXMI.SuspendLayout();
             this.panelInferior.SuspendLayout();
             this.panelCentral.SuspendLayout();
-            this.menuStrip1.SuspendLayout();
+            this.menuStrip.SuspendLayout();
+            this.panelPrincipal.SuspendLayout();
+            this.panelIzquierdo.SuspendLayout();
             this.SuspendLayout();
             // 
-            // panelPrincipal
+            // imageList
             // 
-            this.panelPrincipal.BackColor = System.Drawing.SystemColors.ActiveCaption;
-            this.panelPrincipal.Controls.Add(this.panelInferior);
-            this.panelPrincipal.Controls.Add(this.panelCentral);
-            this.panelPrincipal.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panelPrincipal.Location = new System.Drawing.Point(0, 0);
-            this.panelPrincipal.Name = "panelPrincipal";
-            this.panelPrincipal.Size = new System.Drawing.Size(439, 226);
-            this.panelPrincipal.TabIndex = 0;
+            imageList.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("imageList.ImageStream")));
+            imageList.TransparentColor = System.Drawing.Color.Transparent;
+            imageList.Images.SetKeyName(0, "carpeta");
+            imageList.Images.SetKeyName(1, "clase");
+            imageList.Images.SetKeyName(2, "enumeracion");
+            imageList.Images.SetKeyName(3, "interfaz");
+            // 
+            // panelAbrirXMI
+            // 
+            this.panelAbrirXMI.BackColor = System.Drawing.SystemColors.ActiveCaption;
+            this.panelAbrirXMI.Controls.Add(this.panelInferior);
+            this.panelAbrirXMI.Controls.Add(this.panelCentral);
+            this.panelAbrirXMI.Location = new System.Drawing.Point(170, 145);
+            this.panelAbrirXMI.Name = "panelAbrirXMI";
+            this.panelAbrirXMI.Size = new System.Drawing.Size(439, 226);
+            this.panelAbrirXMI.TabIndex = 0;
             // 
             // panelInferior
             // 
@@ -70,6 +91,17 @@
             this.panelInferior.Name = "panelInferior";
             this.panelInferior.Size = new System.Drawing.Size(439, 39);
             this.panelInferior.TabIndex = 2;
+            // 
+            // buttonContinuar
+            // 
+            this.buttonContinuar.Enabled = false;
+            this.buttonContinuar.Location = new System.Drawing.Point(351, 13);
+            this.buttonContinuar.Name = "buttonContinuar";
+            this.buttonContinuar.Size = new System.Drawing.Size(75, 23);
+            this.buttonContinuar.TabIndex = 0;
+            this.buttonContinuar.Text = "Continuar ->";
+            this.buttonContinuar.UseVisualStyleBackColor = true;
+            this.buttonContinuar.Click += new System.EventHandler(this.buttonContinuar_Click);
             // 
             // panelCentral
             // 
@@ -82,7 +114,6 @@
             this.panelCentral.Controls.Add(this.labelRutaRaiz);
             this.panelCentral.Controls.Add(this.textBoxNombreProyecto);
             this.panelCentral.Controls.Add(this.labelNombreProyecto);
-            this.panelCentral.Controls.Add(this.menuStrip1);
             this.panelCentral.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panelCentral.Location = new System.Drawing.Point(0, 0);
             this.panelCentral.Name = "panelCentral";
@@ -162,21 +193,30 @@
             this.labelNombreProyecto.TabIndex = 0;
             this.labelNombreProyecto.Text = "Nombre del proyecto";
             // 
-            // menuStrip1
+            // treeViewEstructura
             // 
-            this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.treeViewEstructura.LineColor = System.Drawing.Color.Empty;
+            this.treeViewEstructura.Location = new System.Drawing.Point(0, 0);
+            this.treeViewEstructura.Name = "treeViewEstructura";
+            this.treeViewEstructura.Size = new System.Drawing.Size(121, 97);
+            this.treeViewEstructura.TabIndex = 0;
+            // 
+            // menuStrip
+            // 
+            this.menuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.configuraciónToolStripMenuItem});
-            this.menuStrip1.Location = new System.Drawing.Point(0, 0);
-            this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(439, 24);
-            this.menuStrip1.TabIndex = 8;
-            this.menuStrip1.Text = "menuStrip1";
+            this.menuStrip.Location = new System.Drawing.Point(0, 0);
+            this.menuStrip.Name = "menuStrip";
+            this.menuStrip.Size = new System.Drawing.Size(784, 24);
+            this.menuStrip.TabIndex = 8;
+            this.menuStrip.Text = "menuStrip1";
             // 
             // configuraciónToolStripMenuItem
             // 
             this.configuraciónToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.importarToolStripMenuItem,
-            this.exportarToolStripMenuItem});
+            this.exportarToolStripMenuItem,
+            this.importarDiagramaToolStripMenuItem});
             this.configuraciónToolStripMenuItem.Name = "configuraciónToolStripMenuItem";
             this.configuraciónToolStripMenuItem.Size = new System.Drawing.Size(95, 20);
             this.configuraciónToolStripMenuItem.Text = "Configuración";
@@ -184,52 +224,108 @@
             // importarToolStripMenuItem
             // 
             this.importarToolStripMenuItem.Name = "importarToolStripMenuItem";
-            this.importarToolStripMenuItem.Size = new System.Drawing.Size(120, 22);
+            this.importarToolStripMenuItem.Size = new System.Drawing.Size(173, 22);
             this.importarToolStripMenuItem.Text = "Importar";
             this.importarToolStripMenuItem.Click += new System.EventHandler(this.importarToolStripMenuItem_Click);
             // 
             // exportarToolStripMenuItem
             // 
             this.exportarToolStripMenuItem.Name = "exportarToolStripMenuItem";
-            this.exportarToolStripMenuItem.Size = new System.Drawing.Size(120, 22);
+            this.exportarToolStripMenuItem.Size = new System.Drawing.Size(173, 22);
             this.exportarToolStripMenuItem.Text = "Exportar";
             this.exportarToolStripMenuItem.Click += new System.EventHandler(this.exportarToolStripMenuItem_Click);
             // 
-            // buttonContinuar
+            // importarDiagramaToolStripMenuItem
             // 
-            this.buttonContinuar.Enabled = false;
-            this.buttonContinuar.Location = new System.Drawing.Point(351, 13);
-            this.buttonContinuar.Name = "buttonContinuar";
-            this.buttonContinuar.Size = new System.Drawing.Size(75, 23);
-            this.buttonContinuar.TabIndex = 0;
-            this.buttonContinuar.Text = "Continuar ->";
-            this.buttonContinuar.UseVisualStyleBackColor = true;
-            this.buttonContinuar.Click += new System.EventHandler(this.buttonContinuar_Click);
+            this.importarDiagramaToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.importarXMIToolStripMenuItem});
+            this.importarDiagramaToolStripMenuItem.Name = "importarDiagramaToolStripMenuItem";
+            this.importarDiagramaToolStripMenuItem.Size = new System.Drawing.Size(173, 22);
+            this.importarDiagramaToolStripMenuItem.Text = "Importar diagrama";
+            // 
+            // importarXMIToolStripMenuItem
+            // 
+            this.importarXMIToolStripMenuItem.Name = "importarXMIToolStripMenuItem";
+            this.importarXMIToolStripMenuItem.Size = new System.Drawing.Size(144, 22);
+            this.importarXMIToolStripMenuItem.Text = "Importar XMI";
+            this.importarXMIToolStripMenuItem.Click += new System.EventHandler(this.importarXMIToolStripMenuItem_Click);
+            // 
+            // panelPrincipal
+            // 
+            this.panelPrincipal.BackColor = System.Drawing.Color.White;
+            this.panelPrincipal.Controls.Add(this.panelIzquierdo);
+            this.panelPrincipal.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panelPrincipal.Location = new System.Drawing.Point(0, 24);
+            this.panelPrincipal.Name = "panelPrincipal";
+            this.panelPrincipal.Size = new System.Drawing.Size(784, 437);
+            this.panelPrincipal.TabIndex = 9;
+            // 
+            // panelIzquierdo
+            // 
+            this.panelIzquierdo.BackColor = System.Drawing.SystemColors.Control;
+            this.panelIzquierdo.Controls.Add(this.treeView);
+            this.panelIzquierdo.Controls.Add(this.textBoxBuscarComponente);
+            this.panelIzquierdo.Dock = System.Windows.Forms.DockStyle.Left;
+            this.panelIzquierdo.Location = new System.Drawing.Point(0, 0);
+            this.panelIzquierdo.Name = "panelIzquierdo";
+            this.panelIzquierdo.Padding = new System.Windows.Forms.Padding(5);
+            this.panelIzquierdo.Size = new System.Drawing.Size(358, 437);
+            this.panelIzquierdo.TabIndex = 0;
+            this.panelIzquierdo.MouseDown += new System.Windows.Forms.MouseEventHandler(this.PanelIzquierdo_MouseDown);
+            this.panelIzquierdo.MouseLeave += new System.EventHandler(this.PanelIzquierdo_MouseLeave);
+            this.panelIzquierdo.MouseMove += new System.Windows.Forms.MouseEventHandler(this.PanelIzquierdo_MouseMove);
+            this.panelIzquierdo.MouseUp += new System.Windows.Forms.MouseEventHandler(this.PanelIzquierdo_MouseUp);
+            // 
+            // treeView
+            // 
+            this.treeView.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.treeView.ImageIndex = 0;
+            this.treeView.ImageList = imageList;
+            this.treeView.Location = new System.Drawing.Point(5, 25);
+            this.treeView.Name = "treeView";
+            this.treeView.SelectedImageIndex = 0;
+            this.treeView.Size = new System.Drawing.Size(348, 407);
+            this.treeView.TabIndex = 1;
+            // 
+            // textBoxBuscarComponente
+            // 
+            this.textBoxBuscarComponente.Dock = System.Windows.Forms.DockStyle.Top;
+            this.textBoxBuscarComponente.Location = new System.Drawing.Point(5, 5);
+            this.textBoxBuscarComponente.Name = "textBoxBuscarComponente";
+            this.textBoxBuscarComponente.Size = new System.Drawing.Size(348, 20);
+            this.textBoxBuscarComponente.TabIndex = 0;
             // 
             // FormPrincipal
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(439, 226);
+            this.ClientSize = new System.Drawing.Size(784, 461);
             this.Controls.Add(this.panelPrincipal);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
-            this.MainMenuStrip = this.menuStrip1;
+            this.Controls.Add(this.menuStrip);
+            this.Controls.Add(this.panelAbrirXMI);
+            this.MainMenuStrip = this.menuStrip;
+            this.MinimumSize = new System.Drawing.Size(800, 500);
             this.Name = "FormPrincipal";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Generador MDA";
-            this.panelPrincipal.ResumeLayout(false);
+            this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
+            this.panelAbrirXMI.ResumeLayout(false);
             this.panelInferior.ResumeLayout(false);
             this.panelCentral.ResumeLayout(false);
             this.panelCentral.PerformLayout();
-            this.menuStrip1.ResumeLayout(false);
-            this.menuStrip1.PerformLayout();
+            this.menuStrip.ResumeLayout(false);
+            this.menuStrip.PerformLayout();
+            this.panelPrincipal.ResumeLayout(false);
+            this.panelIzquierdo.ResumeLayout(false);
+            this.panelIzquierdo.PerformLayout();
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
         #endregion
 
-        private System.Windows.Forms.Panel panelPrincipal;
+        private System.Windows.Forms.Panel panelAbrirXMI;
         private System.Windows.Forms.Panel panelInferior;
         private System.Windows.Forms.Panel panelCentral;
         private System.Windows.Forms.TextBox textBoxNombreProyecto;
@@ -237,7 +333,7 @@
         private System.Windows.Forms.TextBox textBoxRutaFicheroDeEntrada;
         private System.Windows.Forms.Label RutaFicheroEntrada;
         private System.Windows.Forms.TextBox textBoxRutaRaiz;
-        private System.Windows.Forms.MenuStrip menuStrip1;
+        private System.Windows.Forms.MenuStrip menuStrip;
         private System.Windows.Forms.ToolStripMenuItem configuraciónToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem importarToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem exportarToolStripMenuItem;
@@ -245,6 +341,13 @@
         private System.Windows.Forms.Button buttonBuscarFicheroDeEntrada;
         private System.Windows.Forms.Label labelRutaRaiz;
         private System.Windows.Forms.Button buttonContinuar;
+        private System.Windows.Forms.Panel panelPrincipal;
+        private System.Windows.Forms.TreeView treeViewEstructura;
+        private System.Windows.Forms.ToolStripMenuItem importarDiagramaToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem importarXMIToolStripMenuItem;
+        private System.Windows.Forms.Panel panelIzquierdo;
+        private System.Windows.Forms.TextBox textBoxBuscarComponente;
+        private System.Windows.Forms.TreeView treeView;
     }
 }
 

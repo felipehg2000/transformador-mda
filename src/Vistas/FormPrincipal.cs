@@ -1,11 +1,25 @@
 ﻿using System;
+using System.Drawing;
 using System.Windows.Forms;
 using transformador_mda.src.Controladores;
+using transformador_mda.src.Dominio.ElementosUML;
 using transformador_mda.src.Dominio.Retornos;
 using transformador_mda.src.Features.ExploradorFicheros;
 
 namespace transformador_mda.src.Vistas
 {
+    /// <summary>
+    /// Enumeración con los índices de las imágenes del imageList asociado al TreeView
+    /// </summary>
+    enum EnumIndiceImagenes
+    {
+        CARPETA = 0,        /// <summary> Representa el icono de un directorio, posición 0. </summary>
+        CLASE = 1,          /// <summary> Representa el icono de una clase, posición 1. </summary>
+        ENUMERACION = 2,    /// <summary> Representa el icono de una enumeración, posición 2. </summary>
+        INTERFAZ = 3,       /// <summary> Representa el icono de una interfaz, posición 3. </summary>
+        NO_DEFINIDA = 4     /// <summary> No representa ningún icono del image list. </summary>
+    };
+
     /// <summary>
     /// Formuulario principal. Vista de la aplicación.
     /// </summary>
@@ -17,6 +31,31 @@ namespace transformador_mda.src.Vistas
         /// Controlador para conectar la vista con la lógica del generador de código.
         /// </summary>
         private Principal _controlador;
+
+        /// <summary>
+        /// True si el panel ya está redimensionado, false si no.
+        /// </summary>
+        private bool _redimensionando_panelIzquierdo;
+
+        /// <summary>
+        /// Punto de partida de la redimensión.
+        /// </summary>
+        private int _redimensionar_inicio_x;
+
+        /// <summary>
+        /// Ancho del panelIzquierdo antes de la redimensión
+        /// </summary>
+        private int _panelIzquierdo_inicio_anchura;
+
+        /// <summary>
+        /// Borde izquierdo del panelIzquierdo visible y desde el que se permite la redimensión.
+        /// </summary>
+        private const int AnchoBordeRedimension = 5;
+
+        /// <summary>
+        /// Ancho mínimo permitido para el panelIzquierdo.
+        /// </summary>
+        private const int AnchoPanelIzquierdoMinimo = 150;
 
         #endregion
 
@@ -34,7 +73,7 @@ namespace transformador_mda.src.Vistas
 
         #endregion
 
-        #region "Eventos"
+        #region "Menú"
 
         /// <summary>
         /// Evento para exportar la configuración que está usando el generador.
@@ -78,6 +117,147 @@ namespace transformador_mda.src.Vistas
         }
 
         /// <summary>
+        /// Muestra el panel para importar XMI y desactiva el panel principal.
+        /// </summary>
+        /// <param name="sender">Componente que lanza el evento.</param>
+        /// <param name="e">Argumentos asociados al evento.</param>
+        private void importarXMIToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            panelAbrirXMI.Enabled = true;
+            panelAbrirXMI.Visible = true;
+            panelAbrirXMI.BringToFront();
+
+            panelPrincipal.Enabled = false;
+        }
+
+        #endregion
+
+        #region "Redimensión ancho panelIzquierdo"
+
+        /// <summary>
+        /// Controla las variables de redimensión por si el click se queda pulsado.
+        /// </summary>
+        /// <param name="sender">Componente que lanza el evento.</param>
+        /// <param name="e">Argumentos asociados al evento.</param>
+        private void PanelIzquierdo_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (e.Button != MouseButtons.Left)
+                return;
+
+            var control = sender as Control;
+            if (control == null)
+                return;
+
+            Point puntoEnPanel = panelIzquierdo.PointToClient(control.PointToScreen(e.Location));
+            if (!EstaEnBordeDerechoPanelIzquierdo(puntoEnPanel))
+                return;
+
+            _redimensionando_panelIzquierdo = true;
+            _redimensionar_inicio_x = Control.MousePosition.X;
+            _panelIzquierdo_inicio_anchura = panelIzquierdo.Width;
+            panelIzquierdo.Capture = true;
+        }
+
+        /// <summary>
+        /// Modifica el cursos al salir del panelIzquierdo 
+        /// </summary>
+        /// <param name="sender">Componente que lanza el evento.</param>
+        /// <param name="e">Argumentos asociados al evento.</param>
+        private void PanelIzquierdo_MouseLeave(object sender, EventArgs e)
+        {
+            if (_redimensionando_panelIzquierdo)
+                return;
+
+            RestaurarCursorPanelIzquierdo();
+        }
+
+        /// <summary>
+        /// Comprueba la posición para controlar el aspecto del cursor, si el click está pulsado modifica el ancho del panel.
+        /// </summary>
+        /// <param name="sender">Componente que lanza el evento.</param>
+        /// <param name="e">Argumentos asociados al evento.</param>
+        private void PanelIzquierdo_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (_redimensionando_panelIzquierdo)
+            {
+                int delta = Control.MousePosition.X - _redimensionar_inicio_x;
+                int nuevoAncho = _panelIzquierdo_inicio_anchura + delta;
+
+                if (nuevoAncho < AnchoPanelIzquierdoMinimo)
+                    nuevoAncho = AnchoPanelIzquierdoMinimo;
+
+                panelIzquierdo.Width = nuevoAncho;
+                return;
+            }
+
+            ActualizarCursorRedimension(sender as Control, e);
+        }
+
+        /// <summary>
+        /// Modifica el cursor al salir del PanelIzquierdo
+        /// </summary>
+        /// <param name="sender">Componente que lanza el evento.</param>
+        /// <param name="e">Argumentos asociados al evento.</param>
+        private void PanelIzquierdo_MouseUp(object sender, MouseEventArgs e)
+        {
+            if (!_redimensionando_panelIzquierdo)
+                return;
+
+            _redimensionando_panelIzquierdo = false;
+            panelIzquierdo.Capture = false;
+            RestaurarCursorPanelIzquierdo();
+        }
+
+        /// <summary>
+        /// Método encargado de definir el punto donde se encuentra el cursor para mostrar un aspecto u otro.
+        /// </summary>
+        /// <param name="sender">Componente que lanza el evento.</param>
+        /// <param name="e">Argumentos asociados al evento.</param>
+        private void ActualizarCursorRedimension(Control control, MouseEventArgs e)
+        {
+            if (control == null)
+                return;
+
+            Point puntoEnPanel = panelIzquierdo.PointToClient(control.PointToScreen(e.Location));
+            bool sobreBorde = EstaEnBordeDerechoPanelIzquierdo(puntoEnPanel);
+            Cursor cursorDeseado = sobreBorde ? Cursors.SizeWE : Cursors.Default;
+
+            if (panelIzquierdo.Cursor != cursorDeseado)
+                panelIzquierdo.Cursor = cursorDeseado;
+
+            if (control.Cursor != cursorDeseado)
+                control.Cursor = cursorDeseado;
+        }
+
+
+        /// <summary>
+        /// Comprueba si está en el borde izquierdo del panel o no para saber si modificar o no el aspecto del cursor.
+        /// </summary>
+        /// <param name="param_punto_en_panel">Punto en el que se encuentra el cursor.</param>
+        /// <returns></returns>
+        private bool EstaEnBordeDerechoPanelIzquierdo(Point param_punto_en_panel)
+        {
+            return param_punto_en_panel.X >= panelIzquierdo.Width - AnchoBordeRedimension &&
+                   param_punto_en_panel.X <= panelIzquierdo.Width;
+        }
+
+        /// <summary>
+        /// Método encargado de devolver el estilo por defecto al cursor.
+        /// </summary>
+        private void RestaurarCursorPanelIzquierdo()
+        {
+            panelIzquierdo.Cursor = Cursors.Default;
+            if (treeView != null)
+                treeView.Cursor = Cursors.Default;
+            if (textBoxBuscarComponente != null)
+                textBoxBuscarComponente.Cursor = Cursors.Default;
+        }
+
+        #endregion
+
+        #region "Panel ImportarXMI"
+
+        /// <summary>
         /// Abre el explorador de directorios y rellena el textBox de ruta raíz con el directorio seleccionado, si no hay nombre de proyecto se coge el nombre del directorio.
         /// </summary>
         /// <param name="sender">Componente que lanza el evento.</param>
@@ -92,6 +272,8 @@ namespace transformador_mda.src.Vistas
 
             if (textBoxNombreProyecto.Text != _controlador.Configuracion.Proyecto.Nombre)
                 textBoxNombreProyecto.Text = _controlador.Configuracion.Proyecto.Nombre;
+
+            ActivarBotonContinuar();
         }
 
         /// <summary>
@@ -102,6 +284,7 @@ namespace transformador_mda.src.Vistas
         private void textBoxNombreProyecto_TextChanged(object sender, EventArgs e)
         {
             _controlador.Configuracion.Proyecto.Nombre = textBoxNombreProyecto.Text;
+            ActivarBotonContinuar();
         }
 
         /// <summary>
@@ -124,13 +307,12 @@ namespace transformador_mda.src.Vistas
                 return;
 
             textBoxRutaFicheroDeEntrada.Text = _controlador.Configuracion.RutaFicheroEntrada;
+            ActivarBotonContinuar();
         }
 
-        #endregion
-
-
-        #region "Métodos privados"
-
+        /// <summary>
+        /// Activa o desactiva el botón para completar la lectura del fichero XMI.
+        /// </summary>
         private void ActivarBotonContinuar()
         {
             if (string.IsNullOrEmpty(textBoxRutaRaiz.Text) &&
@@ -145,11 +327,115 @@ namespace transformador_mda.src.Vistas
             }
         }
 
-        #endregion
-
+        /// <summary>
+        /// Carga el árbol de ficheros y directorios y muestra el panel principal
+        /// </summary>
+        /// <param name="sender">Componente que lanza el evento.</param>
+        /// <param name="e">Argumentos asociados al evento.</param>
         private void buttonContinuar_Click(object sender, EventArgs e)
         {
+            panelAbrirXMI.Enabled = false;
+            panelAbrirXMI.Visible = false;
+            panelAbrirXMI.SendToBack();
 
+            if (_controlador?.Configuracion?.Proyecto == null)
+            {
+                panelPrincipal.Enabled = true;
+                return;
+            }
+
+            RellenarArbolProyecto();
+            panelPrincipal.Enabled = true;
         }
+
+        /// <summary>
+        /// Comprueba la existencia de los elementos, genera el directorio del proyecto y recorre los directorios principales.
+        /// </summary>
+        private void RellenarArbolProyecto()
+        {
+            if (treeView == null || treeView.ImageList == null)
+                return;
+
+            treeView.Nodes.Clear();
+
+            TreeNode nodo_raiz = new TreeNode(_controlador.Configuracion.Proyecto.Nombre)
+            {
+                Tag = _controlador.Configuracion.Proyecto,
+                ImageIndex = (int)EnumIndiceImagenes.CARPETA,
+                SelectedImageIndex = (int)EnumIndiceImagenes.CARPETA
+            };
+
+            if (_controlador.Configuracion.Proyecto.Directorios != null)
+            {
+                foreach (Directorio directorio in _controlador.Configuracion.Proyecto.Directorios)
+                    nodo_raiz.Nodes.Add(CrearNodoDirectorio(directorio));
+            }
+
+            treeView.Nodes.Add(nodo_raiz);
+            nodo_raiz.Expand();
+        }
+
+        /// <summary>
+        /// Genera los subdirectdorios y las clases asociadas a un directorio principal.
+        /// </summary>
+        /// <param name="param_directorio">Directorio principal del que se generarán los subdirectorios y clases.</param>
+        /// <returns>Nodo del directorio generado.</returns>
+        private TreeNode CrearNodoDirectorio(Directorio param_directorio)
+        {
+            TreeNode ret_nodo_directorio = new TreeNode(param_directorio.Nombre)
+            {
+                Tag = param_directorio,
+                ImageIndex = (int)EnumIndiceImagenes.CARPETA,
+                SelectedImageIndex = (int)EnumIndiceImagenes.CARPETA
+            };
+
+            if (param_directorio.Subdirectorios != null)
+            {
+                foreach (Directorio subdirectorio in param_directorio.Subdirectorios)
+                    ret_nodo_directorio.Nodes.Add(CrearNodoDirectorio(subdirectorio));
+            }
+
+            if (param_directorio.Clases != null)
+            {
+                foreach (Clase clase in param_directorio.Clases)
+                {
+                    int indice_icono = ObtenerClaveIcono(clase);
+                    var nodo_clase = new TreeNode(clase.Nombre)
+                    {
+                        Tag = clase,
+                        ImageIndex = indice_icono,
+                        SelectedImageIndex = indice_icono
+                    };
+
+                    ret_nodo_directorio.Nodes.Add(nodo_clase);
+                }
+            }
+
+            return ret_nodo_directorio;
+        }
+
+        /// <summary>
+        /// Según el tipo de clase decide el icono a mostrar en el tree view.
+        /// </summary>
+        /// <param name="param_clase">Clase para asociar el tipo de icono.</param>
+        /// <returns>Índice del tipo de icono en el image list.</returns>
+        private int ObtenerClaveIcono(Clase param_clase)
+        {
+            if (param_clase == null)
+                return (int)EnumIndiceImagenes.NO_DEFINIDA;
+
+            switch (param_clase.TipoClase)
+            {
+                case EnumTiposClases.INTERFAZ:
+                    return (int) EnumIndiceImagenes.INTERFAZ;
+                case EnumTiposClases.ENUMERACION:
+                    return (int)EnumIndiceImagenes.ENUMERACION;
+                default:
+                    return (int) EnumIndiceImagenes.CLASE;
+            }
+        }
+
+        #endregion
+
     }
 }

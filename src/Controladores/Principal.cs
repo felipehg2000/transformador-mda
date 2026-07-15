@@ -60,16 +60,18 @@ namespace transformador_mda.src.Controladores
                     RetornoMultiple.EnumEstado.CANCELADO_POR_USUARIO,
                     "Proceso cancelado por el usuario.");
 
-            RetornoMultiple ret_retorno = (RetornoMultiple)LeerFichero(ruta_fichero);
-            if (!ret_retorno.Exito)
+            RetornoBase retorno = LeerFichero(ruta_fichero);
+            RetornoMultiple ret_retorno = new RetornoMultiple()
             {
-                ret_retorno.Estado = RetornoMultiple.EnumEstado.ERROR;
-                return ret_retorno;
-            }
+                Exito = retorno.Exito,
+                TextoUsuario = retorno.TextoUsuario,
+                TextoDesarrollador = retorno.TextoDesarrollador,
+                Estado = retorno.Exito ? RetornoMultiple.EnumEstado.CORRECTO : RetornoMultiple.EnumEstado.ERROR
+            };
+                        
+            if (ret_retorno.Exito)
+                Configuracion.RutaFicheroEntrada = ruta_fichero;
 
-            Configuracion.RutaFicheroEntrada = ruta_fichero;
-
-            ret_retorno.Estado = RetornoMultiple.EnumEstado.CORRECTO;
             return ret_retorno;
         }      
 
