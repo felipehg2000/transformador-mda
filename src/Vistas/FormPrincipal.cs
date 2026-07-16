@@ -20,6 +20,24 @@ namespace transformador_mda.src.Vistas
         NO_DEFINIDA = 4     /// <summary> No representa ningún icono del image list. </summary>
     };
 
+    enum EnumColumnasAtributos
+    {
+        ID = 0,
+        NOMBRE = 1,
+        TIPO_DATO = 2,
+        DESCRIPCION = 3,
+        NO_DEFINIDA = 4
+    }
+
+    enum EnumColumnasAsociaciones
+    {
+        ID = 0,
+        TIPO_ASOCIACION = 1,
+        CLASE_ASOCIACION = 2,
+        DESCRIPCION = 3,
+        NO_DEFINIDA = 4
+    }
+
     /// <summary>
     /// Formuulario principal. Vista de la aplicación.
     /// </summary>
@@ -56,6 +74,8 @@ namespace transformador_mda.src.Vistas
         /// Ancho mínimo permitido para el panelIzquierdo.
         /// </summary>
         private const int AnchoPanelIzquierdoMinimo = 150;
+
+        private Clase _clase_mostrada;
 
         #endregion
 
@@ -437,5 +457,62 @@ namespace transformador_mda.src.Vistas
 
         #endregion
 
+        private void treeView_NodeMouseDoubleClick(object sender, TreeNodeMouseClickEventArgs e)
+        {
+            if (!(e.Node.Tag is Clase clase))
+                return;
+
+            RellenarFormulario(clase);
+        }
+
+        private void RellenarFormulario(Clase param_clase)
+        {
+            richTextBoxClase.Text = string.Empty;
+            listView.Items.Clear();
+            dataGridViewAsociaciones.Rows.Clear();
+            dataGridViewAtributos.Rows.Clear();
+
+            richTextBoxMetodo.Text = string.Empty;
+            richTextBoxRetorno.Text = string.Empty;
+            dataGridViewParametros.Rows.Clear();
+
+            richTextBoxClase.Text = param_clase.Comentario;
+            foreach (Metodo metodo in param_clase.Metodos)
+            {
+                ListViewItem item = new ListViewItem(metodo.Nombre)
+                {
+                    Tag = metodo
+                };
+
+                listView.Items.Add(item);
+            }
+
+            foreach(Atributo atributo in param_clase.Atributos)
+            {
+                dataGridViewAtributos.Rows.Add(atributo.Id, atributo.Nombre, "void", atributo.Comentario);
+            }
+
+            foreach(Asociacion asociacion in param_clase.Asociaciones)
+            {
+                dataGridViewAsociaciones.Rows.Add(asociacion.Id, asociacion.Nombre, asociacion.Comentario);
+            }
+        }
+
+        private void listView_ItemSelectionChanged(object sender, ListViewItemSelectionChangedEventArgs e)
+        {
+            richTextBoxMetodo.Text = string.Empty;
+            richTextBoxRetorno.Text = string.Empty;
+            dataGridViewParametros.Rows.Clear();
+
+            if (!(e.Item.Tag is Metodo metodo))
+                return;
+
+            richTextBoxMetodo.Text = metodo.Comentario;
+            
+            foreach (Parametro parametro in metodo.Parametros)
+            {
+                dataGridViewParametros.Rows.Add(parametro.Id, parametro.Nombre, parametro.Comentario);
+            }
+        }
     }
 }

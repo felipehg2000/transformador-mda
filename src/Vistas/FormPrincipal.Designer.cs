@@ -77,12 +77,12 @@
             this.ColumnDescripcionAsociacion = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.tableLayoutPanelMethods = new System.Windows.Forms.TableLayoutPanel();
             this.panelLeftMetodos = new System.Windows.Forms.Panel();
-            this.listView1 = new System.Windows.Forms.ListView();
+            this.listView = new System.Windows.Forms.ListView();
             this.labelMetodos = new System.Windows.Forms.Label();
             this.tableLayoutPanelMethodDetails = new System.Windows.Forms.TableLayoutPanel();
             this.labelTitulo = new System.Windows.Forms.Label();
             this.labelDescripcion = new System.Windows.Forms.Label();
-            this.richTextBoxDescripcion = new System.Windows.Forms.RichTextBox();
+            this.richTextBoxMetodo = new System.Windows.Forms.RichTextBox();
             this.labelParametros = new System.Windows.Forms.Label();
             this.dataGridViewParametros = new System.Windows.Forms.DataGridView();
             this.ColumnId = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -262,7 +262,7 @@
             this.configuraciónToolStripMenuItem});
             this.menuStrip.Location = new System.Drawing.Point(0, 0);
             this.menuStrip.Name = "menuStrip";
-            this.menuStrip.Size = new System.Drawing.Size(1584, 24);
+            this.menuStrip.Size = new System.Drawing.Size(1370, 24);
             this.menuStrip.TabIndex = 8;
             this.menuStrip.Text = "menuStrip1";
             // 
@@ -313,7 +313,7 @@
             this.panelPrincipal.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panelPrincipal.Location = new System.Drawing.Point(0, 24);
             this.panelPrincipal.Name = "panelPrincipal";
-            this.panelPrincipal.Size = new System.Drawing.Size(1584, 815);
+            this.panelPrincipal.Size = new System.Drawing.Size(1370, 703);
             this.panelPrincipal.TabIndex = 9;
             // 
             // splitContainer
@@ -325,8 +325,8 @@
             // splitContainer.Panel1
             // 
             this.splitContainer.Panel1.Controls.Add(this.tabControl);
-            this.splitContainer.Size = new System.Drawing.Size(1434, 815);
-            this.splitContainer.SplitterDistance = 873;
+            this.splitContainer.Size = new System.Drawing.Size(1220, 703);
+            this.splitContainer.SplitterDistance = 742;
             this.splitContainer.TabIndex = 1;
             // 
             // tabControl
@@ -336,7 +336,7 @@
             this.tabControl.Location = new System.Drawing.Point(0, 0);
             this.tabControl.Name = "tabControl";
             this.tabControl.SelectedIndex = 0;
-            this.tabControl.Size = new System.Drawing.Size(873, 815);
+            this.tabControl.Size = new System.Drawing.Size(742, 703);
             this.tabControl.TabIndex = 0;
             // 
             // tabPageComentarios
@@ -346,7 +346,7 @@
             this.tabPageComentarios.Location = new System.Drawing.Point(4, 22);
             this.tabPageComentarios.Name = "tabPageComentarios";
             this.tabPageComentarios.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPageComentarios.Size = new System.Drawing.Size(865, 789);
+            this.tabPageComentarios.Size = new System.Drawing.Size(734, 677);
             this.tabPageComentarios.TabIndex = 1;
             this.tabPageComentarios.Text = "Comentarios";
             // 
@@ -375,7 +375,7 @@
             this.tableLayoutPanelRight.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanelRight.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 18.8253F));
             this.tableLayoutPanelRight.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 51.05422F));
-            this.tableLayoutPanelRight.Size = new System.Drawing.Size(859, 783);
+            this.tableLayoutPanelRight.Size = new System.Drawing.Size(728, 671);
             this.tableLayoutPanelRight.TabIndex = 1002;
             // 
             // labelTituloEdicion
@@ -385,7 +385,7 @@
             this.labelTituloEdicion.ImageAlign = System.Drawing.ContentAlignment.TopLeft;
             this.labelTituloEdicion.Location = new System.Drawing.Point(3, 0);
             this.labelTituloEdicion.Name = "labelTituloEdicion";
-            this.labelTituloEdicion.Size = new System.Drawing.Size(853, 20);
+            this.labelTituloEdicion.Size = new System.Drawing.Size(722, 20);
             this.labelTituloEdicion.TabIndex = 15;
             this.labelTituloEdicion.Text = "Clase: ";
             this.labelTituloEdicion.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -396,7 +396,7 @@
             this.labelClase.Dock = System.Windows.Forms.DockStyle.Top;
             this.labelClase.Location = new System.Drawing.Point(3, 20);
             this.labelClase.Name = "labelClase";
-            this.labelClase.Size = new System.Drawing.Size(853, 13);
+            this.labelClase.Size = new System.Drawing.Size(722, 13);
             this.labelClase.TabIndex = 13;
             this.labelClase.Text = "Clase";
             // 
@@ -407,7 +407,7 @@
             this.richTextBoxClase.Location = new System.Drawing.Point(3, 36);
             this.richTextBoxClase.Name = "richTextBoxClase";
             this.richTextBoxClase.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.Vertical;
-            this.richTextBoxClase.Size = new System.Drawing.Size(853, 54);
+            this.richTextBoxClase.Size = new System.Drawing.Size(722, 54);
             this.richTextBoxClase.TabIndex = 14;
             this.richTextBoxClase.Text = "";
             // 
@@ -417,7 +417,7 @@
             this.labelAtributos.Dock = System.Windows.Forms.DockStyle.Top;
             this.labelAtributos.Location = new System.Drawing.Point(3, 93);
             this.labelAtributos.Name = "labelAtributos";
-            this.labelAtributos.Size = new System.Drawing.Size(853, 13);
+            this.labelAtributos.Size = new System.Drawing.Size(722, 13);
             this.labelAtributos.TabIndex = 10;
             this.labelAtributos.Text = "Atributos";
             // 
@@ -456,7 +456,7 @@
             this.dataGridViewAtributos.RowHeadersDefaultCellStyle = dataGridViewCellStyle2;
             this.dataGridViewAtributos.RowHeadersVisible = false;
             this.dataGridViewAtributos.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.dataGridViewAtributos.Size = new System.Drawing.Size(853, 193);
+            this.dataGridViewAtributos.Size = new System.Drawing.Size(722, 159);
             this.dataGridViewAtributos.TabIndex = 9;
             // 
             // ColumnIDAtributos
@@ -492,9 +492,9 @@
             // 
             this.labelAsociaciones.AutoSize = true;
             this.labelAsociaciones.Dock = System.Windows.Forms.DockStyle.Top;
-            this.labelAsociaciones.Location = new System.Drawing.Point(3, 305);
+            this.labelAsociaciones.Location = new System.Drawing.Point(3, 271);
             this.labelAsociaciones.Name = "labelAsociaciones";
-            this.labelAsociaciones.Size = new System.Drawing.Size(853, 13);
+            this.labelAsociaciones.Size = new System.Drawing.Size(722, 13);
             this.labelAsociaciones.TabIndex = 11;
             this.labelAsociaciones.Text = "Asociaciones";
             // 
@@ -519,7 +519,7 @@
             this.ColumnDescripcionAsociacion});
             this.dataGridViewAsociaciones.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dataGridViewAsociaciones.EnableHeadersVisualStyles = false;
-            this.dataGridViewAsociaciones.Location = new System.Drawing.Point(3, 321);
+            this.dataGridViewAsociaciones.Location = new System.Drawing.Point(3, 287);
             this.dataGridViewAsociaciones.Name = "dataGridViewAsociaciones";
             this.dataGridViewAsociaciones.RowHeadersBorderStyle = System.Windows.Forms.DataGridViewHeaderBorderStyle.Single;
             dataGridViewCellStyle4.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
@@ -532,7 +532,7 @@
             this.dataGridViewAsociaciones.RowHeadersDefaultCellStyle = dataGridViewCellStyle4;
             this.dataGridViewAsociaciones.RowHeadersVisible = false;
             this.dataGridViewAsociaciones.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.dataGridViewAsociaciones.Size = new System.Drawing.Size(853, 119);
+            this.dataGridViewAsociaciones.Size = new System.Drawing.Size(722, 98);
             this.dataGridViewAsociaciones.TabIndex = 12;
             // 
             // ColumnIDAsociacion
@@ -560,38 +560,40 @@
             // tableLayoutPanelMethods
             // 
             this.tableLayoutPanelMethods.ColumnCount = 2;
-            this.tableLayoutPanelMethods.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 35F));
-            this.tableLayoutPanelMethods.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 65F));
+            this.tableLayoutPanelMethods.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 20.36011F));
+            this.tableLayoutPanelMethods.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 79.63989F));
             this.tableLayoutPanelMethods.Controls.Add(this.panelLeftMetodos, 0, 0);
             this.tableLayoutPanelMethods.Controls.Add(this.tableLayoutPanelMethodDetails, 1, 0);
             this.tableLayoutPanelMethods.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tableLayoutPanelMethods.Location = new System.Drawing.Point(3, 446);
+            this.tableLayoutPanelMethods.Location = new System.Drawing.Point(3, 391);
             this.tableLayoutPanelMethods.Name = "tableLayoutPanelMethods";
             this.tableLayoutPanelMethods.RowCount = 1;
             this.tableLayoutPanelMethods.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanelMethods.Size = new System.Drawing.Size(853, 334);
+            this.tableLayoutPanelMethods.Size = new System.Drawing.Size(722, 277);
             this.tableLayoutPanelMethods.TabIndex = 1003;
             // 
             // panelLeftMetodos
             // 
-            this.panelLeftMetodos.Controls.Add(this.listView1);
+            this.panelLeftMetodos.Controls.Add(this.listView);
             this.panelLeftMetodos.Controls.Add(this.labelMetodos);
             this.panelLeftMetodos.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panelLeftMetodos.Location = new System.Drawing.Point(3, 3);
             this.panelLeftMetodos.Name = "panelLeftMetodos";
-            this.panelLeftMetodos.Size = new System.Drawing.Size(292, 328);
+            this.panelLeftMetodos.Size = new System.Drawing.Size(141, 271);
             this.panelLeftMetodos.TabIndex = 0;
             // 
-            // listView1
+            // listView
             // 
-            this.listView1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.listView1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.listView1.HideSelection = false;
-            this.listView1.Location = new System.Drawing.Point(0, 13);
-            this.listView1.Name = "listView1";
-            this.listView1.Size = new System.Drawing.Size(292, 315);
-            this.listView1.TabIndex = 1;
-            this.listView1.UseCompatibleStateImageBehavior = false;
+            this.listView.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.listView.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.listView.HideSelection = false;
+            this.listView.Location = new System.Drawing.Point(0, 13);
+            this.listView.Name = "listView";
+            this.listView.Size = new System.Drawing.Size(141, 258);
+            this.listView.TabIndex = 1;
+            this.listView.UseCompatibleStateImageBehavior = false;
+            this.listView.View = System.Windows.Forms.View.Tile;
+            this.listView.ItemSelectionChanged += new System.Windows.Forms.ListViewItemSelectionChangedEventHandler(this.listView_ItemSelectionChanged);
             // 
             // labelMetodos
             // 
@@ -610,13 +612,13 @@
             this.tableLayoutPanelMethodDetails.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanelMethodDetails.Controls.Add(this.labelTitulo, 0, 0);
             this.tableLayoutPanelMethodDetails.Controls.Add(this.labelDescripcion, 0, 1);
-            this.tableLayoutPanelMethodDetails.Controls.Add(this.richTextBoxDescripcion, 0, 2);
+            this.tableLayoutPanelMethodDetails.Controls.Add(this.richTextBoxMetodo, 0, 2);
             this.tableLayoutPanelMethodDetails.Controls.Add(this.labelParametros, 0, 3);
             this.tableLayoutPanelMethodDetails.Controls.Add(this.dataGridViewParametros, 0, 4);
             this.tableLayoutPanelMethodDetails.Controls.Add(this.labelRetorno, 0, 5);
             this.tableLayoutPanelMethodDetails.Controls.Add(this.richTextBoxRetorno, 0, 6);
             this.tableLayoutPanelMethodDetails.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tableLayoutPanelMethodDetails.Location = new System.Drawing.Point(301, 3);
+            this.tableLayoutPanelMethodDetails.Location = new System.Drawing.Point(150, 3);
             this.tableLayoutPanelMethodDetails.Name = "tableLayoutPanelMethodDetails";
             this.tableLayoutPanelMethodDetails.RowCount = 7;
             this.tableLayoutPanelMethodDetails.RowStyles.Add(new System.Windows.Forms.RowStyle());
@@ -626,7 +628,7 @@
             this.tableLayoutPanelMethodDetails.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 45F));
             this.tableLayoutPanelMethodDetails.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanelMethodDetails.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25F));
-            this.tableLayoutPanelMethodDetails.Size = new System.Drawing.Size(549, 328);
+            this.tableLayoutPanelMethodDetails.Size = new System.Drawing.Size(569, 271);
             this.tableLayoutPanelMethodDetails.TabIndex = 0;
             // 
             // labelTitulo
@@ -636,7 +638,7 @@
             this.labelTitulo.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.labelTitulo.Location = new System.Drawing.Point(3, 0);
             this.labelTitulo.Name = "labelTitulo";
-            this.labelTitulo.Size = new System.Drawing.Size(543, 13);
+            this.labelTitulo.Size = new System.Drawing.Size(563, 13);
             this.labelTitulo.TabIndex = 1;
             this.labelTitulo.Text = "Comentarios del método: ";
             // 
@@ -646,28 +648,28 @@
             this.labelDescripcion.Dock = System.Windows.Forms.DockStyle.Top;
             this.labelDescripcion.Location = new System.Drawing.Point(3, 13);
             this.labelDescripcion.Name = "labelDescripcion";
-            this.labelDescripcion.Size = new System.Drawing.Size(543, 13);
+            this.labelDescripcion.Size = new System.Drawing.Size(563, 13);
             this.labelDescripcion.TabIndex = 3;
             this.labelDescripcion.Text = "Descripción";
             // 
-            // richTextBoxDescripcion
+            // richTextBoxMetodo
             // 
-            this.richTextBoxDescripcion.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.richTextBoxDescripcion.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.richTextBoxDescripcion.Location = new System.Drawing.Point(3, 29);
-            this.richTextBoxDescripcion.Name = "richTextBoxDescripcion";
-            this.richTextBoxDescripcion.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.Vertical;
-            this.richTextBoxDescripcion.Size = new System.Drawing.Size(543, 76);
-            this.richTextBoxDescripcion.TabIndex = 4;
-            this.richTextBoxDescripcion.Text = "";
+            this.richTextBoxMetodo.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.richTextBoxMetodo.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.richTextBoxMetodo.Location = new System.Drawing.Point(3, 29);
+            this.richTextBoxMetodo.Name = "richTextBoxMetodo";
+            this.richTextBoxMetodo.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.Vertical;
+            this.richTextBoxMetodo.Size = new System.Drawing.Size(563, 59);
+            this.richTextBoxMetodo.TabIndex = 4;
+            this.richTextBoxMetodo.Text = "";
             // 
             // labelParametros
             // 
             this.labelParametros.AutoSize = true;
             this.labelParametros.Dock = System.Windows.Forms.DockStyle.Top;
-            this.labelParametros.Location = new System.Drawing.Point(3, 108);
+            this.labelParametros.Location = new System.Drawing.Point(3, 91);
             this.labelParametros.Name = "labelParametros";
-            this.labelParametros.Size = new System.Drawing.Size(543, 13);
+            this.labelParametros.Size = new System.Drawing.Size(563, 13);
             this.labelParametros.TabIndex = 5;
             this.labelParametros.Text = "Parametros";
             // 
@@ -692,7 +694,7 @@
             this.ColumnDescripcion});
             this.dataGridViewParametros.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dataGridViewParametros.EnableHeadersVisualStyles = false;
-            this.dataGridViewParametros.Location = new System.Drawing.Point(3, 124);
+            this.dataGridViewParametros.Location = new System.Drawing.Point(3, 107);
             this.dataGridViewParametros.Name = "dataGridViewParametros";
             this.dataGridViewParametros.RowHeadersBorderStyle = System.Windows.Forms.DataGridViewHeaderBorderStyle.Single;
             dataGridViewCellStyle6.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
@@ -705,7 +707,7 @@
             this.dataGridViewParametros.RowHeadersDefaultCellStyle = dataGridViewCellStyle6;
             this.dataGridViewParametros.RowHeadersVisible = false;
             this.dataGridViewParametros.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.dataGridViewParametros.Size = new System.Drawing.Size(543, 118);
+            this.dataGridViewParametros.Size = new System.Drawing.Size(563, 92);
             this.dataGridViewParametros.TabIndex = 6;
             // 
             // ColumnId
@@ -734,9 +736,9 @@
             // 
             this.labelRetorno.AutoSize = true;
             this.labelRetorno.Dock = System.Windows.Forms.DockStyle.Top;
-            this.labelRetorno.Location = new System.Drawing.Point(3, 245);
+            this.labelRetorno.Location = new System.Drawing.Point(3, 202);
             this.labelRetorno.Name = "labelRetorno";
-            this.labelRetorno.Size = new System.Drawing.Size(543, 13);
+            this.labelRetorno.Size = new System.Drawing.Size(563, 13);
             this.labelRetorno.TabIndex = 7;
             this.labelRetorno.Text = "Retorno";
             // 
@@ -744,10 +746,10 @@
             // 
             this.richTextBoxRetorno.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.richTextBoxRetorno.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.richTextBoxRetorno.Location = new System.Drawing.Point(3, 261);
+            this.richTextBoxRetorno.Location = new System.Drawing.Point(3, 218);
             this.richTextBoxRetorno.Name = "richTextBoxRetorno";
             this.richTextBoxRetorno.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.Vertical;
-            this.richTextBoxRetorno.Size = new System.Drawing.Size(543, 64);
+            this.richTextBoxRetorno.Size = new System.Drawing.Size(563, 50);
             this.richTextBoxRetorno.TabIndex = 8;
             this.richTextBoxRetorno.Text = "";
             // 
@@ -760,7 +762,7 @@
             this.panelIzquierdo.Location = new System.Drawing.Point(0, 0);
             this.panelIzquierdo.Name = "panelIzquierdo";
             this.panelIzquierdo.Padding = new System.Windows.Forms.Padding(5);
-            this.panelIzquierdo.Size = new System.Drawing.Size(150, 815);
+            this.panelIzquierdo.Size = new System.Drawing.Size(150, 703);
             this.panelIzquierdo.TabIndex = 0;
             this.panelIzquierdo.MouseDown += new System.Windows.Forms.MouseEventHandler(this.PanelIzquierdo_MouseDown);
             this.panelIzquierdo.MouseLeave += new System.EventHandler(this.PanelIzquierdo_MouseLeave);
@@ -775,8 +777,9 @@
             this.treeView.Location = new System.Drawing.Point(5, 25);
             this.treeView.Name = "treeView";
             this.treeView.SelectedImageIndex = 0;
-            this.treeView.Size = new System.Drawing.Size(140, 785);
+            this.treeView.Size = new System.Drawing.Size(140, 673);
             this.treeView.TabIndex = 1;
+            this.treeView.NodeMouseDoubleClick += new System.Windows.Forms.TreeNodeMouseClickEventHandler(this.treeView_NodeMouseDoubleClick);
             // 
             // textBoxBuscarComponente
             // 
@@ -791,9 +794,9 @@
             this.statusStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripStatusLabelProgreso,
             this.toolStripProgressBar1});
-            this.statusStrip.Location = new System.Drawing.Point(0, 839);
+            this.statusStrip.Location = new System.Drawing.Point(0, 727);
             this.statusStrip.Name = "statusStrip";
-            this.statusStrip.Size = new System.Drawing.Size(1584, 22);
+            this.statusStrip.Size = new System.Drawing.Size(1370, 22);
             this.statusStrip.TabIndex = 0;
             this.statusStrip.Text = "statusStrip1";
             // 
@@ -812,7 +815,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1584, 861);
+            this.ClientSize = new System.Drawing.Size(1370, 749);
             this.Controls.Add(this.panelPrincipal);
             this.Controls.Add(this.menuStrip);
             this.Controls.Add(this.statusStrip);
@@ -886,7 +889,7 @@
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanelMethods;
         private System.Windows.Forms.Panel panelLeftMetodos;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanelMethodDetails;
-        private System.Windows.Forms.ListView listView1;
+        private System.Windows.Forms.ListView listView;
         private System.Windows.Forms.Label labelTitulo;
         private System.Windows.Forms.Label labelMetodos;
         private System.Windows.Forms.DataGridView dataGridViewParametros;
@@ -894,7 +897,7 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn ColumnNombre;
         private System.Windows.Forms.DataGridViewTextBoxColumn ColumnDescripcion;
         private System.Windows.Forms.Label labelParametros;
-        private System.Windows.Forms.RichTextBox richTextBoxDescripcion;
+        private System.Windows.Forms.RichTextBox richTextBoxMetodo;
         private System.Windows.Forms.Label labelDescripcion;
         private System.Windows.Forms.RichTextBox richTextBoxRetorno;
         private System.Windows.Forms.Label labelRetorno;
