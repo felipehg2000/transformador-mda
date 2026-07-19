@@ -93,6 +93,14 @@ namespace transformador_mda.src.Controladores
             return new RetornoMultiple(true, RetornoMultiple.EnumEstado.CORRECTO, "Directorio seleccionado correctamente.");
         }
 
+        public RetornoBase GenerarCodigo(Clase param_clase)
+        {
+            GenerarSalidaBase generador = FactoriaSalida.CrearGenerarSalida(Configuracion);
+            string texto = generador.GenerarTexto(param_clase);
+
+            return new RetornoBase(true, "Generación correcta", texto);
+        }
+
         /// <summary>
         /// Método para llamar a la funcionalidad de exportar configuración.
         /// </summary>
@@ -157,44 +165,6 @@ namespace transformador_mda.src.Controladores
         }
 
         #endregion
-
-        public RetornoElementoUML ObtenerClasePorId(string param_id)
-        {
-            foreach (Directorio directorio in Configuracion.Proyecto.Directorios)
-            {
-                Clase clase_buscada = directorio.ObtenerClasePorId(param_id);
-                if (clase_buscada != null)
-                    return new RetornoElementoUML() { Exito = true, Elemento = clase_buscada };
-
-                RetornoElementoUML retorno = ObtenerClasePorId(directorio, param_id);
-                if (retorno.Exito)
-                    return retorno;
-            }
-
-            return new RetornoElementoUML()
-            {
-                Exito = false,
-                TextoUsuario = "Ha ocurrido un error.",
-                TextoDesarrollador = "No se ha encontrado la clase solicitada por el id = " + param_id,
-                Elemento = null
-            };
-        }
-
-        private RetornoElementoUML ObtenerClasePorId(Directorio param_directorio, string param_id)
-        {
-            foreach (Directorio subdirectorio in param_directorio.Subdirectorios)
-            {
-                Clase clase_buscada = subdirectorio.ObtenerClasePorId(param_id);
-                if (clase_buscada != null)
-                    return new RetornoElementoUML() { Exito = true, Elemento = clase_buscada };
-
-                RetornoElementoUML retorno = ObtenerClasePorId(subdirectorio, param_id);
-                if (retorno.Exito)
-                    return retorno;
-            }
-
-            return new RetornoElementoUML() { Exito = false };
-        }
     
     }
 }

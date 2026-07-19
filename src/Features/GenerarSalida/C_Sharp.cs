@@ -50,6 +50,16 @@ namespace transformador_mda.src.Features.GenerarSalida
             return true;
         }
 
+        public override string GenerarTexto(Clase param_clase)
+        {
+            if (param_clase == null || string.IsNullOrEmpty(param_clase.Nombre))
+                return string.Empty;
+
+            _clase_actual = param_clase;
+
+            return GenerarCodigoClase();
+        }
+
         #endregion
 
         #region "Métodos protegidos"
@@ -110,7 +120,7 @@ namespace transformador_mda.src.Features.GenerarSalida
             string metodosPrivados = GenerarMetodos(
                 _clase_actual.Metodos.FindAll(m => m.Visibilidad == EnumTipoVisibilidad.PRIVADO));
 
-            string textoNamespace = _proyecto.Nombre + "." + _directorio_actual.Namespace;
+            string textoNamespace = _proyecto.Nombre;
 
             string herencia = GenerarHerencia();
 
@@ -118,9 +128,8 @@ namespace transformador_mda.src.Features.GenerarSalida
 
             ret_texto = ret_texto.Replace("{Relaciones}", GenerarReferencias());
             ret_texto = ret_texto.Replace("{Namespace}", textoNamespace);
-            throw new NotImplementedException("Faltan los métodos de conversión de visibilidad de XMI.");
-            //ret_texto = ret_texto.Replace("{Visibilidad}", Visibilidad.ObtenerVisibilidad(_clase_actual.Visibilidad));
-            ret_texto = ret_texto.Replace("{TipoClase}", ObtenerTextoTipoClase(_clase_actual));
+            ret_texto = ret_texto.Replace("{Visibilidad}", ObtenerVisibilidad(_clase_actual.Visibilidad));
+            ret_texto = ret_texto.Replace("{TipoClase}", ObtenerTextoTipoClase(_clase_actual.TipoClase));
             ret_texto = ret_texto.Replace("{NombreClase}", _clase_actual.Nombre);
             ret_texto = ret_texto.Replace("{Herencia}", herencia);
             ret_texto = ret_texto.Replace("{Atributos}", atributos);
@@ -211,9 +220,8 @@ namespace transformador_mda.src.Features.GenerarSalida
 
                 string textoMetodo = PlantillasC_Sharp.Metodo;
 
-                throw new NotImplementedException("Faltan los métodos de conversión de visibilidad de XMI.");
-                //textoMetodo = textoMetodo.Replace("{Visibilidad}", Visibilidad.ObtenerVisibilidad(metodo.Visibilidad));
-                //textoMetodo = textoMetodo.Replace("{TipoRetorno}", metodo.TipoRetorno.Trim());
+                textoMetodo = textoMetodo.Replace("{Visibilidad}", ObtenerVisibilidad(metodo.Visibilidad));
+                textoMetodo = textoMetodo.Replace("{TipoRetorno}", ObtenerTipoDato(metodo.TipoRetorno));
                 textoMetodo = textoMetodo.Replace("{NombreMetodo}", metodo.Nombre);
                 textoMetodo = textoMetodo.Replace("{Parametros}", GenerarParametros(metodo.Parametros));
 
@@ -256,28 +264,6 @@ namespace transformador_mda.src.Features.GenerarSalida
             }
 
             return string.Empty;
-        }
-
-        /// <summary>
-        /// Casteo del tipo de clase que viene en el XMI al texto de la clase que hay que poner en el código.
-        /// </summary>
-        /// <param name="param_clase">Tipo de clase en lenguaje XMI.</param>
-        /// <returns>Tipo de clase en lenguaje C#</returns>
-        private string ObtenerTextoTipoClase(Clase param_clase)
-        {
-            throw new NotImplementedException("Faltan los métodos de conversión de tipos de XMI.");
-            //string tipo = EnumTiposClases.ObtenerTexto(param_clase.TipoClase);
-            string tipo = string.Empty;
-            if (tipo == "uml:Class")
-                return "class";
-
-            if (tipo == "uml:Interface")
-                return "interface";
-
-            if (tipo == "uml:Enumeration")
-                return "enum";
-
-            return tipo;
         }
 
         /// <summary>
@@ -331,5 +317,47 @@ namespace transformador_mda.src.Features.GenerarSalida
         }
 
         #endregion
+    
+        private string ObtenerVisibilidad(EnumTipoVisibilidad param_visibilidad)
+        {
+            switch (param_visibilidad)
+            {
+                case EnumTipoVisibilidad.PUBLICO: return "public";
+                case EnumTipoVisibilidad.PRIVADO: return "private";
+                case EnumTipoVisibilidad.PROTEGIDO: return "protected";
+                case EnumTipoVisibilidad.INTERNA: return "internal";
+                default: return string.Empty; ;
+            }
+        }
+
+        private string ObtenerTipoDato(EnumTipoDato param_tipo_dato)
+        {
+            switch (param_tipo_dato)
+            {
+                case EnumTipoDato.NO_DEFINIDO: return "void";
+                case EnumTipoDato.ENTERO: return "int";
+                case EnumTipoDato.FLOTANTE: return "float";
+                case EnumTipoDato.DOBLE: return "double";
+                case EnumTipoDato.BOOLEANO: return "bool";
+                case EnumTipoDato.CARACTER: return "char";
+                case EnumTipoDato.CADENA: return "string";
+                case EnumTipoDato.LARGO: return "long";
+                case EnumTipoDato.CORTO: return "short";
+                case EnumTipoDato.BYTE: return "byte";
+                default: return string.Empty;
+            }
+        }
+
+        private string ObtenerTextoTipoClase(EnumTiposClases param_tipo_clase)
+        {
+            switch(param_tipo_clase)
+            {
+                case EnumTiposClases.CLASE: return "class";
+                case EnumTiposClases.INTERFAZ: return "interface";
+                case EnumTiposClases.CLASE_ABSTRACTA: return "abstract class";
+                case EnumTiposClases.ENUMERACION: return "enum";
+                default: return string.Empty;
+            }
+        }
     }
 }

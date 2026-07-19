@@ -33,9 +33,17 @@ namespace transformador_mda.src.Vistas
     {
         ID = 0,
         TIPO_ASOCIACION = 1,
-        CLASE_ASOCIACION = 2,
-        DESCRIPCION = 3,
+        DESCRIPCION = 2,
+        CLASE_ASOCIACION = 3,
         NO_DEFINIDA = 4
+    }
+
+    enum EnumColumnasParametros
+    {
+        ID = 0,
+        NOMBRE = 1,
+        DESCRIPCION = 2,
+        NO_DEFINIDA = 3
     }
 
     /// <summary>
@@ -89,6 +97,20 @@ namespace transformador_mda.src.Vistas
             InitializeComponent();
 
             _controlador = new Principal();
+
+            // Ajusta las columnas 
+            int ancho = dataGridViewAtributos.Width;
+            dataGridViewAtributos.Columns[(int)EnumColumnasAtributos.NOMBRE].Width = (int)(ancho * 0.25);
+            dataGridViewAtributos.Columns[(int)EnumColumnasAtributos.TIPO_DATO].Width = (int)(ancho * 0.25);
+            dataGridViewAtributos.Columns[(int)EnumColumnasAtributos.DESCRIPCION].Width = (int)(ancho * 0.5);
+
+            ancho = dataGridViewAsociaciones.Width;
+            dataGridViewAsociaciones.Columns[(int)EnumColumnasAsociaciones.TIPO_ASOCIACION].Width = (int)(ancho * 0.25);
+            dataGridViewAsociaciones.Columns[(int)EnumColumnasAsociaciones.DESCRIPCION].Width = (int)(ancho * 0.75);
+
+            ancho = dataGridViewParametros.Width;
+            dataGridViewParametros.Columns[(int)EnumColumnasParametros.NOMBRE].Width = (int)(ancho * 0.25);
+            dataGridViewParametros.Columns[(int)EnumColumnasParametros.DESCRIPCION].Width = (int)(ancho * 0.75);
         }
 
         #endregion
@@ -248,7 +270,6 @@ namespace transformador_mda.src.Vistas
             if (control.Cursor != cursorDeseado)
                 control.Cursor = cursorDeseado;
         }
-
 
         /// <summary>
         /// Comprueba si está en el borde izquierdo del panel o no para saber si modificar o no el aspecto del cursor.
@@ -513,6 +534,21 @@ namespace transformador_mda.src.Vistas
             {
                 dataGridViewParametros.Rows.Add(parametro.Id, parametro.Nombre, parametro.Comentario);
             }
+        }
+
+        private void generarEsqueletoToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (!(treeView.SelectedNode.Tag is Clase clase_seleccionada))
+                return;
+
+            RetornoBase retorno = _controlador.GenerarCodigo(clase_seleccionada);
+            if (!retorno.Exito)
+                MessageBox.Show(retorno.TextoUsuario,
+                    "Error",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+
+            richTextBoxCodigo.Text = retorno.TextoDesarrollador;
         }
     }
 }
