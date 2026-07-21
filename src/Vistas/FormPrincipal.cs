@@ -99,18 +99,7 @@ namespace transformador_mda.src.Vistas
             _controlador = new Principal();
 
             // Ajusta las columnas 
-            int ancho = dataGridViewAtributos.Width;
-            dataGridViewAtributos.Columns[(int)EnumColumnasAtributos.NOMBRE].Width = (int)(ancho * 0.25);
-            dataGridViewAtributos.Columns[(int)EnumColumnasAtributos.TIPO_DATO].Width = (int)(ancho * 0.25);
-            dataGridViewAtributos.Columns[(int)EnumColumnasAtributos.DESCRIPCION].Width = (int)(ancho * 0.5);
-
-            ancho = dataGridViewAsociaciones.Width;
-            dataGridViewAsociaciones.Columns[(int)EnumColumnasAsociaciones.TIPO_ASOCIACION].Width = (int)(ancho * 0.25);
-            dataGridViewAsociaciones.Columns[(int)EnumColumnasAsociaciones.DESCRIPCION].Width = (int)(ancho * 0.75);
-
-            ancho = dataGridViewParametros.Width;
-            dataGridViewParametros.Columns[(int)EnumColumnasParametros.NOMBRE].Width = (int)(ancho * 0.25);
-            dataGridViewParametros.Columns[(int)EnumColumnasParametros.DESCRIPCION].Width = (int)(ancho * 0.75);
+            AjustarAnchoTablas();  
         }
 
         #endregion
@@ -549,6 +538,27 @@ namespace transformador_mda.src.Vistas
                     MessageBoxIcon.Error);
 
             richTextBoxCodigo.Text = retorno.TextoDesarrollador;
+        }
+    
+        private void AjustarAnchoTablas()
+        {
+            int ancho = dataGridViewAtributos.Width;
+            dataGridViewAtributos.Columns[(int)EnumColumnasAtributos.NOMBRE].Width = (int)(ancho * 0.25);
+            dataGridViewAtributos.Columns[(int)EnumColumnasAtributos.TIPO_DATO].Width = (int)(ancho * 0.25);
+            dataGridViewAtributos.Columns[(int)EnumColumnasAtributos.DESCRIPCION].Width = (int)(ancho * 0.5);
+
+            ancho = dataGridViewAsociaciones.Width;
+            dataGridViewAsociaciones.Columns[(int)EnumColumnasAsociaciones.TIPO_ASOCIACION].Width = (int)(ancho * 0.25);
+            dataGridViewAsociaciones.Columns[(int)EnumColumnasAsociaciones.DESCRIPCION].Width = (int)(ancho * 0.75);
+
+            ancho = dataGridViewParametros.Width;
+            dataGridViewParametros.Columns[(int)EnumColumnasParametros.NOMBRE].Width = (int)(ancho * 0.25);
+            dataGridViewParametros.Columns[(int)EnumColumnasParametros.DESCRIPCION].Width = (int)(ancho * 0.75);
+        }
+
+        private void dataGridView_Resize(object sender, EventArgs e)
+        {
+            AjustarAnchoTablas();
         }
     }
 }

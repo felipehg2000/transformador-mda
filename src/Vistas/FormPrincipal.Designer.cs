@@ -69,8 +69,15 @@
             this.richTextBoxClase = new System.Windows.Forms.RichTextBox();
             this.labelAtributos = new System.Windows.Forms.Label();
             this.dataGridViewAtributos = new System.Windows.Forms.DataGridView();
+            this.ColumnIDAtributos = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.ColumnNombreAtributos = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.ColumnTipoDatoAtributos = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.ColumnDescripcionAtributos = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.labelAsociaciones = new System.Windows.Forms.Label();
             this.dataGridViewAsociaciones = new System.Windows.Forms.DataGridView();
+            this.ColumnIDAsociacion = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.ColumnTipoAsociacion = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.ColumnDescripcionAsociacion = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.tableLayoutPanelMethods = new System.Windows.Forms.TableLayoutPanel();
             this.panelLeftMetodos = new System.Windows.Forms.Panel();
             this.listView = new System.Windows.Forms.ListView();
@@ -80,9 +87,14 @@
             this.labelDescripcion = new System.Windows.Forms.Label();
             this.richTextBoxMetodo = new System.Windows.Forms.RichTextBox();
             this.labelParametros = new System.Windows.Forms.Label();
+            this.buttonGrabarParametros = new System.Windows.Forms.Button();
             this.dataGridViewParametros = new System.Windows.Forms.DataGridView();
+            this.ColumnId = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.ColumnNombre = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.ColumnDescripcion = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.labelRetorno = new System.Windows.Forms.Label();
             this.richTextBoxRetorno = new System.Windows.Forms.RichTextBox();
+            this.buttonGrabarInfo = new System.Windows.Forms.Button();
             this.richTextBoxCodigo = new System.Windows.Forms.RichTextBox();
             this.panelIzquierdo = new System.Windows.Forms.Panel();
             this.treeView = new System.Windows.Forms.TreeView();
@@ -90,16 +102,12 @@
             this.statusStrip = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabelProgreso = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripProgressBar1 = new System.Windows.Forms.ToolStripProgressBar();
-            this.ColumnIDAtributos = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.ColumnNombreAtributos = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.ColumnTipoDatoAtributos = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.ColumnDescripcionAtributos = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.ColumnIDAsociacion = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.ColumnTipoAsociacion = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.ColumnDescripcionAsociacion = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.ColumnId = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.ColumnNombre = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.ColumnDescripcion = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.tabControlCodigo = new System.Windows.Forms.TabControl();
+            this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.panelBorderTextClase = new System.Windows.Forms.Panel();
+            this.panelBorderTextMetDescripcion = new System.Windows.Forms.Panel();
+            this.panelBorderMetRetorno = new System.Windows.Forms.Panel();
+            this.panelBordeTextCodigo = new System.Windows.Forms.Panel();
             imageList = new System.Windows.Forms.ImageList(this.components);
             this.panelAbrirXMI.SuspendLayout();
             this.panelInferior.SuspendLayout();
@@ -121,6 +129,12 @@
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewParametros)).BeginInit();
             this.panelIzquierdo.SuspendLayout();
             this.statusStrip.SuspendLayout();
+            this.tabControlCodigo.SuspendLayout();
+            this.tabPage1.SuspendLayout();
+            this.panelBorderTextClase.SuspendLayout();
+            this.panelBorderTextMetDescripcion.SuspendLayout();
+            this.panelBorderMetRetorno.SuspendLayout();
+            this.panelBordeTextCodigo.SuspendLayout();
             this.SuspendLayout();
             // 
             // imageList
@@ -357,10 +371,9 @@
             // 
             // splitContainer.Panel2
             // 
-            this.splitContainer.Panel2.Controls.Add(this.richTextBoxCodigo);
-            this.splitContainer.Panel2.Padding = new System.Windows.Forms.Padding(10);
+            this.splitContainer.Panel2.Controls.Add(this.tabControlCodigo);
             this.splitContainer.Size = new System.Drawing.Size(1220, 703);
-            this.splitContainer.SplitterDistance = 742;
+            this.splitContainer.SplitterDistance = 777;
             this.splitContainer.TabIndex = 1;
             // 
             // tabControl
@@ -370,7 +383,7 @@
             this.tabControl.Location = new System.Drawing.Point(0, 0);
             this.tabControl.Name = "tabControl";
             this.tabControl.SelectedIndex = 0;
-            this.tabControl.Size = new System.Drawing.Size(742, 703);
+            this.tabControl.Size = new System.Drawing.Size(777, 703);
             this.tabControl.TabIndex = 0;
             // 
             // tabPageComentarios
@@ -380,7 +393,7 @@
             this.tabPageComentarios.Location = new System.Drawing.Point(4, 22);
             this.tabPageComentarios.Name = "tabPageComentarios";
             this.tabPageComentarios.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPageComentarios.Size = new System.Drawing.Size(734, 677);
+            this.tabPageComentarios.Size = new System.Drawing.Size(769, 677);
             this.tabPageComentarios.TabIndex = 1;
             this.tabPageComentarios.Text = "Comentarios";
             // 
@@ -388,28 +401,31 @@
             // 
             this.tableLayoutPanelRight.ColumnCount = 1;
             this.tableLayoutPanelRight.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanelRight.Controls.Add(this.panelBorderTextClase, 0, 2);
             this.tableLayoutPanelRight.Controls.Add(this.labelTituloEdicion, 0, 0);
             this.tableLayoutPanelRight.Controls.Add(this.labelClase, 0, 1);
-            this.tableLayoutPanelRight.Controls.Add(this.richTextBoxClase, 0, 2);
             this.tableLayoutPanelRight.Controls.Add(this.labelAtributos, 0, 3);
             this.tableLayoutPanelRight.Controls.Add(this.dataGridViewAtributos, 0, 4);
             this.tableLayoutPanelRight.Controls.Add(this.labelAsociaciones, 0, 5);
             this.tableLayoutPanelRight.Controls.Add(this.dataGridViewAsociaciones, 0, 6);
             this.tableLayoutPanelRight.Controls.Add(this.tableLayoutPanelMethods, 0, 7);
+            this.tableLayoutPanelRight.Controls.Add(this.buttonGrabarInfo, 0, 8);
             this.tableLayoutPanelRight.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanelRight.Location = new System.Drawing.Point(3, 3);
             this.tableLayoutPanelRight.Margin = new System.Windows.Forms.Padding(0);
             this.tableLayoutPanelRight.Name = "tableLayoutPanelRight";
-            this.tableLayoutPanelRight.RowCount = 8;
+            this.tableLayoutPanelRight.RowCount = 9;
             this.tableLayoutPanelRight.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanelRight.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanelRight.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 60F));
             this.tableLayoutPanelRight.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanelRight.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 29.96988F));
+            this.tableLayoutPanelRight.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 30.01508F));
             this.tableLayoutPanelRight.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanelRight.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 18.8253F));
-            this.tableLayoutPanelRight.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 51.05422F));
-            this.tableLayoutPanelRight.Size = new System.Drawing.Size(728, 671);
+            this.tableLayoutPanelRight.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 18.85369F));
+            this.tableLayoutPanelRight.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 51.13123F));
+            this.tableLayoutPanelRight.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanelRight.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
+            this.tableLayoutPanelRight.Size = new System.Drawing.Size(763, 671);
             this.tableLayoutPanelRight.TabIndex = 1002;
             // 
             // labelTituloEdicion
@@ -419,7 +435,7 @@
             this.labelTituloEdicion.ImageAlign = System.Drawing.ContentAlignment.TopLeft;
             this.labelTituloEdicion.Location = new System.Drawing.Point(3, 0);
             this.labelTituloEdicion.Name = "labelTituloEdicion";
-            this.labelTituloEdicion.Size = new System.Drawing.Size(722, 20);
+            this.labelTituloEdicion.Size = new System.Drawing.Size(757, 20);
             this.labelTituloEdicion.TabIndex = 15;
             this.labelTituloEdicion.Text = "Clase: ";
             this.labelTituloEdicion.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -430,18 +446,18 @@
             this.labelClase.Dock = System.Windows.Forms.DockStyle.Top;
             this.labelClase.Location = new System.Drawing.Point(3, 20);
             this.labelClase.Name = "labelClase";
-            this.labelClase.Size = new System.Drawing.Size(722, 13);
+            this.labelClase.Size = new System.Drawing.Size(757, 13);
             this.labelClase.TabIndex = 13;
             this.labelClase.Text = "Clase";
             // 
             // richTextBoxClase
             // 
-            this.richTextBoxClase.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.richTextBoxClase.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.richTextBoxClase.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.richTextBoxClase.Location = new System.Drawing.Point(3, 36);
+            this.richTextBoxClase.Location = new System.Drawing.Point(0, 0);
             this.richTextBoxClase.Name = "richTextBoxClase";
             this.richTextBoxClase.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.Vertical;
-            this.richTextBoxClase.Size = new System.Drawing.Size(722, 54);
+            this.richTextBoxClase.Size = new System.Drawing.Size(755, 52);
             this.richTextBoxClase.TabIndex = 14;
             this.richTextBoxClase.Text = "";
             // 
@@ -451,7 +467,7 @@
             this.labelAtributos.Dock = System.Windows.Forms.DockStyle.Top;
             this.labelAtributos.Location = new System.Drawing.Point(3, 93);
             this.labelAtributos.Name = "labelAtributos";
-            this.labelAtributos.Size = new System.Drawing.Size(722, 13);
+            this.labelAtributos.Size = new System.Drawing.Size(757, 13);
             this.labelAtributos.TabIndex = 10;
             this.labelAtributos.Text = "Atributos";
             // 
@@ -490,16 +506,45 @@
             this.dataGridViewAtributos.RowHeadersDefaultCellStyle = dataGridViewCellStyle2;
             this.dataGridViewAtributos.RowHeadersVisible = false;
             this.dataGridViewAtributos.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.dataGridViewAtributos.Size = new System.Drawing.Size(722, 159);
+            this.dataGridViewAtributos.Size = new System.Drawing.Size(757, 151);
             this.dataGridViewAtributos.TabIndex = 9;
+            this.dataGridViewAtributos.Resize += new System.EventHandler(this.dataGridView_Resize);
+            // 
+            // ColumnIDAtributos
+            // 
+            this.ColumnIDAtributos.Frozen = true;
+            this.ColumnIDAtributos.HeaderText = "ID";
+            this.ColumnIDAtributos.Name = "ColumnIDAtributos";
+            this.ColumnIDAtributos.ReadOnly = true;
+            this.ColumnIDAtributos.Visible = false;
+            // 
+            // ColumnNombreAtributos
+            // 
+            this.ColumnNombreAtributos.Frozen = true;
+            this.ColumnNombreAtributos.HeaderText = "Nombre";
+            this.ColumnNombreAtributos.Name = "ColumnNombreAtributos";
+            this.ColumnNombreAtributos.ReadOnly = true;
+            // 
+            // ColumnTipoDatoAtributos
+            // 
+            this.ColumnTipoDatoAtributos.Frozen = true;
+            this.ColumnTipoDatoAtributos.HeaderText = "Tipo de Dato";
+            this.ColumnTipoDatoAtributos.Name = "ColumnTipoDatoAtributos";
+            this.ColumnTipoDatoAtributos.ReadOnly = true;
+            // 
+            // ColumnDescripcionAtributos
+            // 
+            this.ColumnDescripcionAtributos.Frozen = true;
+            this.ColumnDescripcionAtributos.HeaderText = "Descripción";
+            this.ColumnDescripcionAtributos.Name = "ColumnDescripcionAtributos";
             // 
             // labelAsociaciones
             // 
             this.labelAsociaciones.AutoSize = true;
             this.labelAsociaciones.Dock = System.Windows.Forms.DockStyle.Top;
-            this.labelAsociaciones.Location = new System.Drawing.Point(3, 271);
+            this.labelAsociaciones.Location = new System.Drawing.Point(3, 263);
             this.labelAsociaciones.Name = "labelAsociaciones";
-            this.labelAsociaciones.Size = new System.Drawing.Size(722, 13);
+            this.labelAsociaciones.Size = new System.Drawing.Size(757, 13);
             this.labelAsociaciones.TabIndex = 11;
             this.labelAsociaciones.Text = "Asociaciones";
             // 
@@ -524,7 +569,7 @@
             this.ColumnDescripcionAsociacion});
             this.dataGridViewAsociaciones.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dataGridViewAsociaciones.EnableHeadersVisualStyles = false;
-            this.dataGridViewAsociaciones.Location = new System.Drawing.Point(3, 287);
+            this.dataGridViewAsociaciones.Location = new System.Drawing.Point(3, 279);
             this.dataGridViewAsociaciones.Name = "dataGridViewAsociaciones";
             this.dataGridViewAsociaciones.RowHeadersBorderStyle = System.Windows.Forms.DataGridViewHeaderBorderStyle.Single;
             dataGridViewCellStyle4.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
@@ -537,8 +582,30 @@
             this.dataGridViewAsociaciones.RowHeadersDefaultCellStyle = dataGridViewCellStyle4;
             this.dataGridViewAsociaciones.RowHeadersVisible = false;
             this.dataGridViewAsociaciones.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.dataGridViewAsociaciones.Size = new System.Drawing.Size(722, 98);
+            this.dataGridViewAsociaciones.Size = new System.Drawing.Size(757, 92);
             this.dataGridViewAsociaciones.TabIndex = 12;
+            this.dataGridViewAsociaciones.Resize += new System.EventHandler(this.dataGridView_Resize);
+            // 
+            // ColumnIDAsociacion
+            // 
+            this.ColumnIDAsociacion.Frozen = true;
+            this.ColumnIDAsociacion.HeaderText = "ID";
+            this.ColumnIDAsociacion.Name = "ColumnIDAsociacion";
+            this.ColumnIDAsociacion.ReadOnly = true;
+            this.ColumnIDAsociacion.Visible = false;
+            // 
+            // ColumnTipoAsociacion
+            // 
+            this.ColumnTipoAsociacion.Frozen = true;
+            this.ColumnTipoAsociacion.HeaderText = "Tipo de Asociación";
+            this.ColumnTipoAsociacion.Name = "ColumnTipoAsociacion";
+            this.ColumnTipoAsociacion.ReadOnly = true;
+            // 
+            // ColumnDescripcionAsociacion
+            // 
+            this.ColumnDescripcionAsociacion.Frozen = true;
+            this.ColumnDescripcionAsociacion.HeaderText = "Descripción";
+            this.ColumnDescripcionAsociacion.Name = "ColumnDescripcionAsociacion";
             // 
             // tableLayoutPanelMethods
             // 
@@ -548,11 +615,11 @@
             this.tableLayoutPanelMethods.Controls.Add(this.panelLeftMetodos, 0, 0);
             this.tableLayoutPanelMethods.Controls.Add(this.tableLayoutPanelMethodDetails, 1, 0);
             this.tableLayoutPanelMethods.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tableLayoutPanelMethods.Location = new System.Drawing.Point(3, 391);
+            this.tableLayoutPanelMethods.Location = new System.Drawing.Point(3, 377);
             this.tableLayoutPanelMethods.Name = "tableLayoutPanelMethods";
             this.tableLayoutPanelMethods.RowCount = 1;
             this.tableLayoutPanelMethods.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanelMethods.Size = new System.Drawing.Size(722, 277);
+            this.tableLayoutPanelMethods.Size = new System.Drawing.Size(757, 261);
             this.tableLayoutPanelMethods.TabIndex = 1003;
             // 
             // panelLeftMetodos
@@ -562,7 +629,7 @@
             this.panelLeftMetodos.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panelLeftMetodos.Location = new System.Drawing.Point(3, 3);
             this.panelLeftMetodos.Name = "panelLeftMetodos";
-            this.panelLeftMetodos.Size = new System.Drawing.Size(140, 271);
+            this.panelLeftMetodos.Size = new System.Drawing.Size(148, 255);
             this.panelLeftMetodos.TabIndex = 0;
             // 
             // listView
@@ -572,7 +639,7 @@
             this.listView.HideSelection = false;
             this.listView.Location = new System.Drawing.Point(0, 13);
             this.listView.Name = "listView";
-            this.listView.Size = new System.Drawing.Size(140, 258);
+            this.listView.Size = new System.Drawing.Size(148, 242);
             this.listView.TabIndex = 1;
             this.listView.UseCompatibleStateImageBehavior = false;
             this.listView.View = System.Windows.Forms.View.Tile;
@@ -591,70 +658,86 @@
             // 
             // tableLayoutPanelMethodDetails
             // 
-            this.tableLayoutPanelMethodDetails.ColumnCount = 1;
+            this.tableLayoutPanelMethodDetails.ColumnCount = 2;
             this.tableLayoutPanelMethodDetails.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanelMethodDetails.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanelMethodDetails.Controls.Add(this.panelBorderMetRetorno, 0, 6);
+            this.tableLayoutPanelMethodDetails.Controls.Add(this.panelBorderTextMetDescripcion, 0, 2);
             this.tableLayoutPanelMethodDetails.Controls.Add(this.labelTitulo, 0, 0);
             this.tableLayoutPanelMethodDetails.Controls.Add(this.labelDescripcion, 0, 1);
-            this.tableLayoutPanelMethodDetails.Controls.Add(this.richTextBoxMetodo, 0, 2);
             this.tableLayoutPanelMethodDetails.Controls.Add(this.labelParametros, 0, 3);
+            this.tableLayoutPanelMethodDetails.Controls.Add(this.buttonGrabarParametros, 1, 3);
             this.tableLayoutPanelMethodDetails.Controls.Add(this.dataGridViewParametros, 0, 4);
             this.tableLayoutPanelMethodDetails.Controls.Add(this.labelRetorno, 0, 5);
-            this.tableLayoutPanelMethodDetails.Controls.Add(this.richTextBoxRetorno, 0, 6);
             this.tableLayoutPanelMethodDetails.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tableLayoutPanelMethodDetails.Location = new System.Drawing.Point(149, 3);
+            this.tableLayoutPanelMethodDetails.Location = new System.Drawing.Point(157, 3);
             this.tableLayoutPanelMethodDetails.Name = "tableLayoutPanelMethodDetails";
             this.tableLayoutPanelMethodDetails.RowCount = 7;
             this.tableLayoutPanelMethodDetails.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanelMethodDetails.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanelMethodDetails.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 30F));
             this.tableLayoutPanelMethodDetails.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanelMethodDetails.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 45F));
+            this.tableLayoutPanelMethodDetails.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.tableLayoutPanelMethodDetails.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanelMethodDetails.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25F));
-            this.tableLayoutPanelMethodDetails.Size = new System.Drawing.Size(570, 271);
+            this.tableLayoutPanelMethodDetails.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 20F));
+            this.tableLayoutPanelMethodDetails.Size = new System.Drawing.Size(597, 255);
             this.tableLayoutPanelMethodDetails.TabIndex = 0;
             // 
             // labelTitulo
             // 
             this.labelTitulo.AutoSize = true;
+            this.tableLayoutPanelMethodDetails.SetColumnSpan(this.labelTitulo, 2);
             this.labelTitulo.Dock = System.Windows.Forms.DockStyle.Top;
             this.labelTitulo.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.labelTitulo.Location = new System.Drawing.Point(3, 0);
             this.labelTitulo.Name = "labelTitulo";
-            this.labelTitulo.Size = new System.Drawing.Size(564, 13);
+            this.labelTitulo.Size = new System.Drawing.Size(591, 13);
             this.labelTitulo.TabIndex = 1;
             this.labelTitulo.Text = "Comentarios del método: ";
             // 
             // labelDescripcion
             // 
             this.labelDescripcion.AutoSize = true;
+            this.tableLayoutPanelMethodDetails.SetColumnSpan(this.labelDescripcion, 2);
             this.labelDescripcion.Dock = System.Windows.Forms.DockStyle.Top;
             this.labelDescripcion.Location = new System.Drawing.Point(3, 13);
             this.labelDescripcion.Name = "labelDescripcion";
-            this.labelDescripcion.Size = new System.Drawing.Size(564, 13);
+            this.labelDescripcion.Size = new System.Drawing.Size(591, 13);
             this.labelDescripcion.TabIndex = 3;
             this.labelDescripcion.Text = "Descripción";
             // 
             // richTextBoxMetodo
             // 
-            this.richTextBoxMetodo.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.richTextBoxMetodo.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.richTextBoxMetodo.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.richTextBoxMetodo.Location = new System.Drawing.Point(3, 29);
+            this.richTextBoxMetodo.Location = new System.Drawing.Point(0, 0);
             this.richTextBoxMetodo.Name = "richTextBoxMetodo";
             this.richTextBoxMetodo.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.Vertical;
-            this.richTextBoxMetodo.Size = new System.Drawing.Size(564, 59);
+            this.richTextBoxMetodo.Size = new System.Drawing.Size(589, 48);
             this.richTextBoxMetodo.TabIndex = 4;
             this.richTextBoxMetodo.Text = "";
             // 
             // labelParametros
             // 
             this.labelParametros.AutoSize = true;
-            this.labelParametros.Dock = System.Windows.Forms.DockStyle.Top;
-            this.labelParametros.Location = new System.Drawing.Point(3, 91);
+            this.labelParametros.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.labelParametros.Location = new System.Drawing.Point(3, 82);
             this.labelParametros.Name = "labelParametros";
-            this.labelParametros.Size = new System.Drawing.Size(564, 13);
+            this.labelParametros.Size = new System.Drawing.Size(510, 29);
             this.labelParametros.TabIndex = 5;
             this.labelParametros.Text = "Parametros";
+            this.labelParametros.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // buttonGrabarParametros
+            // 
+            this.buttonGrabarParametros.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonGrabarParametros.AutoSize = true;
+            this.buttonGrabarParametros.Location = new System.Drawing.Point(519, 85);
+            this.buttonGrabarParametros.Name = "buttonGrabarParametros";
+            this.buttonGrabarParametros.Size = new System.Drawing.Size(75, 23);
+            this.buttonGrabarParametros.TabIndex = 6;
+            this.buttonGrabarParametros.Text = "Grabar ✔";
+            this.buttonGrabarParametros.UseVisualStyleBackColor = true;
             // 
             // dataGridViewParametros
             // 
@@ -675,9 +758,10 @@
             this.ColumnId,
             this.ColumnNombre,
             this.ColumnDescripcion});
+            this.tableLayoutPanelMethodDetails.SetColumnSpan(this.dataGridViewParametros, 2);
             this.dataGridViewParametros.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dataGridViewParametros.EnableHeadersVisualStyles = false;
-            this.dataGridViewParametros.Location = new System.Drawing.Point(3, 107);
+            this.dataGridViewParametros.Location = new System.Drawing.Point(3, 114);
             this.dataGridViewParametros.Name = "dataGridViewParametros";
             this.dataGridViewParametros.RowHeadersBorderStyle = System.Windows.Forms.DataGridViewHeaderBorderStyle.Single;
             dataGridViewCellStyle6.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
@@ -690,36 +774,71 @@
             this.dataGridViewParametros.RowHeadersDefaultCellStyle = dataGridViewCellStyle6;
             this.dataGridViewParametros.RowHeadersVisible = false;
             this.dataGridViewParametros.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.dataGridViewParametros.Size = new System.Drawing.Size(564, 92);
+            this.dataGridViewParametros.Size = new System.Drawing.Size(591, 87);
             this.dataGridViewParametros.TabIndex = 6;
+            this.dataGridViewParametros.Resize += new System.EventHandler(this.dataGridView_Resize);
+            // 
+            // ColumnId
+            // 
+            this.ColumnId.Frozen = true;
+            this.ColumnId.HeaderText = "ID";
+            this.ColumnId.Name = "ColumnId";
+            this.ColumnId.ReadOnly = true;
+            this.ColumnId.Visible = false;
+            // 
+            // ColumnNombre
+            // 
+            this.ColumnNombre.Frozen = true;
+            this.ColumnNombre.HeaderText = "Nombre";
+            this.ColumnNombre.Name = "ColumnNombre";
+            this.ColumnNombre.ReadOnly = true;
+            // 
+            // ColumnDescripcion
+            // 
+            this.ColumnDescripcion.Frozen = true;
+            this.ColumnDescripcion.HeaderText = "Descripción";
+            this.ColumnDescripcion.Name = "ColumnDescripcion";
             // 
             // labelRetorno
             // 
             this.labelRetorno.AutoSize = true;
+            this.tableLayoutPanelMethodDetails.SetColumnSpan(this.labelRetorno, 2);
             this.labelRetorno.Dock = System.Windows.Forms.DockStyle.Top;
-            this.labelRetorno.Location = new System.Drawing.Point(3, 202);
+            this.labelRetorno.Location = new System.Drawing.Point(3, 204);
             this.labelRetorno.Name = "labelRetorno";
-            this.labelRetorno.Size = new System.Drawing.Size(564, 13);
+            this.labelRetorno.Size = new System.Drawing.Size(591, 13);
             this.labelRetorno.TabIndex = 7;
             this.labelRetorno.Text = "Retorno";
             // 
             // richTextBoxRetorno
             // 
-            this.richTextBoxRetorno.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.richTextBoxRetorno.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.richTextBoxRetorno.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.richTextBoxRetorno.Location = new System.Drawing.Point(3, 218);
+            this.richTextBoxRetorno.Location = new System.Drawing.Point(0, 0);
             this.richTextBoxRetorno.Name = "richTextBoxRetorno";
             this.richTextBoxRetorno.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.Vertical;
-            this.richTextBoxRetorno.Size = new System.Drawing.Size(564, 50);
+            this.richTextBoxRetorno.Size = new System.Drawing.Size(589, 30);
             this.richTextBoxRetorno.TabIndex = 8;
             this.richTextBoxRetorno.Text = "";
             // 
+            // buttonGrabarInfo
+            // 
+            this.buttonGrabarInfo.Location = new System.Drawing.Point(3, 644);
+            this.buttonGrabarInfo.Name = "buttonGrabarInfo";
+            this.buttonGrabarInfo.Size = new System.Drawing.Size(75, 22);
+            this.buttonGrabarInfo.TabIndex = 1004;
+            this.buttonGrabarInfo.Text = "Grabar ✔";
+            this.buttonGrabarInfo.UseVisualStyleBackColor = true;
+            // 
             // richTextBoxCodigo
             // 
+            this.richTextBoxCodigo.BackColor = System.Drawing.Color.White;
+            this.richTextBoxCodigo.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.richTextBoxCodigo.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.richTextBoxCodigo.Location = new System.Drawing.Point(10, 10);
+            this.richTextBoxCodigo.Location = new System.Drawing.Point(0, 0);
             this.richTextBoxCodigo.Name = "richTextBoxCodigo";
-            this.richTextBoxCodigo.Size = new System.Drawing.Size(454, 683);
+            this.richTextBoxCodigo.ReadOnly = true;
+            this.richTextBoxCodigo.Size = new System.Drawing.Size(409, 655);
             this.richTextBoxCodigo.TabIndex = 0;
             this.richTextBoxCodigo.Text = "";
             // 
@@ -781,75 +900,68 @@
             this.toolStripProgressBar1.Name = "toolStripProgressBar1";
             this.toolStripProgressBar1.Size = new System.Drawing.Size(100, 16);
             // 
-            // ColumnIDAtributos
+            // tabControlCodigo
             // 
-            this.ColumnIDAtributos.Frozen = true;
-            this.ColumnIDAtributos.HeaderText = "ID";
-            this.ColumnIDAtributos.Name = "ColumnIDAtributos";
-            this.ColumnIDAtributos.ReadOnly = true;
-            this.ColumnIDAtributos.Visible = false;
+            this.tabControlCodigo.Controls.Add(this.tabPage1);
+            this.tabControlCodigo.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tabControlCodigo.Location = new System.Drawing.Point(0, 0);
+            this.tabControlCodigo.Name = "tabControlCodigo";
+            this.tabControlCodigo.SelectedIndex = 0;
+            this.tabControlCodigo.Size = new System.Drawing.Size(439, 703);
+            this.tabControlCodigo.TabIndex = 1;
             // 
-            // ColumnNombreAtributos
+            // tabPage1
             // 
-            this.ColumnNombreAtributos.Frozen = true;
-            this.ColumnNombreAtributos.HeaderText = "Nombre";
-            this.ColumnNombreAtributos.Name = "ColumnNombreAtributos";
-            this.ColumnNombreAtributos.ReadOnly = true;
+            this.tabPage1.BackColor = System.Drawing.SystemColors.Control;
+            this.tabPage1.Controls.Add(this.panelBordeTextCodigo);
+            this.tabPage1.Location = new System.Drawing.Point(4, 22);
+            this.tabPage1.Name = "tabPage1";
+            this.tabPage1.Padding = new System.Windows.Forms.Padding(10);
+            this.tabPage1.Size = new System.Drawing.Size(431, 677);
+            this.tabPage1.TabIndex = 0;
+            this.tabPage1.Text = "Código";
             // 
-            // ColumnTipoDatoAtributos
+            // panelBorderTextClase
             // 
-            this.ColumnTipoDatoAtributos.Frozen = true;
-            this.ColumnTipoDatoAtributos.HeaderText = "Tipo de Dato";
-            this.ColumnTipoDatoAtributos.Name = "ColumnTipoDatoAtributos";
-            this.ColumnTipoDatoAtributos.ReadOnly = true;
+            this.panelBorderTextClase.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.panelBorderTextClase.Controls.Add(this.richTextBoxClase);
+            this.panelBorderTextClase.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panelBorderTextClase.Location = new System.Drawing.Point(3, 36);
+            this.panelBorderTextClase.Name = "panelBorderTextClase";
+            this.panelBorderTextClase.Size = new System.Drawing.Size(757, 54);
+            this.panelBorderTextClase.TabIndex = 10;
             // 
-            // ColumnDescripcionAtributos
+            // panelBorderTextMetDescripcion
             // 
-            this.ColumnDescripcionAtributos.Frozen = true;
-            this.ColumnDescripcionAtributos.HeaderText = "Descripción";
-            this.ColumnDescripcionAtributos.Name = "ColumnDescripcionAtributos";
+            this.panelBorderTextMetDescripcion.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.tableLayoutPanelMethodDetails.SetColumnSpan(this.panelBorderTextMetDescripcion, 2);
+            this.panelBorderTextMetDescripcion.Controls.Add(this.richTextBoxMetodo);
+            this.panelBorderTextMetDescripcion.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panelBorderTextMetDescripcion.Location = new System.Drawing.Point(3, 29);
+            this.panelBorderTextMetDescripcion.Name = "panelBorderTextMetDescripcion";
+            this.panelBorderTextMetDescripcion.Size = new System.Drawing.Size(591, 50);
+            this.panelBorderTextMetDescripcion.TabIndex = 1005;
             // 
-            // ColumnIDAsociacion
+            // panelBorderMetRetorno
             // 
-            this.ColumnIDAsociacion.Frozen = true;
-            this.ColumnIDAsociacion.HeaderText = "ID";
-            this.ColumnIDAsociacion.Name = "ColumnIDAsociacion";
-            this.ColumnIDAsociacion.ReadOnly = true;
-            this.ColumnIDAsociacion.Visible = false;
+            this.panelBorderMetRetorno.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.tableLayoutPanelMethodDetails.SetColumnSpan(this.panelBorderMetRetorno, 2);
+            this.panelBorderMetRetorno.Controls.Add(this.richTextBoxRetorno);
+            this.panelBorderMetRetorno.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panelBorderMetRetorno.Location = new System.Drawing.Point(3, 220);
+            this.panelBorderMetRetorno.Name = "panelBorderMetRetorno";
+            this.panelBorderMetRetorno.Size = new System.Drawing.Size(591, 32);
+            this.panelBorderMetRetorno.TabIndex = 1005;
             // 
-            // ColumnTipoAsociacion
+            // panelBordeTextCodigo
             // 
-            this.ColumnTipoAsociacion.Frozen = true;
-            this.ColumnTipoAsociacion.HeaderText = "Tipo de Asociación";
-            this.ColumnTipoAsociacion.Name = "ColumnTipoAsociacion";
-            this.ColumnTipoAsociacion.ReadOnly = true;
-            // 
-            // ColumnDescripcionAsociacion
-            // 
-            this.ColumnDescripcionAsociacion.Frozen = true;
-            this.ColumnDescripcionAsociacion.HeaderText = "Descripción";
-            this.ColumnDescripcionAsociacion.Name = "ColumnDescripcionAsociacion";
-            // 
-            // ColumnId
-            // 
-            this.ColumnId.Frozen = true;
-            this.ColumnId.HeaderText = "ID";
-            this.ColumnId.Name = "ColumnId";
-            this.ColumnId.ReadOnly = true;
-            this.ColumnId.Visible = false;
-            // 
-            // ColumnNombre
-            // 
-            this.ColumnNombre.Frozen = true;
-            this.ColumnNombre.HeaderText = "Nombre";
-            this.ColumnNombre.Name = "ColumnNombre";
-            this.ColumnNombre.ReadOnly = true;
-            // 
-            // ColumnDescripcion
-            // 
-            this.ColumnDescripcion.Frozen = true;
-            this.ColumnDescripcion.HeaderText = "Descripción";
-            this.ColumnDescripcion.Name = "ColumnDescripcion";
+            this.panelBordeTextCodigo.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.panelBordeTextCodigo.Controls.Add(this.richTextBoxCodigo);
+            this.panelBordeTextCodigo.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panelBordeTextCodigo.Location = new System.Drawing.Point(10, 10);
+            this.panelBordeTextCodigo.Name = "panelBordeTextCodigo";
+            this.panelBordeTextCodigo.Size = new System.Drawing.Size(411, 657);
+            this.panelBordeTextCodigo.TabIndex = 1;
             // 
             // FormPrincipal
             // 
@@ -893,6 +1005,12 @@
             this.panelIzquierdo.PerformLayout();
             this.statusStrip.ResumeLayout(false);
             this.statusStrip.PerformLayout();
+            this.tabControlCodigo.ResumeLayout(false);
+            this.tabPage1.ResumeLayout(false);
+            this.panelBorderTextClase.ResumeLayout(false);
+            this.panelBorderTextMetDescripcion.ResumeLayout(false);
+            this.panelBorderMetRetorno.ResumeLayout(false);
+            this.panelBordeTextCodigo.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -935,6 +1053,7 @@
         private System.Windows.Forms.Label labelMetodos;
         private System.Windows.Forms.DataGridView dataGridViewParametros;
         private System.Windows.Forms.Label labelParametros;
+        private System.Windows.Forms.Button buttonGrabarParametros;
         private System.Windows.Forms.RichTextBox richTextBoxMetodo;
         private System.Windows.Forms.Label labelDescripcion;
         private System.Windows.Forms.RichTextBox richTextBoxRetorno;
@@ -963,6 +1082,13 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn ColumnId;
         private System.Windows.Forms.DataGridViewTextBoxColumn ColumnNombre;
         private System.Windows.Forms.DataGridViewTextBoxColumn ColumnDescripcion;
+        private System.Windows.Forms.Button buttonGrabarInfo;
+        private System.Windows.Forms.TabControl tabControlCodigo;
+        private System.Windows.Forms.TabPage tabPage1;
+        private System.Windows.Forms.Panel panelBorderTextClase;
+        private System.Windows.Forms.Panel panelBorderTextMetDescripcion;
+        private System.Windows.Forms.Panel panelBorderMetRetorno;
+        private System.Windows.Forms.Panel panelBordeTextCodigo;
     }
 }
 
