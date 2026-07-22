@@ -1,11 +1,13 @@
-﻿using transformador_mda.src.Dominio;
-using transformador_mda.src.Dominio.ElementosUML;
+﻿using System.IO;
+using transformador_mda.src.Dominio;
 using transformador_mda.src.Dominio.Retornos;
 using transformador_mda.src.Features.CrearIds;
-using transformador_mda.src.Features.ExploradorFicheros;
+using transformador_mda.src.Features.Utilidades;
+using transformador_mda.src.Dominio.ElementosUML;
 using transformador_mda.src.Features.GenerarSalida;
-using transformador_mda.src.Features.GestionConfiguracion;
 using transformador_mda.src.Features.ParserEntrada;
+using transformador_mda.src.Features.ExploradorFicheros;
+using transformador_mda.src.Features.GestionConfiguracion;
 
 namespace transformador_mda.src.Controladores
 {
@@ -38,40 +40,65 @@ namespace transformador_mda.src.Controladores
         #region "Métodos públicos"
 
         /// <summary>
-        /// Genera el parser correspondiente, llama a los métodos de lectura para rellenar los datos del Proyecto y rellena el resto de datos.
+        /// Permite seleccionar el fichero XMI y realiza el proceso de lectura.
         /// </summary>
-        /// <param name="param_nombre_proyecto">Nombre del proyecto a generar.</param>
-        /// <param name="param_directorio_raiz">Ruta del directorio raíz del proyecto.</param>
-        /// <returns>True si el proceso es correcto, false si hay algún fallo.</returns>
-        public bool LeerFichero(string param_ruta_fichero)
+        /// <returns>Objeto con información del proceso.</returns>
+        public RetornoMultiple BuscarFichero()
         {
-            Configuracion.RutaFicheroEntrada = param_ruta_fichero;
+            string extensiones_soportadas = string.Empty;
+            if (Configuracion.TipoFicheroEntrada == EnumTipoFicheroEntrada.NULO)
+                return new RetornoMultiple(false, 
+                    RetornoMultiple.EnumEstado.ERROR,
+                    "No se ha podido leer el fichero correctamente.",
+                    "El tipo de dato que define el formato del fichero de entrada no está definido.");
+            else if (Configuracion.TipoFicheroEntrada == EnumTipoFicheroEntrada.XMI)
+                extensiones_soportadas = "Archivos XMI (*.xmi) | *.xmi| Archivos XML (*.xml) | *.xml| Todos los archivos (*.*) | *.*";
+            
+            string ruta_fichero = Files.GetFilePath("Buscar fichero de entrada.", extensiones_soportadas);
+            if (string.IsNullOrEmpty(ruta_fichero))
+                return new RetornoMultiple(true,
+                    RetornoMultiple.EnumEstado.CANCELADO_POR_USUARIO,
+                    "Proceso cancelado por el usuario.");
 
-            ParserUMLBase parser = FactoríaParser.CrearParser(Configuracion);
-            if (parser == null)
-                return false;
+            RetornoBase retorno = LeerFichero(ruta_fichero);
+            RetornoMultiple ret_retorno = new RetornoMultiple()
+            {
+                Exito = retorno.Exito,
+                TextoUsuario = retorno.TextoUsuario,
+                TextoDesarrollador = retorno.TextoDesarrollador,
+                Estado = retorno.Exito ? RetornoMultiple.EnumEstado.CORRECTO : RetornoMultiple.EnumEstado.ERROR
+            };
+                        
+            if (ret_retorno.Exito)
+                Configuracion.RutaFicheroEntrada = ruta_fichero;
 
-            RetornoElementoUML ret_resultado = parser.Parsear();
-            Configuracion.Proyecto = ret_resultado.Elemento as ProyectoBase;
-            if (Configuracion.Proyecto == null)
-                return false;
-
-            Configuracion.Proyecto.Id = CrearIdentificador.CrearGUID();
-
-            return true;
-        }
+            return ret_retorno;
+        }      
 
         /// <summary>
-        /// Genera el generador correspondiente y llama al método de escritura.
+        /// Muestra el selector de directorios y, si el proyecto no está nombrado coge el nombre del directorio como nombre del proyecto.
         /// </summary>
-        /// <returns>True si el proceso es correcto, false si no.</returns>
-        public bool EscribirArtefactos()
+        /// <returns>Objeto con información del proceso.</returns>
+        public RetornoMultiple BuscarDirectorioRaiz()
+        {
+            string ruta_directorio = Folder.GetFolderPath("Seleccione el directorio raíz del proyecto...");
+            if (string.IsNullOrEmpty(ruta_directorio))
+                return new RetornoMultiple(true, RetornoMultiple.EnumEstado.CANCELADO_POR_USUARIO, "Operación cancelada por el usuario.");
+
+            Configuracion.RutaRaiz = ruta_directorio;
+
+            if (string.IsNullOrEmpty(Configuracion.Proyecto.Nombre))
+                Configuracion.Proyecto.Nombre = Path.GetFileName(ruta_directorio);
+
+            return new RetornoMultiple(true, RetornoMultiple.EnumEstado.CORRECTO, "Directorio seleccionado correctamente.");
+        }
+
+        public RetornoBase GenerarCodigo(Clase param_clase)
         {
             GenerarSalidaBase generador = FactoriaSalida.CrearGenerarSalida(Configuracion);
-            if (generador == null)
-                return false;
+            string texto = generador.GenerarTexto(param_clase);
 
-            return generador.GenerarSalida();
+            return new RetornoBase(true, "Generación correcta", texto);
         }
 
         /// <summary>
@@ -105,5 +132,138 @@ namespace transformador_mda.src.Controladores
 
         #endregion
 
+        #region "Métodos privados"
+
+        /// <summary>
+        /// Genera el parser según el tipo de formato de entrada y carga el objeto con los datos del fichero.
+        /// </summary>
+        /// <param name="param_ruta_fichero">Ruta del fichero XMI</param>
+        /// <returns>Objeto de tipo RetornoBase con información del proceso.</returns>
+        private RetornoBase LeerFichero(string param_ruta_fichero)
+        {
+            Configuracion.RutaFicheroEntrada = param_ruta_fichero;
+
+            ParserUMLBase parser = FactoríaParser.CrearParser(Configuracion);
+            if (parser == null)
+                return new RetornoBase(false,
+                    "No se ha podido leer el fichero correctamente.",
+                    "No se ha creado el parser correctamente.");
+
+            RetornoElementoUML ret_resultado = parser.Parsear();
+            if (!ret_resultado.Exito)
+                return ret_resultado;
+
+            Configuracion.Proyecto = ret_resultado.Elemento as ProyectoBase;
+            if (Configuracion.Proyecto == null)
+                return new RetornoBase(false,
+                    "No se ha podido leer el fichero correctamente.",
+                    "El proyecto está vacío, la lectura ha sido correcta pero no se han leido datos y el objeto Proyecto está vacío.");
+
+            Configuracion.Proyecto.Id = CrearIdentificador.CrearGUID();
+
+            return new RetornoBase(true, "El fichero se ha leido correctamente.");
+        }
+
+        #endregion
+
+        #region "Actualización de datos"
+
+        /// <summary>
+        /// Método encargado de actualizar los comentarios de los componentes de tipo parámetro.
+        /// </summary>
+        /// <param name="param_id">Identificador del elemento UML.</param>
+        /// <param name="param_descripcion">Comentario con el que se actualizará el componente.</param>
+        /// <returns>True si el proceso es correcto, false si no.</returns>
+        public bool ActualizarParametro(string param_id, string param_descripcion)
+        {
+            Parametro parametro = BuscarComponentes.BuscarParametro(Configuracion.Proyecto, param_id);
+            if (parametro == null)
+                return false;
+
+            parametro.Comentario = param_descripcion;
+            return true;
+        }
+
+        /// <summary>
+        /// Método encargado de actualizar los comentarios de los componentes de tipo clase.
+        /// </summary>
+        /// <param name="param_id">Identificador del elemento UML.</param>
+        /// <param name="param_descripcion">Comentario con el que se actualizará el componente.</param>
+        /// <returns>True si el proceso es correcto, false si no.</returns>
+        public bool ActualizarClase(string param_id, string param_descripcion)
+        {
+            Clase clase = BuscarComponentes.BuscarClase(Configuracion.Proyecto, param_id);
+            if (clase == null)
+                return false;
+
+            clase.Comentario = param_descripcion;
+            return true;
+        }
+
+        /// <summary>
+        /// Método encargado de actualizar los comentarios de los componentes de tipo atributo.
+        /// </summary>
+        /// <param name="param_id">Identificador del elemento UML.</param>
+        /// <param name="param_descripcion">Comentario con el que se actualizará el componente.</param>
+        /// <returns>True si el proceso es correcto, false si no.</returns>
+        public bool ActualizarAtributo(string param_id, string param_descripcion)
+        {
+            Atributo atributo = BuscarComponentes.BuscarAtributo(Configuracion.Proyecto, param_id);
+            if (atributo == null)
+                return false;
+
+            atributo.Comentario = param_descripcion;
+            return true;
+        }
+
+        /// <summary>
+        /// Método encargado de actualizar los comentarios de los componentes de tipo asociación.
+        /// </summary>
+        /// <param name="param_id">Identificador del elemento UML.</param>
+        /// <param name="param_descripcion">Comentario con el que se actualizará el componente.</param>
+        /// <returns>True si el proceso es correcto, false si no.</returns>
+        public bool ActualizarAsociaciones(string param_id, string param_descripcion)
+        {
+            Asociacion asociacion = BuscarComponentes.BuscarAsociacion(Configuracion.Proyecto, param_id);
+            if (asociacion == null)
+                return false;
+
+            asociacion.Comentario = param_descripcion;
+            return true;
+        }
+
+        /// <summary>
+        /// Método encargado de actualizar los comentarios de los componentes de tipo método.
+        /// </summary>
+        /// <param name="param_id">Identificador del elemento UML.</param>
+        /// <param name="param_descripcion">Comentario con el que se actualizará el componente.</param>
+        /// <returns>True si el proceso es correcto, false si no.</returns>
+        public bool ActualizarMetodos(string param_id, string param_descripcion)
+        {
+            Metodo metodo = BuscarComponentes.BuscarMetodo(Configuracion.Proyecto, param_id);
+            if (metodo == null)
+                return false;
+
+            metodo.Comentario = param_descripcion;
+            return true;
+        }
+
+        /// <summary>
+        /// Método encargado de actualizar los comentarios de los componentes de tipo literal.
+        /// </summary>
+        /// <param name="param_id">Identificador del elemento UML.</param>
+        /// <param name="param_descripcion">Comentario con el que se actualizará el componente.</param>
+        /// <returns>True si el proceso es correcto, false si no.</returns>
+        public bool ActualizarLiteral(string param_id, string param_descripcion)
+        {
+            ElementoBase literal = BuscarComponentes.BuscarLiteral(Configuracion.Proyecto, param_id);
+            if (literal == null)
+                return false;
+
+            literal.Comentario = param_descripcion;
+            return true;
+        }
+        
+        #endregion
     }
 }

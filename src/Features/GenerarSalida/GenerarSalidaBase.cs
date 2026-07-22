@@ -59,6 +59,7 @@ namespace transformador_mda.src.Features.GenerarSalida
         /// <returns>True si todo es correcto, false si no.</returns>
         public abstract bool GenerarSalida();
 
+        public abstract string GenerarTexto(Clase param_clase);
         #endregion
 
         #region "Métodos protegidos abstractos"
