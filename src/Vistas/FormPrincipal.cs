@@ -2,9 +2,8 @@
 using System.Drawing;
 using System.Windows.Forms;
 using transformador_mda.src.Controladores;
-using transformador_mda.src.Dominio.ElementosUML;
 using transformador_mda.src.Dominio.Retornos;
-using transformador_mda.src.Features.ExploradorFicheros;
+using transformador_mda.src.Dominio.ElementosUML;
 
 namespace transformador_mda.src.Vistas
 {
@@ -20,30 +19,50 @@ namespace transformador_mda.src.Vistas
         NO_DEFINIDA = 4     /// <summary> No representa ningún icono del image list. </summary>
     };
 
+    /// <summary>
+    /// Enumeración con los índices de las columnas en el DataGridView de atributos.
+    /// </summary>
     enum EnumColumnasAtributos
     {
-        ID = 0,
-        NOMBRE = 1,
-        TIPO_DATO = 2,
-        DESCRIPCION = 3,
-        NO_DEFINIDA = 4
+        ID = 0,             /// <summary> Índice de la columna donde se almacenarán los identificadores. </summary>
+        NOMBRE = 1,         /// <summary> Índice de la columna donde se almacenarán los nombres. </summary>
+        TIPO_DATO = 2,      /// <summary> Índice de la columna donde se almacenarán los tipos de datos. </summary>
+        DESCRIPCION = 3,    /// <summary> Índice de la columna donde se almacenarán los comentarios. </summary>
+        NO_DEFINIDA = 4     /// <summary> Índice tope o columna no definida. </summary>
     }
 
+    /// <summary>
+    /// Enumeración con los índices de las columnas en el DataGridView de asociaciones.
+    /// </summary>
     enum EnumColumnasAsociaciones
     {
-        ID = 0,
-        TIPO_ASOCIACION = 1,
-        DESCRIPCION = 2,
-        CLASE_ASOCIACION = 3,
-        NO_DEFINIDA = 4
+        ID = 0,                 /// <summary> Índice de la columna donde se almacenarán los identificadores. </summary>
+        TIPO_ASOCIACION = 1,    /// <summary> Índice de la columna donde se almacenarán los posibles tipos de asociación. </summary>
+        DESCRIPCION = 2,        /// <summary> Índice de la columna donde se almacenarán los comentarios. </summary>  
+        CLASE_ASOCIACION = 3,   /// <summary> Índice de la columna donde se almacenarán los identificadores de la clase asociada. </summary> 
+        NO_DEFINIDA = 4         /// <summary> Índice tope o columna no definida. </summary>
     }
 
+    /// <summary>
+    /// Enumeración con los índices de las columnas en el DataGridView de parámetros.
+    /// </summary>
     enum EnumColumnasParametros
     {
-        ID = 0,
-        NOMBRE = 1,
-        DESCRIPCION = 2,
-        NO_DEFINIDA = 3
+        ID = 0,             /// <summary> Índice de la columna donde se almacenarán los identificadores. </summary>
+        NOMBRE = 1,         /// <summary> Índice de la columna donde se almacenarán los nombres. </summary>
+        DESCRIPCION = 2,    /// <summary> Índice de la columna donde se almacenarán los comentarios. </summary>
+        NO_DEFINIDA = 3     /// <summary> Índice tope o columna no definida. </summary>
+    }
+
+    /// <summary>
+    /// Enumeración con los índices de las columnas en el DataGridView de literales.
+    /// </summary>
+    enum EnumColumnasLiterales
+    {
+        ID = 0,             /// <summary> Índice de la columna donde se almacenarán los identificadores. </summary>
+        NOMBRE = 1,         /// <summary> Índice de la columna donde se almacenarán los nombres. </summary>
+        DESCRIPCION = 2,    /// <summary> Índice de la columna donde se almacenarán los comentarios. </summary>
+        NO_DEFINIDA = 3     /// <summary> Índice tope o columna no definida. </summary>
     }
 
     /// <summary>
@@ -285,6 +304,43 @@ namespace transformador_mda.src.Vistas
 
         #endregion
 
+        #region "Redimension DataGridView"
+
+        /// <summary>
+        /// Cada vez que se redimensionan los dataGridView se ajusta el ancho de sus columnas.
+        /// </summary>
+        /// <param name="sender">Componente que lanza el evento.</param>
+        /// <param name="e">Argumentos asociados al evento.</param>
+        private void dataGridView_Resize(object sender, EventArgs e)
+        {
+            AjustarAnchoTablas();
+        }
+
+        /// <summary>
+        /// Ajusta el ancho de las columnas de los DataGridView de los formularios.
+        /// </summary>
+        private void AjustarAnchoTablas()
+        {
+            int ancho = dataGridViewAtributos.Width;
+            dataGridViewAtributos.Columns[(int)EnumColumnasAtributos.NOMBRE].Width = (int)(ancho * 0.25);
+            dataGridViewAtributos.Columns[(int)EnumColumnasAtributos.TIPO_DATO].Width = (int)(ancho * 0.25);
+            dataGridViewAtributos.Columns[(int)EnumColumnasAtributos.DESCRIPCION].Width = (int)(ancho * 0.5);
+
+            ancho = dataGridViewAsociaciones.Width;
+            dataGridViewAsociaciones.Columns[(int)EnumColumnasAsociaciones.TIPO_ASOCIACION].Width = (int)(ancho * 0.25);
+            dataGridViewAsociaciones.Columns[(int)EnumColumnasAsociaciones.DESCRIPCION].Width = (int)(ancho * 0.75);
+
+            ancho = dataGridViewParametros.Width;
+            dataGridViewParametros.Columns[(int)EnumColumnasParametros.NOMBRE].Width = (int)(ancho * 0.25);
+            dataGridViewParametros.Columns[(int)EnumColumnasParametros.DESCRIPCION].Width = (int)(ancho * 0.75);
+
+            ancho = dataGridViewLiterales.Width;
+            dataGridViewLiterales.Columns[(int)EnumColumnasLiterales.NOMBRE].Width = (int)(ancho * 0.25);
+            dataGridViewLiterales.Columns[(int)EnumColumnasLiterales.DESCRIPCION].Width = (int)(ancho * 0.75);
+        }
+
+        #endregion
+
         #region "Panel ImportarXMI"
 
         /// <summary>
@@ -467,15 +523,41 @@ namespace transformador_mda.src.Vistas
 
         #endregion
 
+        #region "Rellenar formularios y actualizar comentarios"
+
+        /// <summary>
+        /// Selecciona la clase y muestra sus datos.
+        /// </summary>
+        /// <param name="sender">Componente que lanza el evento.</param>
+        /// <param name="e">Argumentos asociados al evento.</param>
         private void treeView_NodeMouseDoubleClick(object sender, TreeNodeMouseClickEventArgs e)
         {
             if (!(e.Node.Tag is Clase clase))
                 return;
 
-            RellenarFormulario(clase);
+            if (clase.TipoClase == EnumTiposClases.ENUMERACION)
+            {
+                tabControlEnumeraciones.Visible = true;
+                tabControlEnumeraciones.Enabled = true;
+                tabControlEnumeraciones.BringToFront();
+
+                RellenarFormularioEnum(clase);
+            }
+            else
+            {
+                tabControlClases.Visible = true;
+                tabControlClases.Enabled = true;
+                tabControlClases.BringToFront();
+
+                RellenarFormularioClase(clase);
+            }
         }
 
-        private void RellenarFormulario(Clase param_clase)
+        /// <summary>
+        /// Rellena el formulario con los datos de una clase o interfaz.
+        /// </summary>
+        /// <param name="param_clase">Clase de tipo interfaz, clase abstracto o clase normal.</param>
+        private void RellenarFormularioClase(Clase param_clase)
         {
             richTextBoxClase.Text = string.Empty;
             listView.Items.Clear();
@@ -487,6 +569,7 @@ namespace transformador_mda.src.Vistas
             dataGridViewParametros.Rows.Clear();
 
             richTextBoxClase.Text = param_clase.Comentario;
+            richTextBoxClase.Tag = param_clase.Id;
             foreach (Metodo metodo in param_clase.Metodos)
             {
                 ListViewItem item = new ListViewItem(metodo.Nombre)
@@ -497,17 +580,39 @@ namespace transformador_mda.src.Vistas
                 listView.Items.Add(item);
             }
 
-            foreach(Atributo atributo in param_clase.Atributos)
+            foreach (Atributo atributo in param_clase.Atributos)
             {
                 dataGridViewAtributos.Rows.Add(atributo.Id, atributo.Nombre, "void", atributo.Comentario);
             }
 
-            foreach(Asociacion asociacion in param_clase.Asociaciones)
+            foreach (Asociacion asociacion in param_clase.Asociaciones)
             {
                 dataGridViewAsociaciones.Rows.Add(asociacion.Id, asociacion.Nombre, asociacion.Comentario);
             }
         }
 
+        /// <summary>
+        /// Rellena el formulario de las enumeraciones con sus literales.
+        /// </summary>
+        /// <param name="param_clase">Clase de tipo enumeración.</param>
+        private void RellenarFormularioEnum(Clase param_clase)
+        {
+            richTextBoxComentarioEnum.Text = string.Empty;
+            dataGridViewLiterales.Rows.Clear();
+
+            richTextBoxComentarioEnum.Text = param_clase.Comentario;
+            richTextBoxComentarioEnum.Tag = param_clase.Id;
+            foreach (ElementoBase literal in param_clase.Literales)
+            {
+                dataGridViewLiterales.Rows.Add(literal.Id, literal.Nombre, literal.Comentario);
+            }
+        }
+
+        /// <summary>
+        /// Rellena la información de un método según la selección del item en un list view.
+        /// </summary>
+        /// <param name="sender">Componente que lanza el evento.</param>
+        /// <param name="e">Argumentos asociados al evento.</param>
         private void listView_ItemSelectionChanged(object sender, ListViewItemSelectionChangedEventArgs e)
         {
             richTextBoxMetodo.Text = string.Empty;
@@ -518,13 +623,112 @@ namespace transformador_mda.src.Vistas
                 return;
 
             richTextBoxMetodo.Text = metodo.Comentario;
-            
+
             foreach (Parametro parametro in metodo.Parametros)
             {
                 dataGridViewParametros.Rows.Add(parametro.Id, parametro.Nombre, parametro.Comentario);
             }
         }
 
+        /// <summary>
+        /// Graba la información de los comentarios genéricos en la variable del controlador principal.
+        /// </summary>
+        /// <param name="sender">Componente que lanza el evento.</param>
+        /// <param name="e">Argumentos asociados al evento.</param>
+        private void buttonGrabarInfo_Click(object sender, EventArgs e)
+        {
+            string id_clase = richTextBoxClase.Tag?.ToString() ?? string.Empty;
+            _controlador.ActualizarClase(id_clase, richTextBoxClase.Text);
+
+            foreach (DataGridViewRow fila in dataGridViewAtributos.Rows)
+            {
+                string id = fila.Cells[(int)EnumColumnasAtributos.ID].Value?.ToString() ?? string.Empty;
+                string comentario = fila.Cells[(int)EnumColumnasAtributos.DESCRIPCION].Value?.ToString() ?? string.Empty;
+
+                _controlador.ActualizarAtributo(id, comentario);
+            }
+
+            foreach (DataGridViewRow fila in dataGridViewAsociaciones.Rows)
+            {
+                string id = fila.Cells[(int)EnumColumnasAsociaciones.ID].Value?.ToString() ?? string.Empty;
+                string comentario = fila.Cells[(int)EnumColumnasAsociaciones.DESCRIPCION].Value?.ToString() ?? string.Empty;
+
+                _controlador.ActualizarAsociaciones(id, comentario);
+            }
+        }
+
+        /// <summary>
+        /// Graba la información del comentario del método en la variable del controlador
+        /// </summary>
+        /// <param name="sender">Componente que lanza el evento.</param>
+        /// <param name="e">Argumentos asociados al evento.</param>
+        private void buttonGrabarMetodo_Click(object sender, EventArgs e)
+        {
+            if (listView.SelectedItems.Count == 0)
+                return;
+
+            if (!(listView.SelectedItems[0].Tag is Metodo metodo))
+                return;
+
+            _controlador.ActualizarMetodos(metodo.Id, richTextBoxMetodo.Text);
+        }
+
+        /// <summary>
+        /// Graba la información del comentario de los parámetros en la variable del controlador.
+        /// </summary>
+        /// <param name="sender">Componente que lanza el evento.</param>
+        /// <param name="e">Argumentos asociados al evento.</param>
+        private void buttonGrabarParametros_Click(object sender, EventArgs e)
+        {
+            if (listView.SelectedItems.Count == 0)
+                return;
+
+            if (!(listView.SelectedItems[0].Tag is Metodo metodo))
+                return;
+
+            foreach (DataGridViewRow fila in dataGridViewParametros.Rows)
+            {
+                string id = fila.Cells[(int)EnumColumnasParametros.ID].Value?.ToString() ?? string.Empty;
+                string comentario = fila.Cells[(int)EnumColumnasParametros.DESCRIPCION].Value?.ToString() ?? string.Empty;
+
+                _controlador.ActualizarParametro(id, comentario);
+            }
+        }
+
+        /// <summary>
+        /// Graba la información del comentario de las enumeraciones en la variable del controlador.
+        /// </summary>
+        /// <param name="sender">Componente que lanza el evento.</param>
+        /// <param name="e">Argumentos asociados al evento.</param>
+        private void buttonGrabarComentariosEnum_Click(object sender, EventArgs e)
+        {
+            if (!(treeView.SelectedNode.Tag is Clase clase_seleccionada))
+                return;
+
+            if (clase_seleccionada.TipoClase != EnumTiposClases.ENUMERACION)
+                return;
+
+            string id_clase = richTextBoxComentarioEnum.Tag?.ToString() ?? string.Empty;
+            _controlador.ActualizarClase(id_clase, richTextBoxComentarioEnum.Text);
+
+            foreach (DataGridViewRow fila in dataGridViewLiterales.Rows)
+            {
+                string id = fila.Cells[(int)EnumColumnasLiterales.ID].Value?.ToString() ?? string.Empty;
+                string comentario = fila.Cells[(int)EnumColumnasLiterales.DESCRIPCION].Value?.ToString() ?? string.Empty;
+
+                _controlador.ActualizarLiteral(id, comentario);
+            }
+        }
+
+        #endregion
+
+        #region "Generación de código"
+
+        /// <summary>
+        /// Genera el esqueleto del código y lo muestra.
+        /// </summary>
+        /// <param name="sender">Componente que lanza el evento.</param>
+        /// <param name="e">Argumentos asociados al evento.</param>
         private void generarEsqueletoToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (!(treeView.SelectedNode.Tag is Clase clase_seleccionada))
@@ -539,26 +743,7 @@ namespace transformador_mda.src.Vistas
 
             richTextBoxCodigo.Text = retorno.TextoDesarrollador;
         }
-    
-        private void AjustarAnchoTablas()
-        {
-            int ancho = dataGridViewAtributos.Width;
-            dataGridViewAtributos.Columns[(int)EnumColumnasAtributos.NOMBRE].Width = (int)(ancho * 0.25);
-            dataGridViewAtributos.Columns[(int)EnumColumnasAtributos.TIPO_DATO].Width = (int)(ancho * 0.25);
-            dataGridViewAtributos.Columns[(int)EnumColumnasAtributos.DESCRIPCION].Width = (int)(ancho * 0.5);
 
-            ancho = dataGridViewAsociaciones.Width;
-            dataGridViewAsociaciones.Columns[(int)EnumColumnasAsociaciones.TIPO_ASOCIACION].Width = (int)(ancho * 0.25);
-            dataGridViewAsociaciones.Columns[(int)EnumColumnasAsociaciones.DESCRIPCION].Width = (int)(ancho * 0.75);
-
-            ancho = dataGridViewParametros.Width;
-            dataGridViewParametros.Columns[(int)EnumColumnasParametros.NOMBRE].Width = (int)(ancho * 0.25);
-            dataGridViewParametros.Columns[(int)EnumColumnasParametros.DESCRIPCION].Width = (int)(ancho * 0.75);
-        }
-
-        private void dataGridView_Resize(object sender, EventArgs e)
-        {
-            AjustarAnchoTablas();
-        }
+        #endregion
     }
 }

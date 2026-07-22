@@ -1,13 +1,13 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using transformador_mda.src.Dominio;
-using transformador_mda.src.Dominio.ElementosUML;
 using transformador_mda.src.Dominio.Retornos;
 using transformador_mda.src.Features.CrearIds;
-using transformador_mda.src.Features.ExploradorFicheros;
+using transformador_mda.src.Features.Utilidades;
+using transformador_mda.src.Dominio.ElementosUML;
 using transformador_mda.src.Features.GenerarSalida;
-using transformador_mda.src.Features.GestionConfiguracion;
 using transformador_mda.src.Features.ParserEntrada;
+using transformador_mda.src.Features.ExploradorFicheros;
+using transformador_mda.src.Features.GestionConfiguracion;
 
 namespace transformador_mda.src.Controladores
 {
@@ -165,6 +165,105 @@ namespace transformador_mda.src.Controladores
         }
 
         #endregion
-    
+
+        #region "Actualización de datos"
+
+        /// <summary>
+        /// Método encargado de actualizar los comentarios de los componentes de tipo parámetro.
+        /// </summary>
+        /// <param name="param_id">Identificador del elemento UML.</param>
+        /// <param name="param_descripcion">Comentario con el que se actualizará el componente.</param>
+        /// <returns>True si el proceso es correcto, false si no.</returns>
+        public bool ActualizarParametro(string param_id, string param_descripcion)
+        {
+            Parametro parametro = BuscarComponentes.BuscarParametro(Configuracion.Proyecto, param_id);
+            if (parametro == null)
+                return false;
+
+            parametro.Comentario = param_descripcion;
+            return true;
+        }
+
+        /// <summary>
+        /// Método encargado de actualizar los comentarios de los componentes de tipo clase.
+        /// </summary>
+        /// <param name="param_id">Identificador del elemento UML.</param>
+        /// <param name="param_descripcion">Comentario con el que se actualizará el componente.</param>
+        /// <returns>True si el proceso es correcto, false si no.</returns>
+        public bool ActualizarClase(string param_id, string param_descripcion)
+        {
+            Clase clase = BuscarComponentes.BuscarClase(Configuracion.Proyecto, param_id);
+            if (clase == null)
+                return false;
+
+            clase.Comentario = param_descripcion;
+            return true;
+        }
+
+        /// <summary>
+        /// Método encargado de actualizar los comentarios de los componentes de tipo atributo.
+        /// </summary>
+        /// <param name="param_id">Identificador del elemento UML.</param>
+        /// <param name="param_descripcion">Comentario con el que se actualizará el componente.</param>
+        /// <returns>True si el proceso es correcto, false si no.</returns>
+        public bool ActualizarAtributo(string param_id, string param_descripcion)
+        {
+            Atributo atributo = BuscarComponentes.BuscarAtributo(Configuracion.Proyecto, param_id);
+            if (atributo == null)
+                return false;
+
+            atributo.Comentario = param_descripcion;
+            return true;
+        }
+
+        /// <summary>
+        /// Método encargado de actualizar los comentarios de los componentes de tipo asociación.
+        /// </summary>
+        /// <param name="param_id">Identificador del elemento UML.</param>
+        /// <param name="param_descripcion">Comentario con el que se actualizará el componente.</param>
+        /// <returns>True si el proceso es correcto, false si no.</returns>
+        public bool ActualizarAsociaciones(string param_id, string param_descripcion)
+        {
+            Asociacion asociacion = BuscarComponentes.BuscarAsociacion(Configuracion.Proyecto, param_id);
+            if (asociacion == null)
+                return false;
+
+            asociacion.Comentario = param_descripcion;
+            return true;
+        }
+
+        /// <summary>
+        /// Método encargado de actualizar los comentarios de los componentes de tipo método.
+        /// </summary>
+        /// <param name="param_id">Identificador del elemento UML.</param>
+        /// <param name="param_descripcion">Comentario con el que se actualizará el componente.</param>
+        /// <returns>True si el proceso es correcto, false si no.</returns>
+        public bool ActualizarMetodos(string param_id, string param_descripcion)
+        {
+            Metodo metodo = BuscarComponentes.BuscarMetodo(Configuracion.Proyecto, param_id);
+            if (metodo == null)
+                return false;
+
+            metodo.Comentario = param_descripcion;
+            return true;
+        }
+
+        /// <summary>
+        /// Método encargado de actualizar los comentarios de los componentes de tipo literal.
+        /// </summary>
+        /// <param name="param_id">Identificador del elemento UML.</param>
+        /// <param name="param_descripcion">Comentario con el que se actualizará el componente.</param>
+        /// <returns>True si el proceso es correcto, false si no.</returns>
+        public bool ActualizarLiteral(string param_id, string param_descripcion)
+        {
+            ElementoBase literal = BuscarComponentes.BuscarLiteral(Configuracion.Proyecto, param_id);
+            if (literal == null)
+                return false;
+
+            literal.Comentario = param_descripcion;
+            return true;
+        }
+        
+        #endregion
     }
 }
