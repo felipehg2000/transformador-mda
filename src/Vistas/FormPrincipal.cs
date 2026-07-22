@@ -117,6 +117,11 @@ namespace transformador_mda.src.Vistas
 
             _controlador = new Principal();
 
+            // Mostrar panel adecuado
+            tableLayoutPanelInicio.Visible = true;
+            tableLayoutPanelInicio.Enabled = true;
+            tableLayoutPanelInicio.BringToFront();
+
             // Ajusta las columnas 
             AjustarAnchoTablas();  
         }
@@ -425,13 +430,17 @@ namespace transformador_mda.src.Vistas
             panelAbrirXMI.SendToBack();
 
             if (_controlador?.Configuracion?.Proyecto == null)
-            {
-                panelPrincipal.Enabled = true;
                 return;
-            }
 
             RellenarArbolProyecto();
+
             panelPrincipal.Enabled = true;
+            panelPrincipal.Visible = true;
+            panelPrincipal.BringToFront();
+
+            panelSelClase.Enabled = true;
+            panelSelClase.Visible = true;
+            panelSelClase.BringToFront();
         }
 
         /// <summary>
@@ -534,6 +543,10 @@ namespace transformador_mda.src.Vistas
         {
             if (!(e.Node.Tag is Clase clase))
                 return;
+
+            splitContainer.Visible = true;
+            splitContainer.Enabled = true;
+            splitContainer.BringToFront();
 
             if (clase.TipoClase == EnumTiposClases.ENUMERACION)
             {
