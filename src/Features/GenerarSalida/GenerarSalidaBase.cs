@@ -1,6 +1,7 @@
 ﻿using System.IO;
 using System.Collections.Generic;
 using transformador_mda.src.Dominio.ElementosUML;
+using transformador_mda.src.Dominio.Retornos;
 
 namespace transformador_mda.src.Features.GenerarSalida
 {
@@ -57,35 +58,10 @@ namespace transformador_mda.src.Features.GenerarSalida
         /// Método inicial de las clases descendientes. Se llama para la generación de la salida.
         /// </summary>
         /// <returns>True si todo es correcto, false si no.</returns>
-        public abstract bool GenerarSalida();
+        public abstract RetornoBase GenerarSalida();
 
-        public abstract string GenerarTexto(Clase param_clase);
+        public abstract RetornoBase GenerarTexto(Clase param_clase);
         #endregion
 
-        #region "Métodos protegidos abstractos"
-
-        /// <summary>
-        /// Método encargado de generar las clases.
-        /// </summary>
-        protected abstract void GenerarClases();
-
-        /// <summary>
-        /// Método encargado de generar el códgio con el que se rellenarán las clases.
-        /// </summary>
-        /// <returns>Código de la clase.</returns>
-        protected abstract string GenerarCodigoClase();
-
-        protected abstract string GenerarAtributos(List<Atributo> param_elementos);
-
-        protected abstract string GenerarParametros(List<Parametro> param_parametros);
-
-        /// <summary>
-        /// Método encargado de generar los métodos que se añadirán a la clase.
-        /// </summary>
-        /// <param name="param_metodos">Método a generar.</param>
-        /// <returns>Código del método.</returns>
-        protected abstract string GenerarMetodos(List<Metodo> param_metodos);
-        
-        #endregion
     }
 }

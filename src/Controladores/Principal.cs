@@ -96,7 +96,7 @@ namespace transformador_mda.src.Controladores
         public RetornoBase GenerarCodigo(Clase param_clase)
         {
             GenerarSalidaBase generador = FactoriaSalida.CrearGenerarSalida(Configuracion);
-            string texto = generador.GenerarTexto(param_clase);
+            string texto = generador.GenerarTexto(param_clase).TextoDesarrollador;
 
             return new RetornoBase(true, "Generación correcta", texto);
         }
