@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using transformador_mda.src.Dominio.Retornos;
+using transformador_mda.src.Features.Utilidades;
 using transformador_mda.src.Dominio.ElementosUML;
 
 namespace transformador_mda.src.Features.GenerarSalida
@@ -74,10 +75,30 @@ namespace transformador_mda.src.Features.GenerarSalida
 
         static private RetornoBase GenerarCodigoClases(ProyectoBase param_proyecto, Clase param_clase)
         {
-            string texto_clases = "namespace " + GenerarNamespace(param_proyecto, param_clase).TextoDesarrollador + "\n" +
+            RetornoBase retorno_herencia = GenerarHerencia(param_proyecto, param_clase.Id, param_clase.Asociaciones);
+            if (!retorno_herencia.Exito)
+                return retorno_herencia;
+
+            string[] partes = retorno_herencia.TextoDesarrollador.Split(new string[] { "--{{texto_separacion}}--" }, StringSplitOptions.None);
+            string texto_librerias = partes.Length > 0 ? partes[0] : string.Empty;
+            string texto_herencia = partes.Length > 1 ? partes[1] : string.Empty;
+
+            RetornoBase retorno_librerias = GenerarAsociaciones(param_proyecto, param_clase.Id, param_clase.Asociaciones);
+            if (!retorno_librerias.Exito)
+                return retorno_librerias;
+
+            if (retorno_librerias.TextoDesarrollador.Contains(texto_librerias))
+                texto_librerias = retorno_librerias.TextoDesarrollador;
+            else
+                texto_librerias += retorno_librerias.TextoDesarrollador;
+
+            string texto_clases = texto_librerias + "\n" +
+                "namespace " + GenerarNamespace(param_proyecto, param_clase).TextoDesarrollador + "\n" +
                 "{\n" +
-                "\t" + ObtenerTipoVisibilidad(param_clase.Visibilidad) + " " + ObtenerTipoClase(param_clase.TipoClase) + " " + param_clase.Nombre + "\n" +
-                "\t{\n";
+                "\t" + ObtenerTipoVisibilidad(param_clase.Visibilidad) + " " + ObtenerTipoClase(param_clase.TipoClase) + " " + param_clase.Nombre;
+
+            texto_clases += texto_herencia != string.Empty ? ": " + texto_herencia + "\n" : "\n"; 
+            texto_clases += "\t{\n";
 
 
             if (param_clase.TipoClase == EnumTiposClases.ENUMERACION)
@@ -227,7 +248,9 @@ namespace transformador_mda.src.Features.GenerarSalida
                     return new RetornoBase(true, "", texto_namespace + "." + directorio.Nombre + "." + retorno.TextoDesarrollador);
             }
 
-            return new RetornoBase(false, "No se ha podido generar el texto correctamente.", "No se ha podido generar el namespace correctamente. GenerarNamespace de la clase C_Sharp.");
+            return new RetornoBase(false, 
+                "No se ha podido generar el texto correctamente.", 
+                "No se ha podido generar el namespace correctamente. GenerarNamespace de la clase C_Sharp.");
         }
 
         static private RetornoBase GenerarNamespace(Directorio param_directorio, string param_id)
@@ -244,6 +267,82 @@ namespace transformador_mda.src.Features.GenerarSalida
             }
 
             return new RetornoBase(false, "No se ha podido generar el texto correctamente.", "No se ha podido generar el namespace correctamente. GenerarNamespace de la clase C_Sharp método recursivo.");
+        }
+
+        static private RetornoBase GenerarHerencia(ProyectoBase param_proyecto, string param_clase_id, List<Asociacion> param_asociaciones)
+        {
+            List<Asociacion> herencias = param_asociaciones.FindAll(a => a.TipoAsociacion == EnumTipoAsociacion.HERENCIA);
+
+            bool clase_herenciada = false;
+            string texto_herencia = string.Empty;
+            string librerias = string.Empty;
+            foreach (Asociacion herencia in herencias)
+            {
+                Clase clase_origen = BuscarComponentes.BuscarClase(param_proyecto, herencia.IdClaseOrigen);
+                Clase clase_destino = BuscarComponentes.BuscarClase(param_proyecto, herencia.IdClaseDestino);
+
+                if (clase_origen == null || clase_destino == null)
+                    return new RetornoBase(false, 
+                        "No se ha podido generar el código correctamente.", 
+                        "Clase C_Sharp, método generar herencia, asociación con id = " + herencia.Id + " la clase origen o la clase destino son null");
+
+                if (clase_destino.Id != param_clase_id)
+                    continue;
+
+                if (clase_origen.TipoClase != EnumTiposClases.INTERFAZ)
+                {
+                    if (clase_herenciada)
+                        return new RetornoBase(false, 
+                            "No se ha podido generar el código correctamente.", 
+                            "Clase C_Sharp, método generar herencia, una misma clase hereda de dos clases (no interfaces) simultaneamente.");
+                    else
+                        clase_herenciada = true;
+                }
+
+                if (texto_herencia != string.Empty)
+                    texto_herencia += ", ";
+
+                texto_herencia += clase_origen.Nombre;
+
+                RetornoBase retorno = GenerarNamespace(param_proyecto, clase_origen);
+                if (!retorno.Exito)
+                    return retorno;
+
+                librerias += "using " + retorno.TextoDesarrollador + ";\n";
+            }
+
+            return new RetornoBase(true,
+                "",
+                librerias + "--{{texto_separacion}}--" + texto_herencia);
+        }
+
+        static private RetornoBase GenerarAsociaciones(ProyectoBase param_proyecto, string param_clase_id, List<Asociacion> param_asociaciones)
+        {
+            List<Asociacion> asociaciones = param_asociaciones.FindAll(a => (a.TipoAsociacion != EnumTipoAsociacion.NO_DEFINIDA && a.TipoAsociacion != EnumTipoAsociacion.HERENCIA));
+
+            string texto_librearias = string.Empty;
+            foreach (Asociacion asociacion in asociaciones)
+            {
+                Clase clase_origen = BuscarComponentes.BuscarClase(param_proyecto, asociacion.IdClaseOrigen);
+                Clase clase_destino = BuscarComponentes.BuscarClase(param_proyecto, asociacion.IdClaseDestino);
+
+                if (clase_origen == null || clase_destino == null)
+                    return new RetornoBase(false,
+                        "No se ha podido generar el código correctamente.",
+                        "Clase C_Sharp, método generar asociaciones, asociación con id = " + asociacion.Id + " la clase origen o la clase destino son null");
+
+                if (clase_destino.Id != param_clase_id)
+                    continue;
+
+                RetornoBase retorno = GenerarNamespace(param_proyecto, clase_origen);
+                if (!retorno.Exito)
+                    return retorno;
+
+                if (!texto_librearias.Contains(retorno.TextoDesarrollador))
+                    texto_librearias += "using " + retorno.TextoDesarrollador + ";\n";
+            }
+
+            return new RetornoBase(true, "", texto_librearias);
         }
 
         #endregion

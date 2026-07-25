@@ -600,7 +600,7 @@ namespace transformador_mda.src.Vistas
 
             foreach (Asociacion asociacion in param_clase.Asociaciones)
             {
-                dataGridViewAsociaciones.Rows.Add(asociacion.Id, asociacion.Nombre, asociacion.Comentario);
+                dataGridViewAsociaciones.Rows.Add(asociacion.Id, ObtenerTipoAsociacion(asociacion.TipoAsociacion), asociacion.Comentario);
             }
         }
 
@@ -758,5 +758,24 @@ namespace transformador_mda.src.Vistas
         }
 
         #endregion
+    
+        static private string ObtenerTipoAsociacion(EnumTipoAsociacion param_asociacion)
+        {
+            switch (param_asociacion)
+            {
+                case EnumTipoAsociacion.ASOCIACION:
+                    return "Asociación";
+                case EnumTipoAsociacion.AGREGACION:
+                    return "Agregación";
+                case EnumTipoAsociacion.COMPOSICION:
+                    return "Composicion";
+                case EnumTipoAsociacion.HERENCIA:
+                    return "Herencia";
+                case EnumTipoAsociacion.DEPENDENCIA:
+                    return "Dependencia";
+                default:
+                    return "No definida";
+            }
+        }
     }
 }
