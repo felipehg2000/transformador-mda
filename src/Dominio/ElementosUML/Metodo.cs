@@ -9,9 +9,9 @@ namespace transformador_mda.src.Dominio.ElementosUML
     public class Metodo : ElementoVisible
     {
         /// <summary>
-        /// Tipo de dato que retorna el método (bool, int, void...)
+        /// Retorno del método.
         /// </summary>
-        public EnumTipoDato TipoRetorno { get; set; }
+        public Parametro Retorno { get; set; }
 
         /// <summary>
         /// Parámetros asociados al método.
@@ -25,7 +25,7 @@ namespace transformador_mda.src.Dominio.ElementosUML
         public Metodo() : base()
         {
             Tipo = EnumTipoElemento.METODO;
-            TipoRetorno = EnumTipoDato.NO_DEFINIDO;
+            Retorno = new Parametro();
             Parametros = new List<Parametro>();
         }
 
