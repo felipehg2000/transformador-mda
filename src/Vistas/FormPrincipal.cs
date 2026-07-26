@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Drawing;
+using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using transformador_mda.src.Controladores;
-using transformador_mda.src.Dominio.Retornos;
 using transformador_mda.src.Dominio.ElementosUML;
+using transformador_mda.src.Dominio.Retornos;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.Window;
 
 namespace transformador_mda.src.Vistas
 {
@@ -106,6 +108,17 @@ namespace transformador_mda.src.Vistas
 
         #endregion
 
+        #region "Move Form Info"
+        private const int WM_NCLBUTTONDOWN = 0xA1;
+        private const int HTCAPTION = 0x2;
+
+        [DllImport("user32.dll")]
+        private static extern bool ReleaseCapture();
+
+        [DllImport("user32.dll")]
+        private static extern IntPtr SendMessage(IntPtr hWnd, int Msg, int wParam, int lParam);
+        #endregion "Move Form Info"
+
         #region "Constructor"
 
         /// <summary>
@@ -178,6 +191,7 @@ namespace transformador_mda.src.Vistas
         /// <param name="e">Argumentos asociados al evento.</param>
         private void importarXMIToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            CentrarPanel(panelAbrirXMI);
             panelAbrirXMI.Enabled = true;
             panelAbrirXMI.Visible = true;
             panelAbrirXMI.BringToFront();
@@ -530,6 +544,32 @@ namespace transformador_mda.src.Vistas
             }
         }
 
+        /// <summary>
+        /// Arrastra el panel de importación de XMI.
+        /// </summary>
+        /// <param name="sender">Componente que lanza el evento.</param>
+        /// <param name="e">Argumentos asociados al evento.</param>
+        private void labelTituloXMI_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
+            {
+                ReleaseCapture();
+                SendMessage(panelAbrirXMI.Handle, WM_NCLBUTTONDOWN, HTCAPTION, 0);
+            }
+        }
+
+        /// <summary>
+        /// Cierra el panel de importación de XMI.
+        /// </summary>
+        /// <param name="sender">Componente que lanza el evento.</param>
+        /// <param name="e">Argumentos asociados al evento.</param>
+        private void buttonCerrarXMI_Click(object sender, EventArgs e)
+        {
+            panelAbrirXMI.Visible = false;
+            panelAbrirXMI.Enabled = false;
+            panelAbrirXMI.SendToBack();
+        }
+
         #endregion
 
         #region "Rellenar formularios y actualizar comentarios"
@@ -745,7 +785,14 @@ namespace transformador_mda.src.Vistas
         }
 
         #endregion
-    
+
+        #region "Traducir enumeraciones"
+        
+        /// <summary>
+        /// Traduce los valores de una enumeración a lenguaje natural.
+        /// </summary>
+        /// <param name="param_asociacion">Índice de la enumeración a traducir.</param>
+        /// <returns>Texto de la enumeración en lenguaje natural.</returns>
         static private string ObtenerTipoAsociacion(EnumTipoAsociacion param_asociacion)
         {
             switch (param_asociacion)
@@ -764,5 +811,25 @@ namespace transformador_mda.src.Vistas
                     return "No definida";
             }
         }
+
+        #endregion
+
+        #region "Métodos auxiliares"
+
+        /// <summary>
+        /// Método auxiliar para centrar los paneles a visualizar.
+        /// </summary>
+        /// <param name="param_panel">Panel a centrar en mitad de su contenedor.</param>
+        private void CentrarPanel(Panel param_panel)
+        {
+            if (param_panel.Parent == null)
+                return;
+
+            Control contenedor = param_panel.Parent;
+            param_panel.Location = new Point((contenedor.ClientSize.Width - param_panel.Width) / 2,
+                (contenedor.ClientSize.Height - param_panel.Height) / 2);
+        }
+
+        #endregion
     }
 }
