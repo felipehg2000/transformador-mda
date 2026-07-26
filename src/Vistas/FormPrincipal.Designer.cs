@@ -63,6 +63,7 @@
             this.generarCódigoCompletoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.panelPrincipal = new System.Windows.Forms.Panel();
             this.panelSelClase = new System.Windows.Forms.Panel();
+            this.pictureBoxSelClase = new System.Windows.Forms.PictureBox();
             this.splitContainer = new System.Windows.Forms.SplitContainer();
             this.tabControlClases = new System.Windows.Forms.TabControl();
             this.tabPageComentarios = new System.Windows.Forms.TabPage();
@@ -96,7 +97,6 @@
             this.labelTitulo = new System.Windows.Forms.Label();
             this.labelDescripcion = new System.Windows.Forms.Label();
             this.labelParametros = new System.Windows.Forms.Label();
-            this.buttonGrabarParametros = new System.Windows.Forms.Button();
             this.dataGridViewParametros = new System.Windows.Forms.DataGridView();
             this.ColumnId = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.ColumnNombre = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -130,7 +130,6 @@
             this.tableLayoutPanelInicio = new System.Windows.Forms.TableLayoutPanel();
             this.buttonAbrirXMI = new System.Windows.Forms.Button();
             this.buttonAbrirProyecto = new System.Windows.Forms.Button();
-            this.pictureBoxSelClase = new System.Windows.Forms.PictureBox();
             imageList = new System.Windows.Forms.ImageList(this.components);
             this.panelAbrirXMI.SuspendLayout();
             this.panelInferior.SuspendLayout();
@@ -138,6 +137,7 @@
             this.menuStrip.SuspendLayout();
             this.panelPrincipal.SuspendLayout();
             this.panelSelClase.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxSelClase)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer)).BeginInit();
             this.splitContainer.Panel1.SuspendLayout();
             this.splitContainer.Panel2.SuspendLayout();
@@ -167,7 +167,6 @@
             this.statusStrip.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxInicio)).BeginInit();
             this.tableLayoutPanelInicio.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxSelClase)).BeginInit();
             this.SuspendLayout();
             // 
             // imageList
@@ -332,14 +331,14 @@
             // importarToolStripMenuItem
             // 
             this.importarToolStripMenuItem.Name = "importarToolStripMenuItem";
-            this.importarToolStripMenuItem.Size = new System.Drawing.Size(173, 22);
+            this.importarToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.importarToolStripMenuItem.Text = "Importar";
             this.importarToolStripMenuItem.Click += new System.EventHandler(this.importarToolStripMenuItem_Click);
             // 
             // exportarToolStripMenuItem
             // 
             this.exportarToolStripMenuItem.Name = "exportarToolStripMenuItem";
-            this.exportarToolStripMenuItem.Size = new System.Drawing.Size(173, 22);
+            this.exportarToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.exportarToolStripMenuItem.Text = "Exportar";
             this.exportarToolStripMenuItem.Click += new System.EventHandler(this.exportarToolStripMenuItem_Click);
             // 
@@ -348,7 +347,7 @@
             this.importarDiagramaToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.importarXMIToolStripMenuItem});
             this.importarDiagramaToolStripMenuItem.Name = "importarDiagramaToolStripMenuItem";
-            this.importarDiagramaToolStripMenuItem.Size = new System.Drawing.Size(173, 22);
+            this.importarDiagramaToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.importarDiagramaToolStripMenuItem.Text = "Importar diagrama";
             // 
             // importarXMIToolStripMenuItem
@@ -383,13 +382,13 @@
             // panelPrincipal
             // 
             this.panelPrincipal.BackColor = System.Drawing.Color.White;
-            this.panelPrincipal.Controls.Add(this.panelSelClase);
             this.panelPrincipal.Controls.Add(this.splitContainer);
+            this.panelPrincipal.Controls.Add(this.panelSelClase);
             this.panelPrincipal.Controls.Add(this.panelIzquierdo);
             this.panelPrincipal.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panelPrincipal.Location = new System.Drawing.Point(0, 24);
+            this.panelPrincipal.Location = new System.Drawing.Point(0, 0);
             this.panelPrincipal.Name = "panelPrincipal";
-            this.panelPrincipal.Size = new System.Drawing.Size(1370, 703);
+            this.panelPrincipal.Size = new System.Drawing.Size(1370, 727);
             this.panelPrincipal.TabIndex = 9;
             // 
             // panelSelClase
@@ -399,8 +398,19 @@
             this.panelSelClase.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panelSelClase.Location = new System.Drawing.Point(150, 0);
             this.panelSelClase.Name = "panelSelClase";
-            this.panelSelClase.Size = new System.Drawing.Size(1220, 703);
+            this.panelSelClase.Size = new System.Drawing.Size(1220, 727);
             this.panelSelClase.TabIndex = 10;
+            // 
+            // pictureBoxSelClase
+            // 
+            this.pictureBoxSelClase.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.pictureBoxSelClase.Image = ((System.Drawing.Image)(resources.GetObject("pictureBoxSelClase.Image")));
+            this.pictureBoxSelClase.Location = new System.Drawing.Point(0, 0);
+            this.pictureBoxSelClase.Name = "pictureBoxSelClase";
+            this.pictureBoxSelClase.Size = new System.Drawing.Size(1220, 727);
+            this.pictureBoxSelClase.SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage;
+            this.pictureBoxSelClase.TabIndex = 0;
+            this.pictureBoxSelClase.TabStop = false;
             // 
             // splitContainer
             // 
@@ -417,7 +427,7 @@
             // splitContainer.Panel2
             // 
             this.splitContainer.Panel2.Controls.Add(this.tabControlCodigo);
-            this.splitContainer.Size = new System.Drawing.Size(1220, 703);
+            this.splitContainer.Size = new System.Drawing.Size(1220, 727);
             this.splitContainer.SplitterDistance = 777;
             this.splitContainer.TabIndex = 1;
             // 
@@ -429,7 +439,7 @@
             this.tabControlClases.Location = new System.Drawing.Point(0, 0);
             this.tabControlClases.Name = "tabControlClases";
             this.tabControlClases.SelectedIndex = 0;
-            this.tabControlClases.Size = new System.Drawing.Size(777, 703);
+            this.tabControlClases.Size = new System.Drawing.Size(777, 727);
             this.tabControlClases.TabIndex = 0;
             // 
             // tabPageComentarios
@@ -439,7 +449,7 @@
             this.tabPageComentarios.Location = new System.Drawing.Point(4, 22);
             this.tabPageComentarios.Name = "tabPageComentarios";
             this.tabPageComentarios.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPageComentarios.Size = new System.Drawing.Size(769, 677);
+            this.tabPageComentarios.Size = new System.Drawing.Size(769, 701);
             this.tabPageComentarios.TabIndex = 1;
             this.tabPageComentarios.Text = "Clase, atributos y asociaciones";
             // 
@@ -469,7 +479,7 @@
             this.tableLayoutPanelRight.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 38.58024F));
             this.tableLayoutPanelRight.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanelRight.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
-            this.tableLayoutPanelRight.Size = new System.Drawing.Size(763, 671);
+            this.tableLayoutPanelRight.Size = new System.Drawing.Size(763, 695);
             this.tableLayoutPanelRight.TabIndex = 1002;
             // 
             // panelBorderTextClase
@@ -560,7 +570,7 @@
             this.dataGridViewAtributos.RowHeadersDefaultCellStyle = dataGridViewCellStyle2;
             this.dataGridViewAtributos.RowHeadersVisible = false;
             this.dataGridViewAtributos.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.dataGridViewAtributos.Size = new System.Drawing.Size(757, 315);
+            this.dataGridViewAtributos.Size = new System.Drawing.Size(757, 330);
             this.dataGridViewAtributos.TabIndex = 9;
             this.dataGridViewAtributos.Resize += new System.EventHandler(this.dataGridView_Resize);
             // 
@@ -596,7 +606,7 @@
             // 
             this.labelAsociaciones.AutoSize = true;
             this.labelAsociaciones.Dock = System.Windows.Forms.DockStyle.Top;
-            this.labelAsociaciones.Location = new System.Drawing.Point(3, 427);
+            this.labelAsociaciones.Location = new System.Drawing.Point(3, 442);
             this.labelAsociaciones.Name = "labelAsociaciones";
             this.labelAsociaciones.Size = new System.Drawing.Size(757, 13);
             this.labelAsociaciones.TabIndex = 11;
@@ -623,7 +633,7 @@
             this.ColumnDescripcionAsociacion});
             this.dataGridViewAsociaciones.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dataGridViewAsociaciones.EnableHeadersVisualStyles = false;
-            this.dataGridViewAsociaciones.Location = new System.Drawing.Point(3, 443);
+            this.dataGridViewAsociaciones.Location = new System.Drawing.Point(3, 458);
             this.dataGridViewAsociaciones.Name = "dataGridViewAsociaciones";
             this.dataGridViewAsociaciones.RowHeadersBorderStyle = System.Windows.Forms.DataGridViewHeaderBorderStyle.Single;
             dataGridViewCellStyle4.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
@@ -636,7 +646,7 @@
             this.dataGridViewAsociaciones.RowHeadersDefaultCellStyle = dataGridViewCellStyle4;
             this.dataGridViewAsociaciones.RowHeadersVisible = false;
             this.dataGridViewAsociaciones.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.dataGridViewAsociaciones.Size = new System.Drawing.Size(757, 196);
+            this.dataGridViewAsociaciones.Size = new System.Drawing.Size(757, 205);
             this.dataGridViewAsociaciones.TabIndex = 12;
             this.dataGridViewAsociaciones.Resize += new System.EventHandler(this.dataGridView_Resize);
             // 
@@ -663,7 +673,7 @@
             // 
             // buttonGrabarInfo
             // 
-            this.buttonGrabarInfo.Location = new System.Drawing.Point(3, 645);
+            this.buttonGrabarInfo.Location = new System.Drawing.Point(3, 669);
             this.buttonGrabarInfo.Name = "buttonGrabarInfo";
             this.buttonGrabarInfo.Size = new System.Drawing.Size(75, 22);
             this.buttonGrabarInfo.TabIndex = 1004;
@@ -677,7 +687,7 @@
             this.tabPageMetodos.Controls.Add(this.tableLayoutPanelMethods);
             this.tabPageMetodos.Location = new System.Drawing.Point(4, 22);
             this.tabPageMetodos.Name = "tabPageMetodos";
-            this.tabPageMetodos.Size = new System.Drawing.Size(769, 677);
+            this.tabPageMetodos.Size = new System.Drawing.Size(769, 701);
             this.tabPageMetodos.TabIndex = 2;
             this.tabPageMetodos.Text = "Métodos";
             // 
@@ -695,7 +705,7 @@
             this.tableLayoutPanelMethods.RowCount = 2;
             this.tableLayoutPanelMethods.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanelMethods.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanelMethods.Size = new System.Drawing.Size(769, 677);
+            this.tableLayoutPanelMethods.Size = new System.Drawing.Size(769, 701);
             this.tableLayoutPanelMethods.TabIndex = 1003;
             // 
             // panelLeftMetodos
@@ -705,7 +715,7 @@
             this.panelLeftMetodos.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panelLeftMetodos.Location = new System.Drawing.Point(3, 3);
             this.panelLeftMetodos.Name = "panelLeftMetodos";
-            this.panelLeftMetodos.Size = new System.Drawing.Size(150, 642);
+            this.panelLeftMetodos.Size = new System.Drawing.Size(150, 666);
             this.panelLeftMetodos.TabIndex = 0;
             // 
             // listView
@@ -715,7 +725,7 @@
             this.listView.HideSelection = false;
             this.listView.Location = new System.Drawing.Point(0, 13);
             this.listView.Name = "listView";
-            this.listView.Size = new System.Drawing.Size(150, 629);
+            this.listView.Size = new System.Drawing.Size(150, 653);
             this.listView.TabIndex = 1;
             this.listView.UseCompatibleStateImageBehavior = false;
             this.listView.View = System.Windows.Forms.View.Tile;
@@ -734,15 +744,14 @@
             // 
             // tableLayoutPanelMethodDetails
             // 
-            this.tableLayoutPanelMethodDetails.ColumnCount = 2;
+            this.tableLayoutPanelMethodDetails.ColumnCount = 1;
             this.tableLayoutPanelMethodDetails.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanelMethodDetails.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanelMethodDetails.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 20F));
             this.tableLayoutPanelMethodDetails.Controls.Add(this.panelBorderMetRetorno, 0, 6);
             this.tableLayoutPanelMethodDetails.Controls.Add(this.panelBorderTextMetDescripcion, 0, 2);
             this.tableLayoutPanelMethodDetails.Controls.Add(this.labelTitulo, 0, 0);
             this.tableLayoutPanelMethodDetails.Controls.Add(this.labelDescripcion, 0, 1);
             this.tableLayoutPanelMethodDetails.Controls.Add(this.labelParametros, 0, 3);
-            this.tableLayoutPanelMethodDetails.Controls.Add(this.buttonGrabarParametros, 1, 3);
             this.tableLayoutPanelMethodDetails.Controls.Add(this.dataGridViewParametros, 0, 4);
             this.tableLayoutPanelMethodDetails.Controls.Add(this.labelRetorno, 0, 5);
             this.tableLayoutPanelMethodDetails.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -756,18 +765,17 @@
             this.tableLayoutPanelMethodDetails.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.tableLayoutPanelMethodDetails.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanelMethodDetails.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 20F));
-            this.tableLayoutPanelMethodDetails.Size = new System.Drawing.Size(607, 642);
+            this.tableLayoutPanelMethodDetails.Size = new System.Drawing.Size(607, 666);
             this.tableLayoutPanelMethodDetails.TabIndex = 0;
             // 
             // panelBorderMetRetorno
             // 
             this.panelBorderMetRetorno.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.tableLayoutPanelMethodDetails.SetColumnSpan(this.panelBorderMetRetorno, 2);
             this.panelBorderMetRetorno.Controls.Add(this.richTextBoxRetorno);
             this.panelBorderMetRetorno.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panelBorderMetRetorno.Location = new System.Drawing.Point(3, 530);
+            this.panelBorderMetRetorno.Location = new System.Drawing.Point(3, 546);
             this.panelBorderMetRetorno.Name = "panelBorderMetRetorno";
-            this.panelBorderMetRetorno.Size = new System.Drawing.Size(601, 109);
+            this.panelBorderMetRetorno.Size = new System.Drawing.Size(601, 117);
             this.panelBorderMetRetorno.TabIndex = 1005;
             // 
             // richTextBoxRetorno
@@ -777,19 +785,18 @@
             this.richTextBoxRetorno.Location = new System.Drawing.Point(0, 0);
             this.richTextBoxRetorno.Name = "richTextBoxRetorno";
             this.richTextBoxRetorno.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.Vertical;
-            this.richTextBoxRetorno.Size = new System.Drawing.Size(599, 107);
+            this.richTextBoxRetorno.Size = new System.Drawing.Size(599, 115);
             this.richTextBoxRetorno.TabIndex = 8;
             this.richTextBoxRetorno.Text = "";
             // 
             // panelBorderTextMetDescripcion
             // 
             this.panelBorderTextMetDescripcion.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.tableLayoutPanelMethodDetails.SetColumnSpan(this.panelBorderTextMetDescripcion, 2);
             this.panelBorderTextMetDescripcion.Controls.Add(this.richTextBoxMetodo);
             this.panelBorderTextMetDescripcion.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panelBorderTextMetDescripcion.Location = new System.Drawing.Point(3, 29);
             this.panelBorderTextMetDescripcion.Name = "panelBorderTextMetDescripcion";
-            this.panelBorderTextMetDescripcion.Size = new System.Drawing.Size(601, 166);
+            this.panelBorderTextMetDescripcion.Size = new System.Drawing.Size(601, 178);
             this.panelBorderTextMetDescripcion.TabIndex = 1005;
             // 
             // richTextBoxMetodo
@@ -799,14 +806,13 @@
             this.richTextBoxMetodo.Location = new System.Drawing.Point(0, 0);
             this.richTextBoxMetodo.Name = "richTextBoxMetodo";
             this.richTextBoxMetodo.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.Vertical;
-            this.richTextBoxMetodo.Size = new System.Drawing.Size(599, 164);
+            this.richTextBoxMetodo.Size = new System.Drawing.Size(599, 176);
             this.richTextBoxMetodo.TabIndex = 4;
             this.richTextBoxMetodo.Text = "";
             // 
             // labelTitulo
             // 
             this.labelTitulo.AutoSize = true;
-            this.tableLayoutPanelMethodDetails.SetColumnSpan(this.labelTitulo, 2);
             this.labelTitulo.Dock = System.Windows.Forms.DockStyle.Top;
             this.labelTitulo.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.labelTitulo.Location = new System.Drawing.Point(3, 0);
@@ -818,7 +824,6 @@
             // labelDescripcion
             // 
             this.labelDescripcion.AutoSize = true;
-            this.tableLayoutPanelMethodDetails.SetColumnSpan(this.labelDescripcion, 2);
             this.labelDescripcion.Dock = System.Windows.Forms.DockStyle.Top;
             this.labelDescripcion.Location = new System.Drawing.Point(3, 13);
             this.labelDescripcion.Name = "labelDescripcion";
@@ -830,24 +835,12 @@
             // 
             this.labelParametros.AutoSize = true;
             this.labelParametros.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.labelParametros.Location = new System.Drawing.Point(3, 198);
+            this.labelParametros.Location = new System.Drawing.Point(3, 210);
             this.labelParametros.Name = "labelParametros";
-            this.labelParametros.Size = new System.Drawing.Size(520, 29);
+            this.labelParametros.Size = new System.Drawing.Size(601, 13);
             this.labelParametros.TabIndex = 5;
             this.labelParametros.Text = "Parametros";
             this.labelParametros.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            // 
-            // buttonGrabarParametros
-            // 
-            this.buttonGrabarParametros.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonGrabarParametros.AutoSize = true;
-            this.buttonGrabarParametros.Location = new System.Drawing.Point(529, 201);
-            this.buttonGrabarParametros.Name = "buttonGrabarParametros";
-            this.buttonGrabarParametros.Size = new System.Drawing.Size(75, 23);
-            this.buttonGrabarParametros.TabIndex = 6;
-            this.buttonGrabarParametros.Text = "Grabar ✔";
-            this.buttonGrabarParametros.UseVisualStyleBackColor = true;
-            this.buttonGrabarParametros.Click += new System.EventHandler(this.buttonGrabarParametros_Click);
             // 
             // dataGridViewParametros
             // 
@@ -868,10 +861,9 @@
             this.ColumnId,
             this.ColumnNombre,
             this.ColumnDescripcion});
-            this.tableLayoutPanelMethodDetails.SetColumnSpan(this.dataGridViewParametros, 2);
             this.dataGridViewParametros.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dataGridViewParametros.EnableHeadersVisualStyles = false;
-            this.dataGridViewParametros.Location = new System.Drawing.Point(3, 230);
+            this.dataGridViewParametros.Location = new System.Drawing.Point(3, 226);
             this.dataGridViewParametros.Name = "dataGridViewParametros";
             this.dataGridViewParametros.RowHeadersBorderStyle = System.Windows.Forms.DataGridViewHeaderBorderStyle.Single;
             dataGridViewCellStyle6.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
@@ -884,7 +876,7 @@
             this.dataGridViewParametros.RowHeadersDefaultCellStyle = dataGridViewCellStyle6;
             this.dataGridViewParametros.RowHeadersVisible = false;
             this.dataGridViewParametros.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.dataGridViewParametros.Size = new System.Drawing.Size(601, 281);
+            this.dataGridViewParametros.Size = new System.Drawing.Size(601, 301);
             this.dataGridViewParametros.TabIndex = 6;
             this.dataGridViewParametros.Resize += new System.EventHandler(this.dataGridView_Resize);
             // 
@@ -912,9 +904,8 @@
             // labelRetorno
             // 
             this.labelRetorno.AutoSize = true;
-            this.tableLayoutPanelMethodDetails.SetColumnSpan(this.labelRetorno, 2);
             this.labelRetorno.Dock = System.Windows.Forms.DockStyle.Top;
-            this.labelRetorno.Location = new System.Drawing.Point(3, 514);
+            this.labelRetorno.Location = new System.Drawing.Point(3, 530);
             this.labelRetorno.Name = "labelRetorno";
             this.labelRetorno.Size = new System.Drawing.Size(601, 13);
             this.labelRetorno.TabIndex = 7;
@@ -922,7 +913,7 @@
             // 
             // buttonGrabarMetodo
             // 
-            this.buttonGrabarMetodo.Location = new System.Drawing.Point(3, 651);
+            this.buttonGrabarMetodo.Location = new System.Drawing.Point(3, 675);
             this.buttonGrabarMetodo.Name = "buttonGrabarMetodo";
             this.buttonGrabarMetodo.Size = new System.Drawing.Size(75, 23);
             this.buttonGrabarMetodo.TabIndex = 1;
@@ -937,7 +928,7 @@
             this.tabControlEnumeraciones.Location = new System.Drawing.Point(0, 0);
             this.tabControlEnumeraciones.Name = "tabControlEnumeraciones";
             this.tabControlEnumeraciones.SelectedIndex = 0;
-            this.tabControlEnumeraciones.Size = new System.Drawing.Size(777, 703);
+            this.tabControlEnumeraciones.Size = new System.Drawing.Size(777, 727);
             this.tabControlEnumeraciones.TabIndex = 10;
             // 
             // tabPageEnumComentarios
@@ -947,7 +938,7 @@
             this.tabPageEnumComentarios.Location = new System.Drawing.Point(4, 22);
             this.tabPageEnumComentarios.Name = "tabPageEnumComentarios";
             this.tabPageEnumComentarios.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPageEnumComentarios.Size = new System.Drawing.Size(769, 677);
+            this.tabPageEnumComentarios.Size = new System.Drawing.Size(769, 701);
             this.tabPageEnumComentarios.TabIndex = 0;
             this.tabPageEnumComentarios.Text = "Comentarios";
             // 
@@ -971,7 +962,7 @@
             this.tableLayoutPanelEnumComentarios.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanelEnumComentarios.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 80F));
             this.tableLayoutPanelEnumComentarios.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanelEnumComentarios.Size = new System.Drawing.Size(763, 671);
+            this.tableLayoutPanelEnumComentarios.Size = new System.Drawing.Size(763, 695);
             this.tableLayoutPanelEnumComentarios.TabIndex = 0;
             // 
             // dataGridViewLiterales
@@ -996,7 +987,7 @@
             this.tableLayoutPanelEnumComentarios.SetColumnSpan(this.dataGridViewLiterales, 2);
             this.dataGridViewLiterales.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dataGridViewLiterales.EnableHeadersVisualStyles = false;
-            this.dataGridViewLiterales.Location = new System.Drawing.Point(10, 178);
+            this.dataGridViewLiterales.Location = new System.Drawing.Point(10, 183);
             this.dataGridViewLiterales.Margin = new System.Windows.Forms.Padding(10, 3, 10, 10);
             this.dataGridViewLiterales.Name = "dataGridViewLiterales";
             this.dataGridViewLiterales.RowHeadersBorderStyle = System.Windows.Forms.DataGridViewHeaderBorderStyle.Single;
@@ -1010,7 +1001,7 @@
             this.dataGridViewLiterales.RowHeadersDefaultCellStyle = dataGridViewCellStyle8;
             this.dataGridViewLiterales.RowHeadersVisible = false;
             this.dataGridViewLiterales.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.dataGridViewLiterales.Size = new System.Drawing.Size(743, 453);
+            this.dataGridViewLiterales.Size = new System.Drawing.Size(743, 472);
             this.dataGridViewLiterales.TabIndex = 7;
             // 
             // dataGridViewTextBoxColumn1
@@ -1066,7 +1057,7 @@
             this.panelBordeComentarioEnum.Location = new System.Drawing.Point(10, 39);
             this.panelBordeComentarioEnum.Margin = new System.Windows.Forms.Padding(10, 3, 10, 10);
             this.panelBordeComentarioEnum.Name = "panelBordeComentarioEnum";
-            this.panelBordeComentarioEnum.Size = new System.Drawing.Size(743, 103);
+            this.panelBordeComentarioEnum.Size = new System.Drawing.Size(743, 108);
             this.panelBordeComentarioEnum.TabIndex = 2;
             // 
             // richTextBoxComentarioEnum
@@ -1075,7 +1066,7 @@
             this.richTextBoxComentarioEnum.Dock = System.Windows.Forms.DockStyle.Fill;
             this.richTextBoxComentarioEnum.Location = new System.Drawing.Point(0, 0);
             this.richTextBoxComentarioEnum.Name = "richTextBoxComentarioEnum";
-            this.richTextBoxComentarioEnum.Size = new System.Drawing.Size(741, 101);
+            this.richTextBoxComentarioEnum.Size = new System.Drawing.Size(741, 106);
             this.richTextBoxComentarioEnum.TabIndex = 0;
             this.richTextBoxComentarioEnum.Text = "";
             // 
@@ -1083,7 +1074,7 @@
             // 
             this.labelComentarioLiterales.AutoSize = true;
             this.labelComentarioLiterales.Dock = System.Windows.Forms.DockStyle.Top;
-            this.labelComentarioLiterales.Location = new System.Drawing.Point(10, 162);
+            this.labelComentarioLiterales.Location = new System.Drawing.Point(10, 167);
             this.labelComentarioLiterales.Margin = new System.Windows.Forms.Padding(10, 10, 3, 0);
             this.labelComentarioLiterales.Name = "labelComentarioLiterales";
             this.labelComentarioLiterales.Size = new System.Drawing.Size(750, 13);
@@ -1092,7 +1083,7 @@
             // 
             // buttonGrabarComentariosEnum
             // 
-            this.buttonGrabarComentariosEnum.Location = new System.Drawing.Point(10, 644);
+            this.buttonGrabarComentariosEnum.Location = new System.Drawing.Point(10, 668);
             this.buttonGrabarComentariosEnum.Margin = new System.Windows.Forms.Padding(10, 3, 3, 3);
             this.buttonGrabarComentariosEnum.Name = "buttonGrabarComentariosEnum";
             this.buttonGrabarComentariosEnum.Size = new System.Drawing.Size(75, 23);
@@ -1108,7 +1099,7 @@
             this.tabControlCodigo.Location = new System.Drawing.Point(0, 0);
             this.tabControlCodigo.Name = "tabControlCodigo";
             this.tabControlCodigo.SelectedIndex = 0;
-            this.tabControlCodigo.Size = new System.Drawing.Size(439, 703);
+            this.tabControlCodigo.Size = new System.Drawing.Size(439, 727);
             this.tabControlCodigo.TabIndex = 1;
             // 
             // tabPage1
@@ -1118,7 +1109,7 @@
             this.tabPage1.Location = new System.Drawing.Point(4, 22);
             this.tabPage1.Name = "tabPage1";
             this.tabPage1.Padding = new System.Windows.Forms.Padding(10);
-            this.tabPage1.Size = new System.Drawing.Size(431, 677);
+            this.tabPage1.Size = new System.Drawing.Size(431, 701);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "Código";
             // 
@@ -1129,7 +1120,7 @@
             this.panelBordeTextCodigo.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panelBordeTextCodigo.Location = new System.Drawing.Point(10, 10);
             this.panelBordeTextCodigo.Name = "panelBordeTextCodigo";
-            this.panelBordeTextCodigo.Size = new System.Drawing.Size(411, 657);
+            this.panelBordeTextCodigo.Size = new System.Drawing.Size(411, 681);
             this.panelBordeTextCodigo.TabIndex = 1;
             // 
             // richTextBoxCodigo
@@ -1140,7 +1131,7 @@
             this.richTextBoxCodigo.Location = new System.Drawing.Point(0, 0);
             this.richTextBoxCodigo.Name = "richTextBoxCodigo";
             this.richTextBoxCodigo.ReadOnly = true;
-            this.richTextBoxCodigo.Size = new System.Drawing.Size(409, 655);
+            this.richTextBoxCodigo.Size = new System.Drawing.Size(409, 679);
             this.richTextBoxCodigo.TabIndex = 0;
             this.richTextBoxCodigo.Text = "";
             // 
@@ -1153,7 +1144,7 @@
             this.panelIzquierdo.Location = new System.Drawing.Point(0, 0);
             this.panelIzquierdo.Name = "panelIzquierdo";
             this.panelIzquierdo.Padding = new System.Windows.Forms.Padding(5);
-            this.panelIzquierdo.Size = new System.Drawing.Size(150, 703);
+            this.panelIzquierdo.Size = new System.Drawing.Size(150, 727);
             this.panelIzquierdo.TabIndex = 0;
             this.panelIzquierdo.MouseDown += new System.Windows.Forms.MouseEventHandler(this.PanelIzquierdo_MouseDown);
             this.panelIzquierdo.MouseLeave += new System.EventHandler(this.PanelIzquierdo_MouseLeave);
@@ -1168,7 +1159,7 @@
             this.treeView.Location = new System.Drawing.Point(5, 25);
             this.treeView.Name = "treeView";
             this.treeView.SelectedImageIndex = 0;
-            this.treeView.Size = new System.Drawing.Size(140, 673);
+            this.treeView.Size = new System.Drawing.Size(140, 697);
             this.treeView.TabIndex = 1;
             this.treeView.NodeMouseDoubleClick += new System.Windows.Forms.TreeNodeMouseClickEventHandler(this.treeView_NodeMouseDoubleClick);
             // 
@@ -1259,24 +1250,13 @@
             this.buttonAbrirProyecto.UseVisualStyleBackColor = true;
             this.buttonAbrirProyecto.Click += new System.EventHandler(this.importarToolStripMenuItem_Click);
             // 
-            // pictureBoxSelClase
-            // 
-            this.pictureBoxSelClase.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.pictureBoxSelClase.Image = ((System.Drawing.Image)(resources.GetObject("pictureBoxSelClase.Image")));
-            this.pictureBoxSelClase.Location = new System.Drawing.Point(0, 0);
-            this.pictureBoxSelClase.Name = "pictureBoxSelClase";
-            this.pictureBoxSelClase.Size = new System.Drawing.Size(1220, 703);
-            this.pictureBoxSelClase.SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage;
-            this.pictureBoxSelClase.TabIndex = 0;
-            this.pictureBoxSelClase.TabStop = false;
-            // 
             // FormPrincipal
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1370, 749);
-            this.Controls.Add(this.panelPrincipal);
             this.Controls.Add(this.menuStrip);
+            this.Controls.Add(this.panelPrincipal);
             this.Controls.Add(this.statusStrip);
             this.Controls.Add(this.panelAbrirXMI);
             this.Controls.Add(this.tableLayoutPanelInicio);
@@ -1294,6 +1274,7 @@
             this.menuStrip.PerformLayout();
             this.panelPrincipal.ResumeLayout(false);
             this.panelSelClase.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxSelClase)).EndInit();
             this.splitContainer.Panel1.ResumeLayout(false);
             this.splitContainer.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer)).EndInit();
@@ -1329,7 +1310,6 @@
             this.statusStrip.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxInicio)).EndInit();
             this.tableLayoutPanelInicio.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxSelClase)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -1372,7 +1352,6 @@
         private System.Windows.Forms.Label labelMetodos;
         private System.Windows.Forms.DataGridView dataGridViewParametros;
         private System.Windows.Forms.Label labelParametros;
-        private System.Windows.Forms.Button buttonGrabarParametros;
         private System.Windows.Forms.RichTextBox richTextBoxMetodo;
         private System.Windows.Forms.Label labelDescripcion;
         private System.Windows.Forms.RichTextBox richTextBoxRetorno;

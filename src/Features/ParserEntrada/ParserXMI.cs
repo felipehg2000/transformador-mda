@@ -356,7 +356,7 @@ namespace transformador_mda.src.Features.ParserEntrada
                 if (resultado.Elemento.Tipo == EnumTipoElemento.PARAMETRO)
                     nuevo_nodo.Parametros.Add((Parametro)resultado.Elemento);
                 else if (resultado.Elemento.Tipo == EnumTipoElemento.RETORNO)
-                    nuevo_nodo.TipoRetorno = ((Parametro)resultado.Elemento).TipoDato;
+                    nuevo_nodo.Retorno = (Parametro)resultado.Elemento;
             }
 
             return new RetornoElementoUML() { Exito = true, Elemento = nuevo_nodo };
