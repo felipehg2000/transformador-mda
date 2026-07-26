@@ -1,4 +1,15 @@
-﻿using System;
+﻿/**
+ Propagación de errores en Principal.GenerarCodigo. Se hará cuando se termine el generador
+Orientación y navegabilidad de asociaciones/dependencias. Creo que está solucionado
+Generación de enumeraciones. Solucionado
+Tratamiento específico de interfaces. Pendiente
+Orden de clase base e interfaces. Solucionado
+Comprobación del retorno de GenerarNamespace. Pendiente
+Representación explícita de constructores. Pendiente
+Sustitución de concatenaciones y Contains por colecciones y string.Join. Pendiente
+ */
+
+using System;
 using System.Collections.Generic;
 using transformador_mda.src.Dominio.Retornos;
 using transformador_mda.src.Features.Utilidades;
@@ -27,11 +38,21 @@ namespace transformador_mda.src.Features.GenerarSalida
 
         #region "Métodos publicos heredados"
 
+        /// <summary>
+        /// Método sin implementar
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="NotImplementedException"></exception>
         public override RetornoBase GenerarSalida()
         {
             throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// Genera el código de una única clase.
+        /// </summary>
+        /// <param name="param_clase">Objeto de tipo clase del cual se generará el código.</param>
+        /// <returns>Objeto con el código generado e información del proceso.</returns>
         public override RetornoBase GenerarTexto(Clase param_clase)
         {
             if (param_clase == null || _proyecto == null)
@@ -46,6 +67,11 @@ namespace transformador_mda.src.Features.GenerarSalida
 
         #region "Generar código de elemento"
 
+        /// <summary>
+        /// Genera el código de los atributos de una clase.
+        /// </summary>
+        /// <param name="param_atributos">Lista de atributos asociados a una clase.</param>
+        /// <returns>Objecto con el código de una clase e información del proceso de generación..</returns>
         static private RetornoBase GenerarCodigoAtributos(List<Atributo> param_atributos)
         {
             if (param_atributos.Count <= 0)
@@ -73,6 +99,12 @@ namespace transformador_mda.src.Features.GenerarSalida
                 texto_atributos);
         }
 
+        /// <summary>
+        /// Genera el código de una clase diferenciando por su tipo.
+        /// </summary>
+        /// <param name="param_proyecto">Datos de todo el proyecto.</param>
+        /// <param name="param_clase">Datos de la clase cuyo código debe generarse.</param>
+        /// <returns>Objecto con el código de una clase e información del proceso de generación.</returns>
         static private RetornoBase GenerarCodigoClases(ProyectoBase param_proyecto, Clase param_clase)
         {
             RetornoBase retorno_herencia = GenerarHerencia(param_proyecto, param_clase.Id, param_clase.Asociaciones);
@@ -92,8 +124,12 @@ namespace transformador_mda.src.Features.GenerarSalida
             else
                 texto_librerias += retorno_librerias.TextoDesarrollador;
 
+            RetornoBase retorno_namespace = GenerarNamespace(param_proyecto, param_clase);
+            if (!retorno_namespace.Exito)
+                return retorno_namespace;
+
             string texto_clases = texto_librerias + "\n" +
-                "namespace " + GenerarNamespace(param_proyecto, param_clase).TextoDesarrollador + "\n" +
+                "namespace " + retorno_namespace.TextoDesarrollador + "\n" +
                 "{\n" +
                 "\t" + ObtenerTipoVisibilidad(param_clase.Visibilidad) + " " + ObtenerTipoClase(param_clase.TipoClase) + " " + param_clase.Nombre;
 
@@ -127,6 +163,17 @@ namespace transformador_mda.src.Features.GenerarSalida
             return new RetornoBase(true, "Código generado correctamente.", texto_clases);            
         }
 
+        //static private RetornoBase GenerarCodigoInterfaz();
+
+        //static private RetornoBase GenerarCodigoClase()
+
+        //static private RetornoBase GenerarCodigoClaseAbstracta();
+
+        /// <summary>
+        /// Genera la definición de un método con sus comentarios y definición.
+        /// </summary>
+        /// <param name="param_metodos">Objeto con los datos del método a generar.</param>
+        /// <returns>Objeto con el código de un método e información del proceso de generación.</returns>
         static private RetornoBase GenerarCodigoMetodo(List<Metodo> param_metodos)
         {
             if (param_metodos.Count <= 0)
@@ -196,6 +243,14 @@ namespace transformador_mda.src.Features.GenerarSalida
                 texto_metodos);
         }
 
+        /// <summary>
+        /// Genera la definición de los parámetros de un método con sus comentarios.
+        /// </summary>
+        /// <remarks>
+        /// En el retorno se devuelve la definición de los parámetros y los comentarios sobre estos. Para separar el texto se usa este literal "--{{texto_separacion}}--"
+        /// </remarks>
+        /// <param name="param_parametros">Listado de objetos con la información de los parámetros.</param>
+        /// <returns>Objeto con la definición de los parámetros e información del proceso de generación.</returns>
         static private RetornoBase GenerarCodigoParametro(List<Parametro> param_parametros)
         {
             if (param_parametros.Count <= 0)
@@ -219,6 +274,11 @@ namespace transformador_mda.src.Features.GenerarSalida
                 comentarios + "--{{texto_separacion}}--" + parametros);
         }
 
+        /// <summary>
+        /// Genera la definición de los literales de una enumeración con sus comentarios.
+        /// </summary>
+        /// <param name="param_literales">Listado de objetos de tipo literal cuyo código hay que generar.</param>
+        /// <returns>Objeto con la definición de los literales e información del proceso de generación.</returns>
         static private RetornoBase GenerarCodigoLiterales(List<ElementoBase> param_literales)
         {
             if (param_literales.Count <= 0)
@@ -227,12 +287,18 @@ namespace transformador_mda.src.Features.GenerarSalida
             string texto_literales = string.Empty;
             foreach(ElementoBase literal in param_literales)
             {
-                texto_literales += "\t\t" + literal.Nombre + ", <summary>" + literal.Comentario + "</summary>\n";
+                texto_literales += "\t\t" + literal.Nombre + ",\t\t\t/// <summary>" + literal.Comentario + "</summary>\n";
             }
 
             return new RetornoBase(true, "Código generado correctamente.", texto_literales);
         }
 
+        /// <summary>
+        /// Genera el namespace asociado a una clase según el directorio en el que está guardada la clase.
+        /// </summary>
+        /// <param name="param_proyecto">Datos del proyecto completo para hacer la búsqueda de la clase según los directorios y subdirectorios.</param>
+        /// <param name="param_clase">Clase cuyo namespace se va a generar.</param>
+        /// <returns>Objeto con la definición del namespace e información del proceso de generación.</returns>
         static private RetornoBase GenerarNamespace(ProyectoBase param_proyecto, Clase param_clase)
         {
             string texto_namespace = param_proyecto.Nombre;
@@ -253,6 +319,12 @@ namespace transformador_mda.src.Features.GenerarSalida
                 "No se ha podido generar el namespace correctamente. GenerarNamespace de la clase C_Sharp.");
         }
 
+        /// <summary>
+        /// Método recursivo para la búsqueda de la clase según las subcarpetas. Recorre las subcarpetas generando una parte del namespace.
+        /// </summary>
+        /// <param name="param_directorio">Directorio o subdirectorio que se está recorriendo.</param>
+        /// <param name="param_id">Identificador de la clase cuyo namespace se quiere generar.</param>
+        /// <returns>Objeto con la definición del namespace e información del proceso de generación.</returns>
         static private RetornoBase GenerarNamespace(Directorio param_directorio, string param_id)
         {
             foreach (Directorio subdirectorio in param_directorio.Subdirectorios)
@@ -269,12 +341,25 @@ namespace transformador_mda.src.Features.GenerarSalida
             return new RetornoBase(false, "No se ha podido generar el texto correctamente.", "No se ha podido generar el namespace correctamente. GenerarNamespace de la clase C_Sharp método recursivo.");
         }
 
+        /// <summary>
+        /// Genera el código para identificar una herencia y la implementación de una o más interfaces.
+        /// </summary>
+        /// <remarks>
+        /// En el retorno se devuelve el código y las librerías a importar separadas por el literal "--{{texto_separacion}}--".
+        /// La primera clase que se implementa es la heredada, el resto las interfaces. 
+        /// Si hay más de una clase heredada el método devuelve error.
+        /// </remarks>
+        /// <param name="param_proyecto">Objeto con toda la información del proyecto a procesar, para generar los namespace a importar en las clases.</param>
+        /// <param name="param_clase_id">Identificador de la clase cuyo código se está generando.</param>
+        /// <param name="param_asociaciones">Listado de todas las asociaciones de la clase cuyo código se está generando.</param>
+        /// <returns>Objeto con la definición del namespace e información del proceso de generación.</returns>
         static private RetornoBase GenerarHerencia(ProyectoBase param_proyecto, string param_clase_id, List<Asociacion> param_asociaciones)
         {
             List<Asociacion> herencias = param_asociaciones.FindAll(a => a.TipoAsociacion == EnumTipoAsociacion.HERENCIA);
 
             bool clase_herenciada = false;
             string texto_herencia = string.Empty;
+            string texto_interfaces = string.Empty;
             string librerias = string.Empty;
             foreach (Asociacion herencia in herencias)
             {
@@ -299,10 +384,13 @@ namespace transformador_mda.src.Features.GenerarSalida
                         clase_herenciada = true;
                 }
 
-                if (texto_herencia != string.Empty)
-                    texto_herencia += ", ";
+                if (texto_interfaces != string.Empty)
+                    texto_interfaces += ", ";
 
-                texto_herencia += clase_origen.Nombre;
+                if (clase_origen.TipoClase == EnumTiposClases.INTERFAZ)
+                    texto_interfaces += clase_origen.Nombre;
+                else
+                    texto_herencia += clase_origen.Nombre;
 
                 RetornoBase retorno = GenerarNamespace(param_proyecto, clase_origen);
                 if (!retorno.Exito)
@@ -311,11 +399,23 @@ namespace transformador_mda.src.Features.GenerarSalida
                 librerias += "using " + retorno.TextoDesarrollador + ";\n";
             }
 
+            string texto_retorno = texto_interfaces == string.Empty ? texto_herencia : texto_herencia + ", " + texto_interfaces;
             return new RetornoBase(true,
                 "",
-                librerias + "--{{texto_separacion}}--" + texto_herencia);
+                librerias + "--{{texto_separacion}}--" + texto_retorno);
         }
 
+        /// <summary>
+        /// Genera las librerías internas que necesita la clase cuyo código se está generando para funcionar correctamente según sus asociaciones.
+        /// </summary>
+        /// <remarks>
+        /// El método hace un listado de todas las asociaciones a excepción de las herencias que se gestionan en otro método.
+        /// El método no permite duplicidades de importaciones.
+        /// </remarks>
+        /// <param name="param_proyecto">Objeto con toda la información del proyecto a procesar, para generar los namespace.</param>
+        /// <param name="param_clase_id">Identificador de la clase que se está procesando.</param>
+        /// <param name="param_asociaciones">Listado de todas las asociaciones definidas en la clase que se está procesando.</param>
+        /// <returns></returns>
         static private RetornoBase GenerarAsociaciones(ProyectoBase param_proyecto, string param_clase_id, List<Asociacion> param_asociaciones)
         {
             List<Asociacion> asociaciones = param_asociaciones.FindAll(a => (a.TipoAsociacion != EnumTipoAsociacion.NO_DEFINIDA && a.TipoAsociacion != EnumTipoAsociacion.HERENCIA));
@@ -323,6 +423,9 @@ namespace transformador_mda.src.Features.GenerarSalida
             string texto_librearias = string.Empty;
             foreach (Asociacion asociacion in asociaciones)
             {
+                if (asociacion.IdClaseOrigen != param_clase_id)
+                    continue;
+
                 Clase clase_origen = BuscarComponentes.BuscarClase(param_proyecto, asociacion.IdClaseOrigen);
                 Clase clase_destino = BuscarComponentes.BuscarClase(param_proyecto, asociacion.IdClaseDestino);
 
@@ -330,9 +433,6 @@ namespace transformador_mda.src.Features.GenerarSalida
                     return new RetornoBase(false,
                         "No se ha podido generar el código correctamente.",
                         "Clase C_Sharp, método generar asociaciones, asociación con id = " + asociacion.Id + " la clase origen o la clase destino son null");
-
-                if (clase_destino.Id != param_clase_id)
-                    continue;
 
                 RetornoBase retorno = GenerarNamespace(param_proyecto, clase_origen);
                 if (!retorno.Exito)
@@ -349,6 +449,11 @@ namespace transformador_mda.src.Features.GenerarSalida
 
         #region "Transformacion de enumeraciones"
 
+        /// <summary>
+        /// Genera el literal en C# según la enumeración pasada por parámetro.
+        /// </summary>
+        /// <param name="param_tipo_clase">Enumeración de tipo de clase.</param>
+        /// <returns>Literal en código C#</returns>
         static public string ObtenerTipoClase(EnumTiposClases param_tipo_clase)
         {
             switch (param_tipo_clase)
@@ -366,6 +471,11 @@ namespace transformador_mda.src.Features.GenerarSalida
             }
         }
 
+        /// <summary>
+        /// Genera el literal en C# según la enumeración pasada por parámetro.
+        /// </summary>
+        /// <param name="param_visibilidad">Enumeración de tipo de visibilidad.</param>
+        /// <returns>Literal en código C#</returns>
         static public string ObtenerTipoVisibilidad(EnumTipoVisibilidad param_visibilidad)
         {
             switch (param_visibilidad)
@@ -383,6 +493,11 @@ namespace transformador_mda.src.Features.GenerarSalida
             }
         }
 
+        /// <summary>
+        /// Genera el literal en C# según la enumeración pasada por parámetro.
+        /// </summary>
+        /// <param name="param_tipo_dato">Enumeración de tipo de dato.</param>
+        /// <returns>Literal en código C#</returns>
         static public string ObtenerTipoDato(EnumTipoDato param_tipo_dato)
         {
             switch (param_tipo_dato)
