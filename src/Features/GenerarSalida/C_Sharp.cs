@@ -70,11 +70,6 @@ namespace transformador_mda.src.Features.GenerarSalida
 
             foreach (Atributo atributo in param_atributos)
             {
-                if (atributo.TipoDato == EnumTipoDato.NO_DEFINIDO)
-                    return new RetornoBase(false,
-                        "No se ha podido generar el código correctamente",
-                        "Un atributo no tiene tipo de dato marcado");
-
                 texto_atributos += "\t\t/// <summary>\n";
                 texto_atributos += "\t\t/// " + atributo.Comentario + "\n";
                 texto_atributos += "\t\t/// </summary>\n";
