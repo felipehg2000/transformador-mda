@@ -535,11 +535,11 @@ namespace transformador_mda.src.Features.GenerarSalida
 
             if (texto_metodo != string.Empty)
             {
-                if (param_clase.TipoClase == EnumTiposClases.INTERFAZ)
+                if (param_clase.TipoClase == EnumTiposClases.INTERFAZ || 
+                    (param_clase.TipoClase == EnumTiposClases.CLASE_ABSTRACTA && (param_metodo.EsConstructor || param_metodo.EsDestructor)))
                 {
                     texto_metodo += ";\n\n";
                 }
-
                 else
                 {
                     texto_metodo += "\n\t\t{\n\n" +
