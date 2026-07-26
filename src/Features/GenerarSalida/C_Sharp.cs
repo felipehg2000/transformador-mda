@@ -152,7 +152,7 @@ namespace transformador_mda.src.Features.GenerarSalida
 
             texto_clases += retorno.TextoDesarrollador;
 
-            retorno = GenerarCodigoMetodo(param_clase.Metodos);
+            retorno = GenerarCodigoMetodo(param_clase.Metodos, param_clase.TipoClase);
             if (!retorno.Exito)
                 return retorno;
 
@@ -173,8 +173,9 @@ namespace transformador_mda.src.Features.GenerarSalida
         /// Genera la definición de un método con sus comentarios y definición.
         /// </summary>
         /// <param name="param_metodos">Objeto con los datos del método a generar.</param>
+        /// <param name="param_tipo_clase">Tipo de clase que se está procesando, para saber como definir los métodos.</param>
         /// <returns>Objeto con el código de un método e información del proceso de generación.</returns>
-        static private RetornoBase GenerarCodigoMetodo(List<Metodo> param_metodos)
+        static private RetornoBase GenerarCodigoMetodo(List<Metodo> param_metodos, EnumTiposClases param_tipo_clase)
         {
             if (param_metodos.Count <= 0)
                 return new RetornoBase(true, "Código generado correctamente.", "");
@@ -186,50 +187,40 @@ namespace transformador_mda.src.Features.GenerarSalida
             string texto_metodos_internos = string.Empty;
             foreach (Metodo metodo in param_metodos)
             {
-                RetornoBase retorno = GenerarCodigoParametro(metodo.Parametros);
+                RetornoBase retorno = GenerarTextoMetodo(metodo, param_tipo_clase);
                 if (!retorno.Exito)
+                    return retorno;
+
+                string texto_metodo = retorno.TextoDesarrollador;
+                if (metodo.EsConstructor || metodo.EsDestructor)
+                    texto_constructores += texto_metodo;
+                else
                 {
-                    return retorno;                    
-                }
-
-                string[] partes = retorno.TextoDesarrollador.Split(new string[] { "--{{texto_separacion}}--" }, StringSplitOptions.None);
-                string texto_comentarios = partes.Length > 0 ? partes[0] : string.Empty;
-                string texto_parametros = partes.Length > 1 ? partes[1] : string.Empty;
-
-                string texto_metodo = "\t\t/// <summary>" + "\n" +
-                    "\t\t///" + metodo.Comentario + "\n" +
-                    "\t\t/// </summary>\n" +
-                    texto_comentarios +
-                    "\t\t/// <return> " + metodo.Retorno.Comentario + " </return>\n" +
-                    "\t\t" + ObtenerTipoVisibilidad(metodo.Visibilidad) +
-                    " " + ObtenerTipoDato(metodo.Retorno.TipoDato) +
-                    " " + metodo.Nombre + "(" + texto_parametros + ")\n" +
-                    "\t\t{\n\n" +
-                    "\t\t}\n\n";
-
-                switch (metodo.Visibilidad)
-                {
-                    case EnumTipoVisibilidad.PUBLICO:
-                        texto_metodos_publicos += texto_metodo;
-                        break;
-                    case EnumTipoVisibilidad.PRIVADO:
-                        texto_metodos_privades += texto_metodo;
-                        break;
-                    case EnumTipoVisibilidad.PROTEGIDO:
-                        texto_metodos_protegidos += texto_metodo;
-                        break;
-                    case EnumTipoVisibilidad.INTERNA:
-                        texto_metodos_internos += texto_metodo;
-                        break;
-                    default:
-                        texto_constructores += texto_metodo;
-                        break;
+                    switch (metodo.Visibilidad)
+                    {
+                        case EnumTipoVisibilidad.PUBLICO:
+                            texto_metodos_publicos += texto_metodo;
+                            break;
+                        case EnumTipoVisibilidad.PRIVADO:
+                            texto_metodos_privades += texto_metodo;
+                            break;
+                        case EnumTipoVisibilidad.PROTEGIDO:
+                            texto_metodos_protegidos += texto_metodo;
+                            break;
+                        case EnumTipoVisibilidad.INTERNA:
+                            texto_metodos_internos += texto_metodo;
+                            break;
+                        default:
+                            return new RetornoBase(false, 
+                                "No se ha podido generar el código.", 
+                                "Método GenerarCodigoMetodo, se ha encontrado una clave de visibilidad no soportada por el programa: " + metodo.Visibilidad);
+                    }
                 }
             }
 
             string texto_metodos = string.Empty;
             if (!string.IsNullOrEmpty(texto_constructores))
-                texto_metodos = "\t\t#region \"Constructor\"\n\n" + texto_constructores + "\t\t#endregion";
+                texto_metodos = "\n\n\t\t#region \"Constructor\"\n\n" + texto_constructores + "\t\t#endregion";
             if (!string.IsNullOrEmpty(texto_metodos_publicos))
                 texto_metodos += "\n\n\t\t#region \"Métodos públicos\"\n\n" + texto_metodos_publicos + "\t\t#endregion";
             if (!string.IsNullOrEmpty(texto_metodos_protegidos))
@@ -446,6 +437,79 @@ namespace transformador_mda.src.Features.GenerarSalida
             return new RetornoBase(true, "", texto_librearias);
         }
 
+        /// <summary>
+        /// Genera el código de definición de un método según el tipo de clase y el tipo de método (si es constructor, destructor o un método común).
+        /// </summary>
+        /// <param name="param_metodo">Metodo cuya definición se va a codificar.</param>
+        /// <param name="param_tipo_clase">Tipo de clase que se está generando.</param>
+        /// <returns>Objeto con el código generado e información del proceso.</returns>
+        static private RetornoBase GenerarTextoMetodo(Metodo param_metodo, EnumTiposClases param_tipo_clase)
+        {
+            RetornoBase retorno = GenerarCodigoParametro(param_metodo.Parametros);
+            if (!retorno.Exito)
+            {
+                return retorno;
+            }
+
+            string[] partes = retorno.TextoDesarrollador.Split(new string[] { "--{{texto_separacion}}--" }, StringSplitOptions.None);
+            string texto_comentarios = partes.Length > 0 ? partes[0] : string.Empty;
+            string texto_parametros = partes.Length > 1 ? partes[1] : string.Empty;
+
+            string texto_metodo = string.Empty;
+            if (param_metodo.EsDestructor && param_tipo_clase != EnumTiposClases.INTERFAZ)
+            {
+                texto_metodo = "\t\t/// <summary>" + "\n" +
+                    "\t\t///" + param_metodo.Comentario + "\n" +
+                    "\t\t/// </summary>\n" +
+                    "\t\t~" + param_metodo.Nombre + "()";
+            }
+            else if (param_metodo.EsConstructor && param_tipo_clase != EnumTiposClases.INTERFAZ)
+            {
+                texto_metodo = "\t\t/// <summary>" + "\n" +
+                    "\t\t///" + param_metodo.Comentario + "\n" +
+                    "\t\t/// </summary>\n" +
+                    texto_comentarios +
+                    "\t\t" + ObtenerTipoVisibilidad(param_metodo.Visibilidad) + " " + param_metodo.Nombre + "(" + texto_parametros + ")";
+            }
+            else if (param_tipo_clase == EnumTiposClases.CLASE_ABSTRACTA && !param_metodo.EsConstructor && !param_metodo.EsDestructor)
+            {
+                texto_metodo = "\t\t/// <summary>" + "\n" +
+                    "\t\t///" + param_metodo.Comentario + "\n" +
+                    "\t\t/// </summary>\n" +
+                    texto_comentarios +
+                    "\t\t/// <return> " + param_metodo.Retorno.Comentario + " </return>\n" +
+                    "\t\t" + ObtenerTipoVisibilidad(param_metodo.Visibilidad) + " abstract " +
+                    ObtenerTipoDato(param_metodo.Retorno.TipoDato) + " " +
+                    param_metodo.Nombre + "(" + texto_parametros + ")";
+            }
+            else
+            {
+                texto_metodo = "\t\t/// <summary>" + "\n" +
+                    "\t\t///" + param_metodo.Comentario + "\n" +
+                    "\t\t/// </summary>\n" +
+                    texto_comentarios +
+                    "\t\t/// <return> " + param_metodo.Retorno.Comentario + " </return>\n" +
+                    "\t\t" + ObtenerTipoVisibilidad(param_metodo.Visibilidad) + " " +
+                    ObtenerTipoDato(param_metodo.Retorno.TipoDato) + " " +
+                    param_metodo.Nombre + "(" + texto_parametros + ")";
+            }
+
+            if (texto_metodo != string.Empty)
+            {
+                if (param_tipo_clase == EnumTiposClases.INTERFAZ || param_tipo_clase == EnumTiposClases.CLASE_ABSTRACTA)
+                {
+                    texto_metodo += ";\n\n";
+                }
+
+                else
+                {
+                    texto_metodo += "\n\t\t{\n\n" +
+                        "\t\t}\n\n";
+                }
+            }
+
+            return new RetornoBase(true, "", texto_metodo);
+        }
         #endregion
 
         #region "Transformacion de enumeraciones"
@@ -527,5 +591,6 @@ namespace transformador_mda.src.Features.GenerarSalida
         }
         
         #endregion
+    
     }
 }
