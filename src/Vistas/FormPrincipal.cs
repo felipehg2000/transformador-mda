@@ -784,8 +784,22 @@ namespace transformador_mda.src.Vistas
         /// <param name="e">Argumentos asociados al evento.</param>
         private void generarEsqueletoToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (!(treeView.SelectedNode.Tag is Clase clase_seleccionada))
+            if (treeView.Nodes.Count <= 0)
+            {
+                MessageBox.Show("Debe seleccionar un fichero XMI o un proyecto y una clase en el explorador de soluicones para poder generar código.",
+                    "Aviso",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information);
                 return;
+            }
+            if (!(treeView.SelectedNode.Tag is Clase clase_seleccionada))
+            {
+                MessageBox.Show("Debe seleccionar una clase en el explorador de soluicones para poder generar código.",
+                    "Aviso",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information);
+                return;
+            }
 
             RetornoBase retorno = _controlador.GenerarCodigo(clase_seleccionada);
             if (!retorno.Exito)
