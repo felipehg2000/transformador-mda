@@ -200,8 +200,9 @@ namespace transformador_mda.src.Features.GenerarSalida
                     "\t\t///" + metodo.Comentario + "\n" +
                     "\t\t/// </summary>\n" +
                     texto_comentarios +
+                    "\t\t/// <return> " + metodo.Retorno.Comentario + " </return>\n" +
                     "\t\t" + ObtenerTipoVisibilidad(metodo.Visibilidad) +
-                    " " + ObtenerTipoDato(metodo.TipoRetorno) +
+                    " " + ObtenerTipoDato(metodo.Retorno.TipoDato) +
                     " " + metodo.Nombre + "(" + texto_parametros + ")\n" +
                     "\t\t{\n\n" +
                     "\t\t}\n\n";
