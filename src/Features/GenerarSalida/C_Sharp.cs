@@ -1,15 +1,4 @@
-﻿/**
- Propagación de errores en Principal.GenerarCodigo. Se hará cuando se termine el generador
-Orientación y navegabilidad de asociaciones/dependencias. Creo que está solucionado
-Generación de enumeraciones. Solucionado
-Tratamiento específico de interfaces. Solucionado
-Orden de clase base e interfaces. Solucionado
-Comprobación del retorno de GenerarNamespace. Pendiente
-Representación explícita de constructores. Solucionado
-Sustitución de concatenaciones y Contains por colecciones y string.Join. Pendiente
- */
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using transformador_mda.src.Dominio.Retornos;
 using transformador_mda.src.Features.Utilidades;
@@ -116,18 +105,13 @@ namespace transformador_mda.src.Features.GenerarSalida
             if (!retorno_herencia.Exito)
                 return retorno_herencia;
 
-            string[] partes = retorno_herencia.TextoDesarrollador.Split(new string[] { "--{{texto_separacion}}--" }, StringSplitOptions.None);
-            string texto_librerias = partes.Length > 0 ? partes[0] : string.Empty;
-            string texto_herencia = partes.Length > 1 ? partes[1] : string.Empty;
+            string texto_herencia = retorno_herencia.TextoDesarrollador;
 
             RetornoBase retorno_librerias = GenerarAsociaciones(param_proyecto, param_clase.Id, param_clase.Asociaciones);
             if (!retorno_librerias.Exito)
                 return retorno_librerias;
 
-            if (retorno_librerias.TextoDesarrollador.Contains(texto_librerias))
-                texto_librerias = retorno_librerias.TextoDesarrollador;
-            else
-                texto_librerias += retorno_librerias.TextoDesarrollador;
+            string texto_librerias = retorno_librerias.TextoDesarrollador;
 
             RetornoBase retorno_namespace = GenerarNamespace(param_proyecto, param_clase);
             if (!retorno_namespace.Exito)
@@ -338,11 +322,6 @@ namespace transformador_mda.src.Features.GenerarSalida
         /// <summary>
         /// Genera el código para identificar una herencia y la implementación de una o más interfaces.
         /// </summary>
-        /// <remarks>
-        /// En el retorno se devuelve el código y las librerías a importar separadas por el literal "--{{texto_separacion}}--".
-        /// La primera clase que se implementa es la heredada, el resto las interfaces. 
-        /// Si hay más de una clase heredada el método devuelve error.
-        /// </remarks>
         /// <param name="param_proyecto">Objeto con toda la información del proyecto a procesar, para generar los namespace a importar en las clases.</param>
         /// <param name="param_clase_id">Identificador de la clase cuyo código se está generando.</param>
         /// <param name="param_asociaciones">Listado de todas las asociaciones de la clase cuyo código se está generando.</param>
@@ -354,7 +333,6 @@ namespace transformador_mda.src.Features.GenerarSalida
             bool clase_herenciada = false;
             string texto_herencia = string.Empty;
             string texto_interfaces = string.Empty;
-            string librerias = string.Empty;
             foreach (Asociacion herencia in herencias)
             {
                 Clase clase_origen = BuscarComponentes.BuscarClase(param_proyecto, herencia.IdClaseOrigen);
@@ -385,12 +363,6 @@ namespace transformador_mda.src.Features.GenerarSalida
                     texto_interfaces += clase_origen.Nombre;
                 else
                     texto_herencia += clase_origen.Nombre;
-
-                RetornoBase retorno = GenerarNamespace(param_proyecto, clase_origen);
-                if (!retorno.Exito)
-                    return retorno;
-
-                librerias += "using " + retorno.TextoDesarrollador + ";\n";
             }
 
             string texto_retorno = string.Empty;
@@ -400,9 +372,8 @@ namespace transformador_mda.src.Features.GenerarSalida
                 texto_retorno = texto_interfaces;
             else
                 texto_retorno = texto_herencia + ", " + texto_interfaces;
-            return new RetornoBase(true,
-                "",
-                librerias + "--{{texto_separacion}}--" + texto_retorno);
+
+            return new RetornoBase(true, "", texto_retorno);
         }
 
         /// <summary>
@@ -418,10 +389,8 @@ namespace transformador_mda.src.Features.GenerarSalida
         /// <returns></returns>
         static private RetornoBase GenerarAsociaciones(ProyectoBase param_proyecto, string param_clase_id, List<Asociacion> param_asociaciones)
         {
-            List<Asociacion> asociaciones = param_asociaciones.FindAll(a => (a.TipoAsociacion != EnumTipoAsociacion.NO_DEFINIDA && a.TipoAsociacion != EnumTipoAsociacion.HERENCIA));
-
             HashSet<string> namespaces = new HashSet<string>();
-            foreach (Asociacion asociacion in asociaciones)
+            foreach (Asociacion asociacion in param_asociaciones)
             {
                 if (asociacion.IdClaseOrigen != param_clase_id)
                     continue;
@@ -442,7 +411,7 @@ namespace transformador_mda.src.Features.GenerarSalida
                 if (!retorno_origen.Exito)
                     return retorno_origen;
 
-                if (string.IsNullOrEmpty(retorno_destino.TextoDesarrollador) &&
+                if (!string.IsNullOrEmpty(retorno_destino.TextoDesarrollador) &&
                     retorno_origen.TextoDesarrollador != retorno_destino.TextoDesarrollador)
                     namespaces.Add(retorno_destino.TextoDesarrollador);
             }
