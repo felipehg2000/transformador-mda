@@ -396,7 +396,7 @@ namespace transformador_mda.src.Features.GenerarSalida
             string texto_retorno = string.Empty;
             if (texto_interfaces == string.Empty)
                 texto_retorno = texto_herencia;
-            else if (texto_retorno == string.Empty)
+            else if (texto_herencia == string.Empty)
                 texto_retorno = texto_interfaces;
             else
                 texto_retorno = texto_herencia + ", " + texto_interfaces;
@@ -420,7 +420,7 @@ namespace transformador_mda.src.Features.GenerarSalida
         {
             List<Asociacion> asociaciones = param_asociaciones.FindAll(a => (a.TipoAsociacion != EnumTipoAsociacion.NO_DEFINIDA && a.TipoAsociacion != EnumTipoAsociacion.HERENCIA));
 
-            string texto_librearias = string.Empty;
+            HashSet<string> namespaces = new HashSet<string>();
             foreach (Asociacion asociacion in asociaciones)
             {
                 if (asociacion.IdClaseOrigen != param_clase_id)
@@ -434,12 +434,23 @@ namespace transformador_mda.src.Features.GenerarSalida
                         "No se ha podido generar el código correctamente.",
                         "Clase C_Sharp, método generar asociaciones, asociación con id = " + asociacion.Id + " la clase origen o la clase destino son null");
 
-                RetornoBase retorno = GenerarNamespace(param_proyecto, clase_origen);
-                if (!retorno.Exito)
-                    return retorno;
+                RetornoBase retorno_destino = GenerarNamespace(param_proyecto, clase_destino);
+                if (!retorno_destino.Exito)
+                    return retorno_destino;
 
-                if (!texto_librearias.Contains(retorno.TextoDesarrollador))
-                    texto_librearias += "using " + retorno.TextoDesarrollador + ";\n";
+                RetornoBase retorno_origen = GenerarNamespace(param_proyecto, clase_origen);
+                if (!retorno_origen.Exito)
+                    return retorno_origen;
+
+                if (string.IsNullOrEmpty(retorno_destino.TextoDesarrollador) &&
+                    retorno_origen.TextoDesarrollador != retorno_destino.TextoDesarrollador)
+                    namespaces.Add(retorno_destino.TextoDesarrollador);
+            }
+
+            string texto_librearias = string.Empty;
+            foreach(string nombre in namespaces)
+            {
+                texto_librearias += "using " + nombre + ";\n";
             }
 
             return new RetornoBase(true, "", texto_librearias);
@@ -456,7 +467,7 @@ namespace transformador_mda.src.Features.GenerarSalida
             if (param_metodo.EsConstructor && param_metodo.EsDestructor)
                 return new RetornoBase(false, "No se ha podido generar el código correctamente", "Un método es constructor y destructor simultaneamente");
 
-            if ((param_metodo.EsDestructor || param_metodo.EsDestructor) && param_metodo.Nombre != param_clase.Nombre)
+            if ((param_metodo.EsConstructor || param_metodo.EsDestructor) && param_metodo.Nombre != param_clase.Nombre)
                 return new RetornoBase(false, "No se ha podido generar el código correctamente.", "Un método es constructor o destructor y no se llama igual que la clase");
 
             RetornoBase retorno = GenerarCodigoParametro(param_metodo.Parametros);
@@ -483,7 +494,7 @@ namespace transformador_mda.src.Features.GenerarSalida
                     "\t\t" + ObtenerTipoDato(param_metodo.Retorno.TipoDato) + " " +
                     param_metodo.Nombre + "(" + texto_parametros + ")";
             }
-            if (param_metodo.EsDestructor && param_clase.TipoClase != EnumTiposClases.INTERFAZ)
+            else if (param_metodo.EsDestructor && param_clase.TipoClase != EnumTiposClases.INTERFAZ)
             {
                 texto_metodo = "\t\t/// <summary>" + "\n" +
                     "\t\t///" + param_metodo.Comentario + "\n" +
@@ -528,7 +539,7 @@ namespace transformador_mda.src.Features.GenerarSalida
 
             if (texto_metodo != string.Empty)
             {
-                if (param_clase.TipoClase == EnumTiposClases.INTERFAZ || param_clase.TipoClase == EnumTiposClases.CLASE_ABSTRACTA)
+                if (param_clase.TipoClase == EnumTiposClases.INTERFAZ)
                 {
                     texto_metodo += ";\n\n";
                 }
