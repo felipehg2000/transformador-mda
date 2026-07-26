@@ -178,9 +178,22 @@ namespace transformador_mda.src.Vistas
             else if (!resultado)
                 return;
 
-            textBoxRutaRaiz.Text = "Ya no se usa, quitar cuando se modifiquen las interfaces.";
-            textBoxNombreProyecto.Text = _controlador.Configuracion.Proyecto.Nombre;
-            textBoxRutaFicheroDeEntrada.Text = _controlador.Configuracion.RutaFicheroEntrada;
+            panelAbrirXMI.Enabled = false;
+            panelAbrirXMI.Visible = false;
+            panelAbrirXMI.SendToBack();
+
+            if (_controlador?.Configuracion?.Proyecto == null)
+                return;
+
+            RellenarArbolProyecto();
+
+            panelPrincipal.Enabled = true;
+            panelPrincipal.Visible = true;
+            panelPrincipal.BringToFront();
+
+            panelSelClase.Enabled = true;
+            panelSelClase.Visible = true;
+            panelSelClase.BringToFront();
 
         }
 
