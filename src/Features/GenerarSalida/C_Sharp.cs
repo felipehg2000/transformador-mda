@@ -1,7 +1,8 @@
-﻿using System.IO;
+﻿using System;
 using System.Collections.Generic;
-using transformador_mda.src.Dominio;
-using transformador_mda.src.Features.GenerarSalida.Plantillas;
+using transformador_mda.src.Dominio.Retornos;
+using transformador_mda.src.Features.Utilidades;
+using transformador_mda.src.Dominio.ElementosUML;
 
 namespace transformador_mda.src.Features.GenerarSalida
 {
@@ -13,337 +14,618 @@ namespace transformador_mda.src.Features.GenerarSalida
         #region "Constructor"
 
         /// <summary>
-        /// Constructor de la clase, inicializa atributos.
+        /// Constructor de la clase, inicializa variables.
         /// </summary>
-        /// <param name="param_proyecto">Datos del proyecto para generar la salida.</param>
-        public C_Sharp(ProyectoBase param_proyecto) : base(param_proyecto)
+        /// <param name="param_proyecto">Información del proyecto que la aplicación está gestionando.</param>
+        public C_Sharp(ProyectoBase param_proyecto) : 
+            base(param_proyecto)
         {
 
         }
 
         #endregion
 
-        #region "Métodos públicos"
+        #region "Métodos publicos heredados"
 
         /// <summary>
-        /// Método principal de la clase, se encarga de comprobar que los datos rellenos sean correctos y llama al método que genera la salida.
+        /// Método sin implementar
         /// </summary>
-        /// <returns>True si el proceso ha sido correcto, false si ha ocurrido algún error.</returns>
-        public override bool GenerarSalida()
+        /// <returns></returns>
+        /// <exception cref="NotImplementedException"></exception>
+        public override RetornoBase GenerarSalida()
         {
-            if (_proyecto == null)
-                return false;
+            throw new NotImplementedException();
+        }
 
-            if (string.IsNullOrWhiteSpace(_proyecto.DirectorioRaiz))
-                return false;
+        /// <summary>
+        /// Genera el código de una única clase.
+        /// </summary>
+        /// <param name="param_clase">Objeto de tipo clase del cual se generará el código.</param>
+        /// <returns>Objeto con el código generado e información del proceso.</returns>
+        public override RetornoBase GenerarTexto(Clase param_clase)
+        {
+            if (param_clase == null || _proyecto == null)
+                return new RetornoBase(false, 
+                    "No se ha podido generar el código correctamente.", 
+                    "En el método GenerarTexto de C_Sharp el parámetro param_clase es nulo.");
 
-            foreach (var directorio in _proyecto.Directorios)
-            {
-                if (directorio == null)
-                    continue;
-
-                if (directorio.Clases == null || directorio.Clases.Count == 0)
-                    continue;
-
-                _directorio_actual = directorio;
-                GenerarClases();
-            }
-
-            return true;
+            return GenerarCodigoClases(_proyecto, param_clase);
         }
 
         #endregion
 
-        #region "Métodos protegidos"
+        #region "Generar código de elemento"
 
         /// <summary>
-        /// Recorre todas las clases incluidas en un directorio y las genera.
+        /// Genera el código de los atributos de una clase.
         /// </summary>
-        protected override void GenerarClases()
+        /// <param name="param_atributos">Lista de atributos asociados a una clase.</param>
+        /// <returns>Objecto con el código de una clase e información del proceso de generación..</returns>
+        static private RetornoBase GenerarCodigoAtributos(List<Atributo> param_atributos)
         {
-            if (_directorio_actual == null)
-                return;
+            if (param_atributos.Count <= 0)
+                return new RetornoBase(true, "Código generado correctamente", "");
 
-            if (_directorio_actual.Clases == null || _directorio_actual.Clases.Count == 0)
-                return;
+            string texto_atributos = "\t\t#region \"Atributos\"\n\n";
 
-            string ruta_directorio = _proyecto.DirectorioRaiz;
-
-            if (!string.IsNullOrWhiteSpace(_directorio_actual.Nombre) &&
-                _directorio_actual.Nombre != _proyecto.DirectorioRaiz)
+            foreach (Atributo atributo in param_atributos)
             {
-                ruta_directorio = Path.Combine(_proyecto.DirectorioRaiz, _directorio_actual.Nombre);
-            }
+                texto_atributos += "\t\t/// <summary>\n";
+                texto_atributos += "\t\t/// " + atributo.Comentario + "\n";
+                texto_atributos += "\t\t/// </summary>\n";
+                texto_atributos += "\t\t" + ObtenerTipoVisibilidad(atributo.Visibilidad) + " " + ObtenerTipoDato(atributo.TipoDato) + " " + atributo.Nombre;
+                if (atributo.Visibilidad == EnumTipoVisibilidad.PUBLICO)
+                    texto_atributos += " { get; set; } \n\n";
+                else
+                    texto_atributos += ";\n\n";
 
-            Directory.CreateDirectory(ruta_directorio);
+            }             
 
-            foreach (var clase in _directorio_actual.Clases)
-            {
-                if (clase == null || string.IsNullOrWhiteSpace(clase.Nombre))
-                    continue;
+            texto_atributos += "\t\t#endregion";
 
-                _clase_actual = clase;
-
-                string contenido = GenerarCodigoClase();
-
-                string ruta_fichero = Path.Combine(
-                    ruta_directorio,
-                    clase.Nombre + ".cs");
-
-                File.WriteAllText(ruta_fichero, contenido);
-            }
+            return new RetornoBase(true, 
+                "Código generado correctamente.", 
+                texto_atributos);
         }
 
         /// <summary>
-        /// Genera el código necesario para que la clase tenga todas las definiciones hechas en el diagrama de clases.
+        /// Genera el código de una clase diferenciando por su tipo.
         /// </summary>
-        /// <returns>Código de la clase.</returns>
-        protected override string GenerarCodigoClase()
+        /// <param name="param_proyecto">Datos de todo el proyecto.</param>
+        /// <param name="param_clase">Datos de la clase cuyo código debe generarse.</param>
+        /// <returns>Objecto con el código de una clase e información del proceso de generación.</returns>
+        static private RetornoBase GenerarCodigoClases(ProyectoBase param_proyecto, Clase param_clase)
         {
-            if (_clase_actual == null)
-                return string.Empty;
+            RetornoBase retorno_herencia = GenerarHerencia(param_proyecto, param_clase.Id, param_clase.Asociaciones);
+            if (!retorno_herencia.Exito)
+                return retorno_herencia;
 
-            string atributos = GenerarElementos(
-                _clase_actual.Elementos.FindAll(e =>
-                    e.TipoElemento != TiposElementos.Enumeracion.PARAMETRO &&
-                    e.Visibilidad == EnumVisibilidad.PUBLICO));
+            string texto_herencia = retorno_herencia.TextoDesarrollador;
 
-            string propiedades = GenerarElementos(
-                _clase_actual.Elementos.FindAll(e =>
-                    e.TipoElemento != TiposElementos.Enumeracion.PARAMETRO &&
-                    e.Visibilidad != EnumVisibilidad.PUBLICO));
+            RetornoBase retorno_librerias = GenerarAsociaciones(param_proyecto, param_clase.Id, param_clase.Asociaciones);
+            if (!retorno_librerias.Exito)
+                return retorno_librerias;
 
-            string metodosPublicos = GenerarMetodos(
-                _clase_actual.Metodos.FindAll(m => m.Visibilidad == EnumVisibilidad.PUBLICO));
+            string texto_librerias = retorno_librerias.TextoDesarrollador;
 
-            string metodosProtegidos = GenerarMetodos(
-                _clase_actual.Metodos.FindAll(m => m.Visibilidad == EnumVisibilidad.PROTEGIDO));
+            RetornoBase retorno_namespace = GenerarNamespace(param_proyecto, param_clase);
+            if (!retorno_namespace.Exito)
+                return retorno_namespace;
 
-            string metodosPrivados = GenerarMetodos(
-                _clase_actual.Metodos.FindAll(m => m.Visibilidad == EnumVisibilidad.PRIVADO));
+            string texto_clases = texto_librerias + "\n" +
+                "namespace " + retorno_namespace.TextoDesarrollador + "\n" +
+                "{\n" +
+                "\t" + ObtenerTipoVisibilidad(param_clase.Visibilidad) + " " + ObtenerTipoClase(param_clase.TipoClase) + " " + param_clase.Nombre;
 
-            string textoNamespace = _proyecto.Nombre + "." + _directorio_actual.Namespace;
+            texto_clases += texto_herencia != string.Empty ? ": " + texto_herencia + "\n" : "\n"; 
+            texto_clases += "\t{\n";
 
-            string herencia = GenerarHerencia();
 
-            string ret_texto = PlantillasC_Sharp.ClaseBase;
+            if (param_clase.TipoClase == EnumTiposClases.ENUMERACION)
+            {
+                texto_clases += GenerarCodigoLiterales(param_clase.Literales).TextoDesarrollador +
+                    "\t}\n" +
+                    "}\n\n";
+                
+                return new RetornoBase(true, "Código generado correctamente.", texto_clases);
+            }
 
-            ret_texto = ret_texto.Replace("{Relaciones}", GenerarReferencias());
-            ret_texto = ret_texto.Replace("{Namespace}", textoNamespace);
-            ret_texto = ret_texto.Replace("{Visibilidad}", Visibilidad.ObtenerVisibilidad(_clase_actual.Visibilidad));
-            ret_texto = ret_texto.Replace("{TipoClase}", ObtenerTextoTipoClase(_clase_actual));
-            ret_texto = ret_texto.Replace("{NombreClase}", _clase_actual.Nombre);
-            ret_texto = ret_texto.Replace("{Herencia}", herencia);
-            ret_texto = ret_texto.Replace("{Atributos}", atributos);
-            ret_texto = ret_texto.Replace("{Propiedades}", propiedades);
-            ret_texto = ret_texto.Replace("{MetodosPublicos}", metodosPublicos);
-            ret_texto = ret_texto.Replace("{MetodosProtegidos}", metodosProtegidos);
-            ret_texto = ret_texto.Replace("{MetodosPrivados}", metodosPrivados);
+            if (param_clase.TipoClase != EnumTiposClases.INTERFAZ)
+            {
+                RetornoBase retorno_atributos = GenerarCodigoAtributos(param_clase.Atributos);
+                if (!retorno_atributos.Exito)
+                    return retorno_atributos;
 
-            return ret_texto;
+                texto_clases += retorno_atributos.TextoDesarrollador;
+            }
+
+            RetornoBase retorno_metodos = GenerarCodigoMetodo(param_clase.Metodos, param_clase);
+            if (!retorno_metodos.Exito)
+                return retorno_metodos;
+
+            texto_clases += retorno_metodos.TextoDesarrollador + "\n" +
+                    "\t}\n" +
+                    "}\n\n";
+
+            return new RetornoBase(true, "Código generado correctamente.", texto_clases);            
         }
 
         /// <summary>
-        /// Genera el código para crear atributos y parámetros.
+        /// Genera la definición de un método con sus comentarios y definición.
         /// </summary>
-        /// <remarks>
-        /// Si el atributo es público se trata como propiedad.
-        /// </remarks>
-        /// <param name="param_elementos">Listado de elementos cuyo código hay que generar.</param>
-        /// <returns>Código de los elementos pasados por parámetros.</returns>
-        protected override string GenerarElementos(List<Elemento> param_elementos)
+        /// <param name="param_metodos">Objeto con los datos del método a generar.</param>
+        /// <param name="param_clase">Objeto de tipo clase con los datos de la clase que se está procesando, para saber como definir los métodos.</param>
+        /// <returns>Objeto con el código de un método e información del proceso de generación.</returns>
+        static private RetornoBase GenerarCodigoMetodo(List<Metodo> param_metodos, Clase param_clase)
         {
-            if (param_elementos == null || param_elementos.Count == 0)
-                return string.Empty;
+            if (param_metodos.Count <= 0)
+                return new RetornoBase(true, "Código generado correctamente.", "");
 
-            string ret_texto = string.Empty;
-
-            foreach (var elemento in param_elementos)
+            string texto_constructores = string.Empty;
+            string texto_metodos_privades = string.Empty;
+            string texto_metodos_publicos = string.Empty;
+            string texto_metodos_protegidos = string.Empty;
+            string texto_metodos_internos = string.Empty;
+            foreach (Metodo metodo in param_metodos)
             {
-                if (elemento == null)
-                    continue;
+                RetornoBase retorno = GenerarTextoMetodo(metodo, param_clase);
+                if (!retorno.Exito)
+                    return retorno;
 
-                if (elemento.TipoElemento == TiposElementos.Enumeracion.PARAMETRO)
-                    continue;
-
-                if (elemento.Visibilidad == EnumVisibilidad.PUBLICO)
-                {
-                    ret_texto += "\t\t\tpublic " + elemento.Tipo + " " + elemento.Nombre + " { get; set; }\n";
-                }
+                string texto_metodo = retorno.TextoDesarrollador;
+                if (metodo.EsConstructor || metodo.EsDestructor)
+                    texto_constructores += texto_metodo;
                 else
                 {
-                    ret_texto += "\t\t\t" +
-                        Visibilidad.ObtenerVisibilidad(elemento.Visibilidad) + " " +
-                        elemento.Tipo + " " +
-                        elemento.Nombre + ";\n";
-                }
-            }
-
-            return ret_texto;
-        }
-
-        /// <summary>
-        /// Genera el código de los métodos que haya definidos en el diagrama de clases.
-        /// </summary>
-        /// <param name="param_metodos">Listado de métodos a generar.</param>
-        /// <returns>Código con los métodos pasados por parámetros.</returns>
-        protected override string GenerarMetodos(List<Metodo> param_metodos)
-        {
-            if (param_metodos == null || param_metodos.Count == 0)
-                return string.Empty;
-
-            string ret_texto = string.Empty;
-
-            foreach (var metodo in param_metodos)
-            {
-                if (metodo == null)
-                    continue;
-
-                string textoMetodo = PlantillasC_Sharp.Metodo;
-
-                textoMetodo = textoMetodo.Replace("{Visibilidad}", Visibilidad.ObtenerVisibilidad(metodo.Visibilidad));
-                textoMetodo = textoMetodo.Replace("{TipoRetorno}", metodo.TipoRetorno.Trim());
-                textoMetodo = textoMetodo.Replace("{NombreMetodo}", metodo.Nombre);
-                textoMetodo = textoMetodo.Replace("{Parametros}", GenerarParametros(metodo.Parametros));
-
-                ret_texto += textoMetodo + "\n\n";
-            }
-
-            return ret_texto;
-        }
-
-        #endregion
-
-        #region "Métodos privados"
-
-        /// <summary>
-        /// Genera el código para los parámetros de un método.
-        /// </summary>
-        /// <param name="param_parametros">Listado de parámetros de un método.</param>
-        /// <returns>Código de los parámetros pasados por parámetro.</returns>
-        private string GenerarParametros(List<Elemento> param_parametros)
-        {
-            if (param_parametros == null || param_parametros.Count == 0)
-                return string.Empty;
-
-            List<string> parametros = new List<string>();
-
-            foreach (var parametro in param_parametros)
-            {
-                if (parametro == null)
-                    continue;
-
-                if (parametro.TipoElemento != TiposElementos.Enumeracion.PARAMETRO)
-                    continue;
-
-                parametros.Add(parametro.Tipo + " " + parametro.Nombre);
-            }
-
-            return string.Join(", ", parametros);
-        }
-
-        /// <summary>
-        /// Genera la herencia de una clase para la definición de la clase.
-        /// </summary>
-        /// <returns>Código de la dependencia de una clase hijo sobre los datos de su clase padre.</returns>
-        private string GenerarHerencia()
-        {
-            if (_clase_actual == null || _clase_actual.Asociaciones == null)
-                return string.Empty;
-
-            Asociacion asociacion_tmp = _clase_actual.Asociaciones
-                .Find(a => a.TipoAsociacion == TiposAsociaciones.Enumeracion.HERENCIA);
-
-            if (asociacion_tmp == null)
-                return string.Empty;
-
-            string id_clase_origen = asociacion_tmp.ClaseOrigen;
-
-            foreach (var directorio in _proyecto.Directorios)
-            {
-                if (directorio.Clases == null)
-                    continue;
-
-                Clase clasePadre = directorio.Clases.Find(c => c.Id == id_clase_origen);
-
-                if (clasePadre != null)
-                    return " : " + clasePadre.Nombre;
-            }
-
-            return string.Empty;
-        }
-
-        /// <summary>
-        /// Casteo del tipo de clase que viene en el XMI al texto de la clase que hay que poner en el código.
-        /// </summary>
-        /// <param name="param_clase">Tipo de clase en lenguaje XMI.</param>
-        /// <returns>Tipo de clase en lenguaje C#</returns>
-        private string ObtenerTextoTipoClase(Clase param_clase)
-        {
-            string tipo = TiposClases.ObtenerTexto(param_clase.TipoClase);
-
-            if (tipo == "uml:Class")
-                return "class";
-
-            if (tipo == "uml:Interface")
-                return "interface";
-
-            if (tipo == "uml:Enumeration")
-                return "enum";
-
-            return tipo;
-        }
-
-        /// <summary>
-        /// Genera los using necesarios para las asociaciones de la clase.
-        /// </summary>
-        /// <returns>Texto con los using.</returns>
-        private string GenerarReferencias()
-        {
-            if (_clase_actual == null ||
-                _clase_actual.Asociaciones == null ||
-                _clase_actual.Asociaciones.Count == 0)
-            {
-                return string.Empty;
-            }
-
-            List<string> referencias = new List<string>();
-
-            foreach (Asociacion asociacion in _clase_actual.Asociaciones)
-            {
-                string idClaseRelacionada;
-
-                if (asociacion.ClaseOrigen == _clase_actual.Id)
-                    idClaseRelacionada = asociacion.ClaseDestino;
-                else
-                    idClaseRelacionada = asociacion.ClaseOrigen;
-
-                Directorio directorioClaseRelacionada = null;
-
-                foreach (Directorio directorio in _proyecto.Directorios)
-                {
-                    if (directorio.Clases.Find(c => c.Id == idClaseRelacionada) != null)
+                    switch (metodo.Visibilidad)
                     {
-                        directorioClaseRelacionada = directorio;
-                        break;
+                        case EnumTipoVisibilidad.PUBLICO:
+                            texto_metodos_publicos += texto_metodo;
+                            break;
+                        case EnumTipoVisibilidad.PRIVADO:
+                            texto_metodos_privades += texto_metodo;
+                            break;
+                        case EnumTipoVisibilidad.PROTEGIDO:
+                            texto_metodos_protegidos += texto_metodo;
+                            break;
+                        case EnumTipoVisibilidad.INTERNA:
+                            texto_metodos_internos += texto_metodo;
+                            break;
+                        default:
+                            return new RetornoBase(false, 
+                                "No se ha podido generar el código.", 
+                                "Método GenerarCodigoMetodo, se ha encontrado una clave de visibilidad no soportada por el programa: " + metodo.Visibilidad);
                     }
                 }
-
-                if (directorioClaseRelacionada == null)
-                    continue;
-
-                if (directorioClaseRelacionada.Namespace == _directorio_actual.Namespace)
-                    continue;
-
-                string referencia = "using " + _proyecto.Nombre + "." + directorioClaseRelacionada.Namespace + ";";
-
-                if (!referencias.Contains(referencia))
-                    referencias.Add(referencia);
             }
 
-            return string.Join("\n", referencias);
+            string texto_metodos = string.Empty;
+            if (!string.IsNullOrEmpty(texto_constructores))
+                texto_metodos = "\n\n\t\t#region \"Constructor\"\n\n" + texto_constructores + "\t\t#endregion";
+            if (!string.IsNullOrEmpty(texto_metodos_publicos))
+                texto_metodos += "\n\n\t\t#region \"Métodos públicos\"\n\n" + texto_metodos_publicos + "\t\t#endregion";
+            if (!string.IsNullOrEmpty(texto_metodos_protegidos))
+                texto_metodos += "\n\n\t\t#region \"Métodos protegidos\"\n\n" + texto_metodos_protegidos + "\t\t#endregion";
+            if (!string.IsNullOrEmpty(texto_metodos_internos))
+                texto_metodos += "\n\n\t\t#region \"Métodos internos\"\n\n" + texto_metodos_internos + "\t\t#endregion";
+            if (!string.IsNullOrEmpty(texto_metodos_privades))
+                texto_metodos += "\n\n\t\t#region \"Métodos privados\"\n\n" + texto_metodos_privades + "\t\t#endregion";
+
+            return new RetornoBase(true,
+                "Código generado correctamente.",
+                texto_metodos);
+        }
+
+        /// <summary>
+        /// Genera la definición de los parámetros de un método con sus comentarios.
+        /// </summary>
+        /// <remarks>
+        /// En el retorno se devuelve la definición de los parámetros y los comentarios sobre estos. Para separar el texto se usa este literal "--{{texto_separacion}}--"
+        /// </remarks>
+        /// <param name="param_parametros">Listado de objetos con la información de los parámetros.</param>
+        /// <returns>Objeto con la definición de los parámetros e información del proceso de generación.</returns>
+        static private RetornoBase GenerarCodigoParametro(List<Parametro> param_parametros)
+        {
+            if (param_parametros.Count <= 0)
+                return new RetornoBase(true, "Código generado correctamente.", "");
+
+            string comentarios = string.Empty;
+            string parametros = string.Empty;
+            
+            foreach (Parametro parametro in param_parametros)
+            {
+                // <param name="param_parametros"></param>
+                comentarios += "\t\t/// <param name=\"" + parametro.Nombre + "\"> " + parametro.Comentario + "</param>\n";
+                if (parametros != string.Empty)
+                    parametros += ", ";
+
+                parametros += ObtenerTipoDato(parametro.TipoDato) + " " + parametro.Nombre;
+            }
+
+            return new RetornoBase(true, 
+                "Código generado correctamente.", 
+                comentarios + "--{{texto_separacion}}--" + parametros);
+        }
+
+        /// <summary>
+        /// Genera la definición de los literales de una enumeración con sus comentarios.
+        /// </summary>
+        /// <param name="param_literales">Listado de objetos de tipo literal cuyo código hay que generar.</param>
+        /// <returns>Objeto con la definición de los literales e información del proceso de generación.</returns>
+        static private RetornoBase GenerarCodigoLiterales(List<ElementoBase> param_literales)
+        {
+            if (param_literales.Count <= 0)
+                return new RetornoBase(true, "Código generado correctamente.", "");
+
+            string texto_literales = string.Empty;
+            foreach(ElementoBase literal in param_literales)
+            {
+                texto_literales += "\t\t" + literal.Nombre + ",\t\t\t/// <summary>" + literal.Comentario + "</summary>\n";
+            }
+
+            return new RetornoBase(true, "Código generado correctamente.", texto_literales);
+        }
+
+        /// <summary>
+        /// Genera el namespace asociado a una clase según el directorio en el que está guardada la clase.
+        /// </summary>
+        /// <param name="param_proyecto">Datos del proyecto completo para hacer la búsqueda de la clase según los directorios y subdirectorios.</param>
+        /// <param name="param_clase">Clase cuyo namespace se va a generar.</param>
+        /// <returns>Objeto con la definición del namespace e información del proceso de generación.</returns>
+        static private RetornoBase GenerarNamespace(ProyectoBase param_proyecto, Clase param_clase)
+        {
+            string texto_namespace = param_proyecto.Nombre;
+
+            foreach (Directorio directorio in param_proyecto.Directorios)
+            {
+                Clase clase = directorio.ObtenerClasePorId(param_clase.Id);
+                if (clase != null)
+                    return new RetornoBase(true, "", texto_namespace);
+
+                RetornoBase retorno = GenerarNamespace(directorio, param_clase.Id);
+                if (retorno.Exito)
+                    return new RetornoBase(true, "", texto_namespace + "." + directorio.Nombre + "." + retorno.TextoDesarrollador);
+            }
+
+            return new RetornoBase(false, 
+                "No se ha podido generar el texto correctamente.", 
+                "No se ha podido generar el namespace correctamente. GenerarNamespace de la clase C_Sharp.");
+        }
+
+        /// <summary>
+        /// Método recursivo para la búsqueda de la clase según las subcarpetas. Recorre las subcarpetas generando una parte del namespace.
+        /// </summary>
+        /// <param name="param_directorio">Directorio o subdirectorio que se está recorriendo.</param>
+        /// <param name="param_id">Identificador de la clase cuyo namespace se quiere generar.</param>
+        /// <returns>Objeto con la definición del namespace e información del proceso de generación.</returns>
+        static private RetornoBase GenerarNamespace(Directorio param_directorio, string param_id)
+        {
+            foreach (Directorio subdirectorio in param_directorio.Subdirectorios)
+            {
+                Clase clase = subdirectorio.ObtenerClasePorId(param_id);
+                if (clase != null)
+                    return new RetornoBase(true, "", subdirectorio.Nombre);
+
+                RetornoBase retorno = GenerarNamespace(subdirectorio, param_id);
+                if (retorno.Exito)
+                    return new RetornoBase(true, "", subdirectorio.Nombre + "." + retorno.TextoDesarrollador);
+            }
+
+            return new RetornoBase(false, "No se ha podido generar el texto correctamente.", "No se ha podido generar el namespace correctamente. GenerarNamespace de la clase C_Sharp método recursivo.");
+        }
+
+        /// <summary>
+        /// Genera el código para identificar una herencia y la implementación de una o más interfaces.
+        /// </summary>
+        /// <param name="param_proyecto">Objeto con toda la información del proyecto a procesar, para generar los namespace a importar en las clases.</param>
+        /// <param name="param_clase_id">Identificador de la clase cuyo código se está generando.</param>
+        /// <param name="param_asociaciones">Listado de todas las asociaciones de la clase cuyo código se está generando.</param>
+        /// <returns>Objeto con la definición del namespace e información del proceso de generación.</returns>
+        static private RetornoBase GenerarHerencia(ProyectoBase param_proyecto, string param_clase_id, List<Asociacion> param_asociaciones)
+        {
+            List<Asociacion> herencias = param_asociaciones.FindAll(a => a.TipoAsociacion == EnumTipoAsociacion.HERENCIA);
+
+            bool clase_herenciada = false;
+            string texto_herencia = string.Empty;
+            string texto_interfaces = string.Empty;
+            foreach (Asociacion herencia in herencias)
+            {
+                Clase clase_origen = BuscarComponentes.BuscarClase(param_proyecto, herencia.IdClaseOrigen);
+                Clase clase_destino = BuscarComponentes.BuscarClase(param_proyecto, herencia.IdClaseDestino);
+
+                if (clase_origen == null || clase_destino == null)
+                    return new RetornoBase(false, 
+                        "No se ha podido generar el código correctamente.", 
+                        "Clase C_Sharp, método generar herencia, asociación con id = " + herencia.Id + " la clase origen o la clase destino son null");
+
+                if (clase_destino.Id != param_clase_id)
+                    continue;
+
+                if (clase_origen.TipoClase != EnumTiposClases.INTERFAZ)
+                {
+                    if (clase_herenciada)
+                        return new RetornoBase(false, 
+                            "No se ha podido generar el código correctamente.", 
+                            "Clase C_Sharp, método generar herencia, una misma clase hereda de dos clases (no interfaces) simultaneamente.");
+                    else
+                        clase_herenciada = true;
+                }
+
+                if (texto_interfaces != string.Empty)
+                    texto_interfaces += ", ";
+
+                if (clase_origen.TipoClase == EnumTiposClases.INTERFAZ)
+                    texto_interfaces += clase_origen.Nombre;
+                else
+                    texto_herencia += clase_origen.Nombre;
+            }
+
+            string texto_retorno = string.Empty;
+            if (texto_interfaces == string.Empty)
+                texto_retorno = texto_herencia;
+            else if (texto_herencia == string.Empty)
+                texto_retorno = texto_interfaces;
+            else
+                texto_retorno = texto_herencia + ", " + texto_interfaces;
+
+            return new RetornoBase(true, "", texto_retorno);
+        }
+
+        /// <summary>
+        /// Genera las librerías internas que necesita la clase cuyo código se está generando para funcionar correctamente según sus asociaciones.
+        /// </summary>
+        /// <param name="param_proyecto">Objeto con toda la información del proyecto a procesar, para generar los namespace.</param>
+        /// <param name="param_clase_id">Identificador de la clase que se está procesando.</param>
+        /// <param name="param_asociaciones">Listado de todas las asociaciones definidas en la clase que se está procesando.</param>
+        /// <returns></returns>
+        static private RetornoBase GenerarAsociaciones(ProyectoBase param_proyecto, string param_clase_id, List<Asociacion> param_asociaciones)
+        {
+            HashSet<string> namespaces = new HashSet<string>();
+
+            Clase clase_actual = BuscarComponentes.BuscarClase(param_proyecto, param_clase_id);
+
+            if (clase_actual == null)
+            {
+                return new RetornoBase(false,
+                    "No se ha podido generar el código correctamente.",
+                    "No se ha encontrado la clase cuyo código se está generando.");
+            }
+
+            RetornoBase retorno_actual = GenerarNamespace(param_proyecto, clase_actual);
+
+            if (!retorno_actual.Exito)
+                return retorno_actual;
+
+            foreach (Asociacion asociacion in param_asociaciones)
+            {
+                Clase clase_relacionada;
+
+                if (asociacion.TipoAsociacion == EnumTipoAsociacion.HERENCIA)
+                {
+                    if (asociacion.IdClaseDestino != param_clase_id)
+                        continue;
+
+                    clase_relacionada = BuscarComponentes.BuscarClase(
+                        param_proyecto,
+                        asociacion.IdClaseOrigen);
+                }
+                else
+                {
+                    if (asociacion.IdClaseOrigen != param_clase_id)
+                        continue;
+
+                    clase_relacionada = BuscarComponentes.BuscarClase(
+                        param_proyecto,
+                        asociacion.IdClaseDestino);
+                }
+
+                if (clase_relacionada == null)
+                {
+                    return new RetornoBase(false,
+                        "No se ha podido generar el código correctamente.",
+                        "Clase C_Sharp, método GenerarAsociaciones, asociación con id = " + asociacion.Id + ": no se ha encontrado la clase relacionada.");
+                }
+
+                RetornoBase retorno_relacionado = GenerarNamespace(param_proyecto, clase_relacionada);
+
+                if (!retorno_relacionado.Exito)
+                    return retorno_relacionado;
+
+                if (!string.IsNullOrWhiteSpace(retorno_relacionado.TextoDesarrollador) &&
+                    retorno_relacionado.TextoDesarrollador != retorno_actual.TextoDesarrollador)
+                {
+                    namespaces.Add(retorno_relacionado.TextoDesarrollador);
+                }
+            }
+
+            string texto_librerias = string.Empty;
+            foreach (string nombre_namespace in namespaces)
+            {
+                texto_librerias += "using " + nombre_namespace + ";\n";
+            }
+
+            return new RetornoBase(true, "", texto_librerias);
+        }
+
+        /// <summary>
+        /// Genera el código de definición de un método según el tipo de clase y el tipo de método (si es constructor, destructor o un método común).
+        /// </summary>
+        /// <param name="param_metodo">Metodo cuya definición se va a codificar.</param>
+        /// <param name="param_clase">Objeto con los datos de la clase del método. </param>
+        /// <returns>Objeto con el código generado e información del proceso.</returns>
+        static private RetornoBase GenerarTextoMetodo(Metodo param_metodo, Clase param_clase)
+        {
+            if (param_metodo.EsConstructor && param_metodo.EsDestructor)
+                return new RetornoBase(false, "No se ha podido generar el código correctamente", "Un método es constructor y destructor simultaneamente");
+
+            if ((param_metodo.EsConstructor || param_metodo.EsDestructor) && param_metodo.Nombre != param_clase.Nombre)
+                return new RetornoBase(false, "No se ha podido generar el código correctamente.", "Un método es constructor o destructor y no se llama igual que la clase");
+
+            RetornoBase retorno = GenerarCodigoParametro(param_metodo.Parametros);
+            if (!retorno.Exito)
+            {
+                return retorno;
+            }
+
+            string[] partes = retorno.TextoDesarrollador.Split(new string[] { "--{{texto_separacion}}--" }, StringSplitOptions.None);
+            string texto_comentarios = partes.Length > 0 ? partes[0] : string.Empty;
+            string texto_parametros = partes.Length > 1 ? partes[1] : string.Empty;
+
+            string texto_metodo = string.Empty;
+            if (param_clase.TipoClase == EnumTiposClases.INTERFAZ)
+            {
+                if (param_metodo.EsConstructor || param_metodo.EsDestructor)
+                    return new RetornoBase(true, "", "");
+
+                texto_metodo = "\t\t/// <summary>" + "\n" +
+                    "\t\t///" + param_metodo.Comentario + "\n" +
+                    "\t\t/// </summary>\n" +
+                    texto_comentarios +
+                    "\t\t/// <return> " + param_metodo.Retorno.Comentario + " </return>\n" +
+                    "\t\t" + ObtenerTipoDato(param_metodo.Retorno.TipoDato) + " " +
+                    param_metodo.Nombre + "(" + texto_parametros + ")";
+            }
+            else if (param_metodo.EsDestructor && param_clase.TipoClase != EnumTiposClases.INTERFAZ)
+            {
+                texto_metodo = "\t\t/// <summary>" + "\n" +
+                    "\t\t///" + param_metodo.Comentario + "\n" +
+                    "\t\t/// </summary>\n" +
+                    "\t\t~" + param_metodo.Nombre + "()";
+            }
+            else if (param_metodo.EsConstructor && param_clase.TipoClase != EnumTiposClases.INTERFAZ)
+            {
+                texto_metodo = "\t\t/// <summary>" + "\n" +
+                    "\t\t///" + param_metodo.Comentario + "\n" +
+                    "\t\t/// </summary>\n" +
+                    texto_comentarios +
+                    "\t\t" + ObtenerTipoVisibilidad(param_metodo.Visibilidad) + " " + param_metodo.Nombre + "(" + texto_parametros + ")";
+            }
+            else if (param_clase.TipoClase == EnumTiposClases.CLASE_ABSTRACTA && !param_metodo.EsConstructor && !param_metodo.EsDestructor)
+            {
+                if (param_metodo.Visibilidad == EnumTipoVisibilidad.PRIVADO)
+                    return new RetornoBase(false, 
+                        "No se ha podido generar el código correctamente", 
+                        "Un método abstracto es privado.");
+
+                texto_metodo = "\t\t/// <summary>" + "\n" +
+                    "\t\t///" + param_metodo.Comentario + "\n" +
+                    "\t\t/// </summary>\n" +
+                    texto_comentarios +
+                    "\t\t/// <return> " + param_metodo.Retorno.Comentario + " </return>\n" +
+                    "\t\t" + ObtenerTipoVisibilidad(param_metodo.Visibilidad) + " abstract " +
+                    ObtenerTipoDato(param_metodo.Retorno.TipoDato) + " " +
+                    param_metodo.Nombre + "(" + texto_parametros + ")";
+            }
+            else
+            {
+                texto_metodo = "\t\t/// <summary>" + "\n" +
+                    "\t\t///" + param_metodo.Comentario + "\n" +
+                    "\t\t/// </summary>\n" +
+                    texto_comentarios +
+                    "\t\t/// <return> " + param_metodo.Retorno.Comentario + " </return>\n" +
+                    "\t\t" + ObtenerTipoVisibilidad(param_metodo.Visibilidad) + " " +
+                    ObtenerTipoDato(param_metodo.Retorno.TipoDato) + " " +
+                    param_metodo.Nombre + "(" + texto_parametros + ")";
+            }
+
+            if (texto_metodo != string.Empty)
+            {
+                if (param_clase.TipoClase == EnumTiposClases.INTERFAZ || 
+                    (param_clase.TipoClase == EnumTiposClases.CLASE_ABSTRACTA && (param_metodo.EsConstructor || param_metodo.EsDestructor)))
+                {
+                    texto_metodo += ";\n\n";
+                }
+                else
+                {
+                    texto_metodo += "\n\t\t{\n\n" +
+                        "\t\t}\n\n";
+                }
+            }
+
+            return new RetornoBase(true, "", texto_metodo);
         }
 
         #endregion
+
+        #region "Transformacion de enumeraciones"
+
+        /// <summary>
+        /// Genera el literal en C# según la enumeración pasada por parámetro.
+        /// </summary>
+        /// <param name="param_tipo_clase">Enumeración de tipo de clase.</param>
+        /// <returns>Literal en código C#</returns>
+        static public string ObtenerTipoClase(EnumTiposClases param_tipo_clase)
+        {
+            switch (param_tipo_clase)
+            {
+                case EnumTiposClases.CLASE_ABSTRACTA:
+                    return "abstract class";
+                case EnumTiposClases.CLASE:
+                    return "class";
+                case EnumTiposClases.INTERFAZ:
+                    return "interface";
+                case EnumTiposClases.ENUMERACION:
+                    return "enum";
+                default:
+                    return "class";
+            }
+        }
+
+        /// <summary>
+        /// Genera el literal en C# según la enumeración pasada por parámetro.
+        /// </summary>
+        /// <param name="param_visibilidad">Enumeración de tipo de visibilidad.</param>
+        /// <returns>Literal en código C#</returns>
+        static public string ObtenerTipoVisibilidad(EnumTipoVisibilidad param_visibilidad)
+        {
+            switch (param_visibilidad)
+            {
+                case EnumTipoVisibilidad.PUBLICO:
+                    return "public";
+                case EnumTipoVisibilidad.PRIVADO:
+                    return "private";
+                case EnumTipoVisibilidad.PROTEGIDO:
+                    return "protected";
+                case EnumTipoVisibilidad.INTERNA:
+                    return "internal"; 
+                default:
+                    return "public";
+            }
+        }
+
+        /// <summary>
+        /// Genera el literal en C# según la enumeración pasada por parámetro.
+        /// </summary>
+        /// <param name="param_tipo_dato">Enumeración de tipo de dato.</param>
+        /// <returns>Literal en código C#</returns>
+        static public string ObtenerTipoDato(EnumTipoDato param_tipo_dato)
+        {
+            switch (param_tipo_dato)
+            {
+                case EnumTipoDato.ENTERO:
+                    return "int";
+                case EnumTipoDato.FLOTANTE:
+                    return "float";
+                case EnumTipoDato.LARGO:
+                    return "long";
+                case EnumTipoDato.CORTO:
+                    return "short";
+                case EnumTipoDato.DOBLE:
+                    return "double";
+                case EnumTipoDato.BOOLEANO:
+                    return "bool";
+                case EnumTipoDato.CARACTER:
+                    return "char";
+                case EnumTipoDato.CADENA:
+                    return "string";
+                case EnumTipoDato.BYTE:
+                    return "byte";
+                default:
+                    return "void";
+            }
+        }
+        
+        #endregion
+    
     }
 }
