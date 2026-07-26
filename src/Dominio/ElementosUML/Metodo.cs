@@ -19,6 +19,16 @@ namespace transformador_mda.src.Dominio.ElementosUML
         public List<Parametro> Parametros { get; set; }
 
         /// <summary>
+        /// True si el método es un constructor, false si no.
+        /// </summary>
+        public bool EsConstructor { get; set; }
+
+        /// <summary>
+        /// True si el método es un destructor, false si no.
+        /// </summary>
+        public bool EsDestructor { get; set; }
+
+        /// <summary>
         /// Constructor de la clase, inicializa atributos.
         /// </summary>
         [JsonConstructor]
@@ -27,6 +37,8 @@ namespace transformador_mda.src.Dominio.ElementosUML
             Tipo = EnumTipoElemento.METODO;
             Retorno = new Parametro();
             Parametros = new List<Parametro>();
+            EsConstructor = false;
+            EsDestructor = false;
         }
 
         /// <summary>
