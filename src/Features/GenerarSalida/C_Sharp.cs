@@ -1,15 +1,4 @@
-﻿/**
- Propagación de errores en Principal.GenerarCodigo. Se hará cuando se termine el generador
-Orientación y navegabilidad de asociaciones/dependencias. Creo que está solucionado
-Generación de enumeraciones. Solucionado
-Tratamiento específico de interfaces. Pendiente
-Orden de clase base e interfaces. Solucionado
-Comprobación del retorno de GenerarNamespace. Pendiente
-Representación explícita de constructores. Pendiente
-Sustitución de concatenaciones y Contains por colecciones y string.Join. Pendiente
- */
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using transformador_mda.src.Dominio.Retornos;
 using transformador_mda.src.Features.Utilidades;
@@ -111,18 +100,13 @@ namespace transformador_mda.src.Features.GenerarSalida
             if (!retorno_herencia.Exito)
                 return retorno_herencia;
 
-            string[] partes = retorno_herencia.TextoDesarrollador.Split(new string[] { "--{{texto_separacion}}--" }, StringSplitOptions.None);
-            string texto_librerias = partes.Length > 0 ? partes[0] : string.Empty;
-            string texto_herencia = partes.Length > 1 ? partes[1] : string.Empty;
+            string texto_herencia = retorno_herencia.TextoDesarrollador;
 
             RetornoBase retorno_librerias = GenerarAsociaciones(param_proyecto, param_clase.Id, param_clase.Asociaciones);
             if (!retorno_librerias.Exito)
                 return retorno_librerias;
 
-            if (retorno_librerias.TextoDesarrollador.Contains(texto_librerias))
-                texto_librerias = retorno_librerias.TextoDesarrollador;
-            else
-                texto_librerias += retorno_librerias.TextoDesarrollador;
+            string texto_librerias = retorno_librerias.TextoDesarrollador;
 
             RetornoBase retorno_namespace = GenerarNamespace(param_proyecto, param_clase);
             if (!retorno_namespace.Exito)
@@ -146,35 +130,33 @@ namespace transformador_mda.src.Features.GenerarSalida
                 return new RetornoBase(true, "Código generado correctamente.", texto_clases);
             }
 
-            RetornoBase retorno = GenerarCodigoAtributos(param_clase.Atributos);
-            if (!retorno.Exito)
-                return retorno;
+            if (param_clase.TipoClase != EnumTiposClases.INTERFAZ)
+            {
+                RetornoBase retorno_atributos = GenerarCodigoAtributos(param_clase.Atributos);
+                if (!retorno_atributos.Exito)
+                    return retorno_atributos;
 
-            texto_clases += retorno.TextoDesarrollador;
+                texto_clases += retorno_atributos.TextoDesarrollador;
+            }
 
-            retorno = GenerarCodigoMetodo(param_clase.Metodos);
-            if (!retorno.Exito)
-                return retorno;
+            RetornoBase retorno_metodos = GenerarCodigoMetodo(param_clase.Metodos, param_clase);
+            if (!retorno_metodos.Exito)
+                return retorno_metodos;
 
-            texto_clases += retorno.TextoDesarrollador + "\n" +
+            texto_clases += retorno_metodos.TextoDesarrollador + "\n" +
                     "\t}\n" +
                     "}\n\n";
 
             return new RetornoBase(true, "Código generado correctamente.", texto_clases);            
         }
 
-        //static private RetornoBase GenerarCodigoInterfaz();
-
-        //static private RetornoBase GenerarCodigoClase()
-
-        //static private RetornoBase GenerarCodigoClaseAbstracta();
-
         /// <summary>
         /// Genera la definición de un método con sus comentarios y definición.
         /// </summary>
         /// <param name="param_metodos">Objeto con los datos del método a generar.</param>
+        /// <param name="param_clase">Objeto de tipo clase con los datos de la clase que se está procesando, para saber como definir los métodos.</param>
         /// <returns>Objeto con el código de un método e información del proceso de generación.</returns>
-        static private RetornoBase GenerarCodigoMetodo(List<Metodo> param_metodos)
+        static private RetornoBase GenerarCodigoMetodo(List<Metodo> param_metodos, Clase param_clase)
         {
             if (param_metodos.Count <= 0)
                 return new RetornoBase(true, "Código generado correctamente.", "");
@@ -186,49 +168,40 @@ namespace transformador_mda.src.Features.GenerarSalida
             string texto_metodos_internos = string.Empty;
             foreach (Metodo metodo in param_metodos)
             {
-                RetornoBase retorno = GenerarCodigoParametro(metodo.Parametros);
+                RetornoBase retorno = GenerarTextoMetodo(metodo, param_clase);
                 if (!retorno.Exito)
+                    return retorno;
+
+                string texto_metodo = retorno.TextoDesarrollador;
+                if (metodo.EsConstructor || metodo.EsDestructor)
+                    texto_constructores += texto_metodo;
+                else
                 {
-                    return retorno;                    
-                }
-
-                string[] partes = retorno.TextoDesarrollador.Split(new string[] { "--{{texto_separacion}}--" }, StringSplitOptions.None);
-                string texto_comentarios = partes.Length > 0 ? partes[0] : string.Empty;
-                string texto_parametros = partes.Length > 1 ? partes[1] : string.Empty;
-
-                string texto_metodo = "\t\t/// <summary>" + "\n" +
-                    "\t\t///" + metodo.Comentario + "\n" +
-                    "\t\t/// </summary>\n" +
-                    texto_comentarios +
-                    "\t\t" + ObtenerTipoVisibilidad(metodo.Visibilidad) +
-                    " " + ObtenerTipoDato(metodo.TipoRetorno) +
-                    " " + metodo.Nombre + "(" + texto_parametros + ")\n" +
-                    "\t\t{\n\n" +
-                    "\t\t}\n\n";
-
-                switch (metodo.Visibilidad)
-                {
-                    case EnumTipoVisibilidad.PUBLICO:
-                        texto_metodos_publicos += texto_metodo;
-                        break;
-                    case EnumTipoVisibilidad.PRIVADO:
-                        texto_metodos_privades += texto_metodo;
-                        break;
-                    case EnumTipoVisibilidad.PROTEGIDO:
-                        texto_metodos_protegidos += texto_metodo;
-                        break;
-                    case EnumTipoVisibilidad.INTERNA:
-                        texto_metodos_internos += texto_metodo;
-                        break;
-                    default:
-                        texto_constructores += texto_metodo;
-                        break;
+                    switch (metodo.Visibilidad)
+                    {
+                        case EnumTipoVisibilidad.PUBLICO:
+                            texto_metodos_publicos += texto_metodo;
+                            break;
+                        case EnumTipoVisibilidad.PRIVADO:
+                            texto_metodos_privades += texto_metodo;
+                            break;
+                        case EnumTipoVisibilidad.PROTEGIDO:
+                            texto_metodos_protegidos += texto_metodo;
+                            break;
+                        case EnumTipoVisibilidad.INTERNA:
+                            texto_metodos_internos += texto_metodo;
+                            break;
+                        default:
+                            return new RetornoBase(false, 
+                                "No se ha podido generar el código.", 
+                                "Método GenerarCodigoMetodo, se ha encontrado una clave de visibilidad no soportada por el programa: " + metodo.Visibilidad);
+                    }
                 }
             }
 
             string texto_metodos = string.Empty;
             if (!string.IsNullOrEmpty(texto_constructores))
-                texto_metodos = "\t\t#region \"Constructor\"\n\n" + texto_constructores + "\t\t#endregion";
+                texto_metodos = "\n\n\t\t#region \"Constructor\"\n\n" + texto_constructores + "\t\t#endregion";
             if (!string.IsNullOrEmpty(texto_metodos_publicos))
                 texto_metodos += "\n\n\t\t#region \"Métodos públicos\"\n\n" + texto_metodos_publicos + "\t\t#endregion";
             if (!string.IsNullOrEmpty(texto_metodos_protegidos))
@@ -262,7 +235,7 @@ namespace transformador_mda.src.Features.GenerarSalida
             foreach (Parametro parametro in param_parametros)
             {
                 // <param name="param_parametros"></param>
-                comentarios += "\t\t/// <param name=\"" + parametro.Nombre + "\">" + parametro.Comentario + "</param>\n";
+                comentarios += "\t\t/// <param name=\"" + parametro.Nombre + "\"> " + parametro.Comentario + "</param>\n";
                 if (parametros != string.Empty)
                     parametros += ", ";
 
@@ -344,11 +317,6 @@ namespace transformador_mda.src.Features.GenerarSalida
         /// <summary>
         /// Genera el código para identificar una herencia y la implementación de una o más interfaces.
         /// </summary>
-        /// <remarks>
-        /// En el retorno se devuelve el código y las librerías a importar separadas por el literal "--{{texto_separacion}}--".
-        /// La primera clase que se implementa es la heredada, el resto las interfaces. 
-        /// Si hay más de una clase heredada el método devuelve error.
-        /// </remarks>
         /// <param name="param_proyecto">Objeto con toda la información del proyecto a procesar, para generar los namespace a importar en las clases.</param>
         /// <param name="param_clase_id">Identificador de la clase cuyo código se está generando.</param>
         /// <param name="param_asociaciones">Listado de todas las asociaciones de la clase cuyo código se está generando.</param>
@@ -360,7 +328,6 @@ namespace transformador_mda.src.Features.GenerarSalida
             bool clase_herenciada = false;
             string texto_herencia = string.Empty;
             string texto_interfaces = string.Empty;
-            string librerias = string.Empty;
             foreach (Asociacion herencia in herencias)
             {
                 Clase clase_origen = BuscarComponentes.BuscarClase(param_proyecto, herencia.IdClaseOrigen);
@@ -391,58 +358,191 @@ namespace transformador_mda.src.Features.GenerarSalida
                     texto_interfaces += clase_origen.Nombre;
                 else
                     texto_herencia += clase_origen.Nombre;
-
-                RetornoBase retorno = GenerarNamespace(param_proyecto, clase_origen);
-                if (!retorno.Exito)
-                    return retorno;
-
-                librerias += "using " + retorno.TextoDesarrollador + ";\n";
             }
 
-            string texto_retorno = texto_interfaces == string.Empty ? texto_herencia : texto_herencia + ", " + texto_interfaces;
-            return new RetornoBase(true,
-                "",
-                librerias + "--{{texto_separacion}}--" + texto_retorno);
+            string texto_retorno = string.Empty;
+            if (texto_interfaces == string.Empty)
+                texto_retorno = texto_herencia;
+            else if (texto_herencia == string.Empty)
+                texto_retorno = texto_interfaces;
+            else
+                texto_retorno = texto_herencia + ", " + texto_interfaces;
+
+            return new RetornoBase(true, "", texto_retorno);
         }
 
         /// <summary>
         /// Genera las librerías internas que necesita la clase cuyo código se está generando para funcionar correctamente según sus asociaciones.
         /// </summary>
-        /// <remarks>
-        /// El método hace un listado de todas las asociaciones a excepción de las herencias que se gestionan en otro método.
-        /// El método no permite duplicidades de importaciones.
-        /// </remarks>
         /// <param name="param_proyecto">Objeto con toda la información del proyecto a procesar, para generar los namespace.</param>
         /// <param name="param_clase_id">Identificador de la clase que se está procesando.</param>
         /// <param name="param_asociaciones">Listado de todas las asociaciones definidas en la clase que se está procesando.</param>
         /// <returns></returns>
         static private RetornoBase GenerarAsociaciones(ProyectoBase param_proyecto, string param_clase_id, List<Asociacion> param_asociaciones)
         {
-            List<Asociacion> asociaciones = param_asociaciones.FindAll(a => (a.TipoAsociacion != EnumTipoAsociacion.NO_DEFINIDA && a.TipoAsociacion != EnumTipoAsociacion.HERENCIA));
+            HashSet<string> namespaces = new HashSet<string>();
 
-            string texto_librearias = string.Empty;
-            foreach (Asociacion asociacion in asociaciones)
+            Clase clase_actual = BuscarComponentes.BuscarClase(param_proyecto, param_clase_id);
+
+            if (clase_actual == null)
             {
-                if (asociacion.IdClaseOrigen != param_clase_id)
-                    continue;
-
-                Clase clase_origen = BuscarComponentes.BuscarClase(param_proyecto, asociacion.IdClaseOrigen);
-                Clase clase_destino = BuscarComponentes.BuscarClase(param_proyecto, asociacion.IdClaseDestino);
-
-                if (clase_origen == null || clase_destino == null)
-                    return new RetornoBase(false,
-                        "No se ha podido generar el código correctamente.",
-                        "Clase C_Sharp, método generar asociaciones, asociación con id = " + asociacion.Id + " la clase origen o la clase destino son null");
-
-                RetornoBase retorno = GenerarNamespace(param_proyecto, clase_origen);
-                if (!retorno.Exito)
-                    return retorno;
-
-                if (!texto_librearias.Contains(retorno.TextoDesarrollador))
-                    texto_librearias += "using " + retorno.TextoDesarrollador + ";\n";
+                return new RetornoBase(false,
+                    "No se ha podido generar el código correctamente.",
+                    "No se ha encontrado la clase cuyo código se está generando.");
             }
 
-            return new RetornoBase(true, "", texto_librearias);
+            RetornoBase retorno_actual = GenerarNamespace(param_proyecto, clase_actual);
+
+            if (!retorno_actual.Exito)
+                return retorno_actual;
+
+            foreach (Asociacion asociacion in param_asociaciones)
+            {
+                Clase clase_relacionada;
+
+                if (asociacion.TipoAsociacion == EnumTipoAsociacion.HERENCIA)
+                {
+                    if (asociacion.IdClaseDestino != param_clase_id)
+                        continue;
+
+                    clase_relacionada = BuscarComponentes.BuscarClase(
+                        param_proyecto,
+                        asociacion.IdClaseOrigen);
+                }
+                else
+                {
+                    if (asociacion.IdClaseOrigen != param_clase_id)
+                        continue;
+
+                    clase_relacionada = BuscarComponentes.BuscarClase(
+                        param_proyecto,
+                        asociacion.IdClaseDestino);
+                }
+
+                if (clase_relacionada == null)
+                {
+                    return new RetornoBase(false,
+                        "No se ha podido generar el código correctamente.",
+                        "Clase C_Sharp, método GenerarAsociaciones, asociación con id = " + asociacion.Id + ": no se ha encontrado la clase relacionada.");
+                }
+
+                RetornoBase retorno_relacionado = GenerarNamespace(param_proyecto, clase_relacionada);
+
+                if (!retorno_relacionado.Exito)
+                    return retorno_relacionado;
+
+                if (!string.IsNullOrWhiteSpace(retorno_relacionado.TextoDesarrollador) &&
+                    retorno_relacionado.TextoDesarrollador != retorno_actual.TextoDesarrollador)
+                {
+                    namespaces.Add(retorno_relacionado.TextoDesarrollador);
+                }
+            }
+
+            string texto_librerias = string.Empty;
+            foreach (string nombre_namespace in namespaces)
+            {
+                texto_librerias += "using " + nombre_namespace + ";\n";
+            }
+
+            return new RetornoBase(true, "", texto_librerias);
+        }
+
+        /// <summary>
+        /// Genera el código de definición de un método según el tipo de clase y el tipo de método (si es constructor, destructor o un método común).
+        /// </summary>
+        /// <param name="param_metodo">Metodo cuya definición se va a codificar.</param>
+        /// <param name="param_clase">Objeto con los datos de la clase del método. </param>
+        /// <returns>Objeto con el código generado e información del proceso.</returns>
+        static private RetornoBase GenerarTextoMetodo(Metodo param_metodo, Clase param_clase)
+        {
+            if (param_metodo.EsConstructor && param_metodo.EsDestructor)
+                return new RetornoBase(false, "No se ha podido generar el código correctamente", "Un método es constructor y destructor simultaneamente");
+
+            if ((param_metodo.EsConstructor || param_metodo.EsDestructor) && param_metodo.Nombre != param_clase.Nombre)
+                return new RetornoBase(false, "No se ha podido generar el código correctamente.", "Un método es constructor o destructor y no se llama igual que la clase");
+
+            RetornoBase retorno = GenerarCodigoParametro(param_metodo.Parametros);
+            if (!retorno.Exito)
+            {
+                return retorno;
+            }
+
+            string[] partes = retorno.TextoDesarrollador.Split(new string[] { "--{{texto_separacion}}--" }, StringSplitOptions.None);
+            string texto_comentarios = partes.Length > 0 ? partes[0] : string.Empty;
+            string texto_parametros = partes.Length > 1 ? partes[1] : string.Empty;
+
+            string texto_metodo = string.Empty;
+            if (param_clase.TipoClase == EnumTiposClases.INTERFAZ)
+            {
+                if (param_metodo.EsConstructor || param_metodo.EsDestructor)
+                    return new RetornoBase(true, "", "");
+
+                texto_metodo = "\t\t/// <summary>" + "\n" +
+                    "\t\t///" + param_metodo.Comentario + "\n" +
+                    "\t\t/// </summary>\n" +
+                    texto_comentarios +
+                    "\t\t/// <return> " + param_metodo.Retorno.Comentario + " </return>\n" +
+                    "\t\t" + ObtenerTipoDato(param_metodo.Retorno.TipoDato) + " " +
+                    param_metodo.Nombre + "(" + texto_parametros + ")";
+            }
+            else if (param_metodo.EsDestructor && param_clase.TipoClase != EnumTiposClases.INTERFAZ)
+            {
+                texto_metodo = "\t\t/// <summary>" + "\n" +
+                    "\t\t///" + param_metodo.Comentario + "\n" +
+                    "\t\t/// </summary>\n" +
+                    "\t\t~" + param_metodo.Nombre + "()";
+            }
+            else if (param_metodo.EsConstructor && param_clase.TipoClase != EnumTiposClases.INTERFAZ)
+            {
+                texto_metodo = "\t\t/// <summary>" + "\n" +
+                    "\t\t///" + param_metodo.Comentario + "\n" +
+                    "\t\t/// </summary>\n" +
+                    texto_comentarios +
+                    "\t\t" + ObtenerTipoVisibilidad(param_metodo.Visibilidad) + " " + param_metodo.Nombre + "(" + texto_parametros + ")";
+            }
+            else if (param_clase.TipoClase == EnumTiposClases.CLASE_ABSTRACTA && !param_metodo.EsConstructor && !param_metodo.EsDestructor)
+            {
+                if (param_metodo.Visibilidad == EnumTipoVisibilidad.PRIVADO)
+                    return new RetornoBase(false, 
+                        "No se ha podido generar el código correctamente", 
+                        "Un método abstracto es privado.");
+
+                texto_metodo = "\t\t/// <summary>" + "\n" +
+                    "\t\t///" + param_metodo.Comentario + "\n" +
+                    "\t\t/// </summary>\n" +
+                    texto_comentarios +
+                    "\t\t/// <return> " + param_metodo.Retorno.Comentario + " </return>\n" +
+                    "\t\t" + ObtenerTipoVisibilidad(param_metodo.Visibilidad) + " abstract " +
+                    ObtenerTipoDato(param_metodo.Retorno.TipoDato) + " " +
+                    param_metodo.Nombre + "(" + texto_parametros + ")";
+            }
+            else
+            {
+                texto_metodo = "\t\t/// <summary>" + "\n" +
+                    "\t\t///" + param_metodo.Comentario + "\n" +
+                    "\t\t/// </summary>\n" +
+                    texto_comentarios +
+                    "\t\t/// <return> " + param_metodo.Retorno.Comentario + " </return>\n" +
+                    "\t\t" + ObtenerTipoVisibilidad(param_metodo.Visibilidad) + " " +
+                    ObtenerTipoDato(param_metodo.Retorno.TipoDato) + " " +
+                    param_metodo.Nombre + "(" + texto_parametros + ")";
+            }
+
+            if (texto_metodo != string.Empty)
+            {
+                if (param_clase.TipoClase == EnumTiposClases.INTERFAZ || 
+                    (param_clase.TipoClase == EnumTiposClases.CLASE_ABSTRACTA && (param_metodo.EsConstructor || param_metodo.EsDestructor)))
+                {
+                    texto_metodo += ";\n\n";
+                }
+                else
+                {
+                    texto_metodo += "\n\t\t{\n\n" +
+                        "\t\t}\n\n";
+                }
+            }
+
+            return new RetornoBase(true, "", texto_metodo);
         }
 
         #endregion
@@ -526,5 +626,6 @@ namespace transformador_mda.src.Features.GenerarSalida
         }
         
         #endregion
+    
     }
 }

@@ -9,14 +9,24 @@ namespace transformador_mda.src.Dominio.ElementosUML
     public class Metodo : ElementoVisible
     {
         /// <summary>
-        /// Tipo de dato que retorna el método (bool, int, void...)
+        /// Retorno del método.
         /// </summary>
-        public EnumTipoDato TipoRetorno { get; set; }
+        public Parametro Retorno { get; set; }
 
         /// <summary>
         /// Parámetros asociados al método.
         /// </summary>
         public List<Parametro> Parametros { get; set; }
+
+        /// <summary>
+        /// True si el método es un constructor, false si no.
+        /// </summary>
+        public bool EsConstructor { get; set; }
+
+        /// <summary>
+        /// True si el método es un destructor, false si no.
+        /// </summary>
+        public bool EsDestructor { get; set; }
 
         /// <summary>
         /// Constructor de la clase, inicializa atributos.
@@ -25,8 +35,10 @@ namespace transformador_mda.src.Dominio.ElementosUML
         public Metodo() : base()
         {
             Tipo = EnumTipoElemento.METODO;
-            TipoRetorno = EnumTipoDato.NO_DEFINIDO;
+            Retorno = new Parametro();
             Parametros = new List<Parametro>();
+            EsConstructor = false;
+            EsDestructor = false;
         }
 
         /// <summary>

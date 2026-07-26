@@ -238,13 +238,14 @@ namespace transformador_mda.src.Controladores
         /// <param name="param_id">Identificador del elemento UML.</param>
         /// <param name="param_descripcion">Comentario con el que se actualizará el componente.</param>
         /// <returns>True si el proceso es correcto, false si no.</returns>
-        public bool ActualizarMetodos(string param_id, string param_descripcion)
+        public bool ActualizarMetodos(string param_id, string param_descripcion, string param_comentario_retorno)
         {
             Metodo metodo = BuscarComponentes.BuscarMetodo(Configuracion.Proyecto, param_id);
             if (metodo == null)
                 return false;
 
             metodo.Comentario = param_descripcion;
+            metodo.Retorno.Comentario = param_comentario_retorno;
             return true;
         }
 

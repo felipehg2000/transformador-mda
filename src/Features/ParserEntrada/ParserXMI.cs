@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using transformador_mda.src.Dominio.Retornos;
 using transformador_mda.src.Features.CrearIds;
 using transformador_mda.src.Dominio.ElementosUML;
+using transformador_mda.src.Features.Utilidades;
 
 namespace transformador_mda.src.Features.ParserEntrada
 {
@@ -158,6 +159,16 @@ namespace transformador_mda.src.Features.ParserEntrada
             } 
 
             EnlazarAsociacionesPendientes();
+
+            RetornoBase retornoEstereotipos = ProcesarConstructoresYDestructores();
+            if (!retornoEstereotipos.Exito)
+            {
+                return new RetornoElementoUML(
+                    false,
+                    retornoEstereotipos.TextoUsuario,
+                    null,
+                    retornoEstereotipos.TextoDesarrollador);
+            }
 
             return new RetornoElementoUML(true, "Fichero XMI leído correctamente.", _proyecto);
         }
@@ -356,7 +367,7 @@ namespace transformador_mda.src.Features.ParserEntrada
                 if (resultado.Elemento.Tipo == EnumTipoElemento.PARAMETRO)
                     nuevo_nodo.Parametros.Add((Parametro)resultado.Elemento);
                 else if (resultado.Elemento.Tipo == EnumTipoElemento.RETORNO)
-                    nuevo_nodo.TipoRetorno = ((Parametro)resultado.Elemento).TipoDato;
+                    nuevo_nodo.Retorno = (Parametro)resultado.Elemento;
             }
 
             return new RetornoElementoUML() { Exito = true, Elemento = nuevo_nodo };
@@ -1135,6 +1146,71 @@ namespace transformador_mda.src.Features.ParserEntrada
                     return EnumTipoDato.NO_DEFINIDO;
             }
         }
+        #endregion
+
+        #region "Procesar constructores y destructores"
+
+        /// <summary>
+        /// Recorre los constructores y los destructores para modificar los métodos asociados marcando booleanos para identificarlos.
+        /// </summary>
+        /// <returns>Objeto con información del proceso.</returns>
+        private RetornoBase ProcesarConstructoresYDestructores()
+        {
+            IEnumerable<XElement> estereotipos = _documento
+                .Descendants()
+                .Where(e =>
+                    e.Name.LocalName == "create" ||
+                    e.Name.LocalName == "destroy");
+
+            foreach (XElement estereotipo in estereotipos)
+            {
+                _elemento_actual = estereotipo;
+
+                bool resultado;
+
+                if (estereotipo.Name.LocalName == "create")
+                    resultado = ProcesarConstructor(true);
+                else
+                    resultado = ProcesarConstructor(false);
+
+                if (!resultado)
+                {
+                    string id_operacion = ObtenerAtributo(estereotipo, "base_Operation");
+
+                    return new RetornoBase(false, 
+                        "No se ha podido procesar un constructor o destructor.",
+                        "No se encontró la operación referenciada por base_Operation: " + id_operacion);
+                }
+            }
+
+            return new RetornoBase(
+                true,
+                "Constructores y destructores procesados correctamente.");
+        }
+
+        /// <summary>
+        /// Obtiene el identificador del método, lo busca en el proyecto y actualiza su variable sobre si es constructor o destructor.
+        /// </summary>
+        /// <param name="param_es_constructor">True si se está procesando un constructor, false si se está procesando un destructor.</param>
+        /// <returns>True si el proceso ha sido correcto, false si no.</returns>
+        protected bool ProcesarConstructor(bool param_es_constructor)
+        {
+            string id_metodo = ObtenerAtributo(_elemento_actual, "base_Operation");
+            if (id_metodo == string.Empty)
+                return false;
+
+            Metodo metodo = BuscarComponentes.BuscarMetodo(_proyecto, id_metodo);
+            if (metodo == null)
+                return false;
+
+            if (param_es_constructor)
+                metodo.EsConstructor = true;
+            else
+                metodo.EsDestructor = true;
+
+            return true;
+        }
+
         #endregion
     }
 
