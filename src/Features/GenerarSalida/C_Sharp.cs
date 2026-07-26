@@ -263,7 +263,7 @@ namespace transformador_mda.src.Features.GenerarSalida
             foreach (Parametro parametro in param_parametros)
             {
                 // <param name="param_parametros"></param>
-                comentarios += "\t\t/// <param name=\"" + parametro.Nombre + "\">" + parametro.Comentario + "</param>\n";
+                comentarios += "\t\t/// <param name=\"" + parametro.Nombre + "\"> " + parametro.Comentario + "</param>\n";
                 if (parametros != string.Empty)
                     parametros += ", ";
 

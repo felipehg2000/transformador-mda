@@ -636,6 +636,7 @@ namespace transformador_mda.src.Vistas
                 return;
 
             richTextBoxMetodo.Text = metodo.Comentario;
+            richTextBoxRetorno.Text = metodo.Retorno.Comentario;
 
             foreach (Parametro parametro in metodo.Parametros)
             {
@@ -671,27 +672,11 @@ namespace transformador_mda.src.Vistas
         }
 
         /// <summary>
-        /// Graba la información del comentario del método en la variable del controlador
+        /// Graba la información del comentario del método, parámetros y retorno en la variable del controlador
         /// </summary>
         /// <param name="sender">Componente que lanza el evento.</param>
         /// <param name="e">Argumentos asociados al evento.</param>
         private void buttonGrabarMetodo_Click(object sender, EventArgs e)
-        {
-            if (listView.SelectedItems.Count == 0)
-                return;
-
-            if (!(listView.SelectedItems[0].Tag is Metodo metodo))
-                return;
-
-            _controlador.ActualizarMetodos(metodo.Id, richTextBoxMetodo.Text);
-        }
-
-        /// <summary>
-        /// Graba la información del comentario de los parámetros en la variable del controlador.
-        /// </summary>
-        /// <param name="sender">Componente que lanza el evento.</param>
-        /// <param name="e">Argumentos asociados al evento.</param>
-        private void buttonGrabarParametros_Click(object sender, EventArgs e)
         {
             if (listView.SelectedItems.Count == 0)
                 return;
@@ -706,6 +691,8 @@ namespace transformador_mda.src.Vistas
 
                 _controlador.ActualizarParametro(id, comentario);
             }
+
+            _controlador.ActualizarMetodos(metodo.Id, richTextBoxMetodo.Text, richTextBoxRetorno.Text);
         }
 
         /// <summary>
