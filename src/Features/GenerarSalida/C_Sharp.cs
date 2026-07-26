@@ -379,10 +379,6 @@ namespace transformador_mda.src.Features.GenerarSalida
         /// <summary>
         /// Genera las librerías internas que necesita la clase cuyo código se está generando para funcionar correctamente según sus asociaciones.
         /// </summary>
-        /// <remarks>
-        /// El método hace un listado de todas las asociaciones a excepción de las herencias que se gestionan en otro método.
-        /// El método no permite duplicidades de importaciones.
-        /// </remarks>
         /// <param name="param_proyecto">Objeto con toda la información del proyecto a procesar, para generar los namespace.</param>
         /// <param name="param_clase_id">Identificador de la clase que se está procesando.</param>
         /// <param name="param_asociaciones">Listado de todas las asociaciones definidas en la clase que se está procesando.</param>
@@ -390,39 +386,70 @@ namespace transformador_mda.src.Features.GenerarSalida
         static private RetornoBase GenerarAsociaciones(ProyectoBase param_proyecto, string param_clase_id, List<Asociacion> param_asociaciones)
         {
             HashSet<string> namespaces = new HashSet<string>();
+
+            Clase clase_actual = BuscarComponentes.BuscarClase(param_proyecto, param_clase_id);
+
+            if (clase_actual == null)
+            {
+                return new RetornoBase(false,
+                    "No se ha podido generar el código correctamente.",
+                    "No se ha encontrado la clase cuyo código se está generando.");
+            }
+
+            RetornoBase retorno_actual = GenerarNamespace(param_proyecto, clase_actual);
+
+            if (!retorno_actual.Exito)
+                return retorno_actual;
+
             foreach (Asociacion asociacion in param_asociaciones)
             {
-                if (asociacion.IdClaseOrigen != param_clase_id)
-                    continue;
+                Clase clase_relacionada;
 
-                Clase clase_origen = BuscarComponentes.BuscarClase(param_proyecto, asociacion.IdClaseOrigen);
-                Clase clase_destino = BuscarComponentes.BuscarClase(param_proyecto, asociacion.IdClaseDestino);
+                if (asociacion.TipoAsociacion == EnumTipoAsociacion.HERENCIA)
+                {
+                    if (asociacion.IdClaseDestino != param_clase_id)
+                        continue;
 
-                if (clase_origen == null || clase_destino == null)
+                    clase_relacionada = BuscarComponentes.BuscarClase(
+                        param_proyecto,
+                        asociacion.IdClaseOrigen);
+                }
+                else
+                {
+                    if (asociacion.IdClaseOrigen != param_clase_id)
+                        continue;
+
+                    clase_relacionada = BuscarComponentes.BuscarClase(
+                        param_proyecto,
+                        asociacion.IdClaseDestino);
+                }
+
+                if (clase_relacionada == null)
+                {
                     return new RetornoBase(false,
                         "No se ha podido generar el código correctamente.",
-                        "Clase C_Sharp, método generar asociaciones, asociación con id = " + asociacion.Id + " la clase origen o la clase destino son null");
+                        "Clase C_Sharp, método GenerarAsociaciones, asociación con id = " + asociacion.Id + ": no se ha encontrado la clase relacionada.");
+                }
 
-                RetornoBase retorno_destino = GenerarNamespace(param_proyecto, clase_destino);
-                if (!retorno_destino.Exito)
-                    return retorno_destino;
+                RetornoBase retorno_relacionado = GenerarNamespace(param_proyecto, clase_relacionada);
 
-                RetornoBase retorno_origen = GenerarNamespace(param_proyecto, clase_origen);
-                if (!retorno_origen.Exito)
-                    return retorno_origen;
+                if (!retorno_relacionado.Exito)
+                    return retorno_relacionado;
 
-                if (!string.IsNullOrEmpty(retorno_destino.TextoDesarrollador) &&
-                    retorno_origen.TextoDesarrollador != retorno_destino.TextoDesarrollador)
-                    namespaces.Add(retorno_destino.TextoDesarrollador);
+                if (!string.IsNullOrWhiteSpace(retorno_relacionado.TextoDesarrollador) &&
+                    retorno_relacionado.TextoDesarrollador != retorno_actual.TextoDesarrollador)
+                {
+                    namespaces.Add(retorno_relacionado.TextoDesarrollador);
+                }
             }
 
-            string texto_librearias = string.Empty;
-            foreach(string nombre in namespaces)
+            string texto_librerias = string.Empty;
+            foreach (string nombre_namespace in namespaces)
             {
-                texto_librearias += "using " + nombre + ";\n";
+                texto_librerias += "using " + nombre_namespace + ";\n";
             }
 
-            return new RetornoBase(true, "", texto_librearias);
+            return new RetornoBase(true, "", texto_librerias);
         }
 
         /// <summary>
