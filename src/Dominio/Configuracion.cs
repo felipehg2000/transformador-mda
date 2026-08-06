@@ -39,6 +39,11 @@ namespace transformador_mda.src.Dominio
         public string RutaRaiz { get; set; }
 
         /// <summary>
+        /// Ruta del fichero JSON del proyecto para la generación IA.
+        /// </summary>
+        public string RutaFicheroJSON { get; set; }
+
+        /// <summary>
         /// Constructor de la clase, inicializa atributos a vacío.
         /// </summary>
         [JsonConstructor]
@@ -50,6 +55,7 @@ namespace transformador_mda.src.Dominio
             Proyecto = new ProyectoBase();
             RutaFicheroEntrada = string.Empty;
             RutaRaiz = string.Empty;
+            RutaFicheroJSON = string.Empty;
         }
     }
 }

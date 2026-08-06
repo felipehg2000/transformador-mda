@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Drawing;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using transformador_mda.src.Controladores;
 using transformador_mda.src.Dominio.ElementosUML;
 using transformador_mda.src.Dominio.Retornos;
+using transformador_mda.src.Features.IntegracionIA;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.Window;
 
 namespace transformador_mda.src.Vistas
@@ -782,7 +784,7 @@ namespace transformador_mda.src.Vistas
         /// </summary>
         /// <param name="sender">Componente que lanza el evento.</param>
         /// <param name="e">Argumentos asociados al evento.</param>
-        private void generarEsqueletoToolStripMenuItem_Click(object sender, EventArgs e)
+        private async void generarEsqueletoToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (treeView.Nodes.Count <= 0)
             {
@@ -801,7 +803,7 @@ namespace transformador_mda.src.Vistas
                 return;
             }
 
-            RetornoBase retorno = _controlador.GenerarCodigo(clase_seleccionada);
+            RetornoBase retorno = await _controlador.GenerarCodigoClase(clase_seleccionada, true);
             if (!retorno.Exito)
                 MessageBox.Show(retorno.TextoUsuario,
                     "Error",
@@ -858,5 +860,29 @@ namespace transformador_mda.src.Vistas
         }
 
         #endregion
+
+        private async void pruebaIAToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (treeView.Nodes.Count <= 0)
+            {
+                MessageBox.Show("Debe seleccionar un fichero XMI o un proyecto y una clase en el explorador de soluicones para poder generar código.",
+                    "Aviso",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information);
+                return;
+            }
+            if (!(treeView.SelectedNode.Tag is Clase clase_seleccionada))
+            {
+                MessageBox.Show("Debe seleccionar una clase en el explorador de soluicones para poder generar código.",
+                    "Aviso",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information);
+                return;
+            }
+
+            throw new NotImplementedException();
+        }
+
+       
     }
 }

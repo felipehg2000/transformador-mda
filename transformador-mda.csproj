@@ -134,7 +134,7 @@
     <Compile Include="src\Dominio\Retornos\RetornoElementoUML.cs" />
     <Compile Include="src\Dominio\Retornos\RetornoBase.cs" />
     <Compile Include="src\Dominio\Retornos\RetornoMultiple.cs" />
-    <Compile Include="src\Features\DAO\ClaseDAO.cs" />
+    <Compile Include="src\Features\DAO\ProyectoDAO.cs" />
     <Compile Include="src\Features\IntegracionIA\FactoriaProveedorIA.cs" />
     <Compile Include="src\Features\IntegracionIA\IProveedorIA.cs" />
     <Compile Include="src\Features\IntegracionIA\OpenAI.cs" />
