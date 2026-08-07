@@ -16,6 +16,8 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using transformador_mda.src.Dominio.ElementosUML;
 using transformador_mda.src.Dominio.Retornos;
+using transformador_mda.src.Features.IntegracionIA.Dominio;
+using transformador_mda.src.Features.Utilidades;
 
 namespace transformador_mda.src.Features.IntegracionIA
 {
@@ -26,6 +28,9 @@ namespace transformador_mda.src.Features.IntegracionIA
         /// </summary>
         private const string Token = "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";
 
+        /// <summary>
+        /// Texto que se envía a la inteligencia artificial para indicarle cómo debe generar el código de los métodos identificados en el esqueleto.
+        /// </summary>
         private const string Prompt =
 @"Actúa como un desarrollador sénior especializado en C# y .NET.
 
@@ -579,81 +584,98 @@ Antes de responder, comprueba internamente que:
 
 Devuelve exclusivamente el objeto JSON.";
 
+        /// <summary>
+        /// Objeto que contiene la información de los ficheros subidos a OpenAI y la ruta donde se almacenan los ficheros temporales.
+        /// </summary>
+        private InformacionIA _metadatos;
+
+        /// <summary>
+        /// Constructor de la clase, inicializa atributos a vacío.
+        /// </summary>
+        public OpenAI()
+        {
+            _metadatos = new InformacionIA();
+            _metadatos.RutaDirectorioFicheros = Path.Combine(Application.StartupPath, "FicherosIA");
+        }
+
         public async Task<RetornoBase> GenerarCodigo(Clase param_clase, string param_ruta_json, string param_esqueleto)
         {
-            throw new Exception("Falta por persistir los identificadores de los archivos subidos a open ai. Borrar el esqueleto de open AI y de la carpeta local.");
-            string ruta_esqueleto = string.Empty;
-            try
-            {
-                string nombre_fichero = DateTime.Now.ToString("yyyyMMddHHmmss") + ".json";
-                ruta_esqueleto = Path.Combine(Application.StartupPath, nombre_fichero);
-                File.WriteAllText(ruta_esqueleto, param_esqueleto);
-            }
-            catch(Exception e)
-            {
-                return new RetornoBase(false, "No se ha podido crear el fichero temporal con el código esqueleto.", e.Message);
-            }
-
-            if (!File.Exists(ruta_esqueleto))
-                return new RetornoBase(false, "No se ha podido crear el fichero temporal con el código esqueleto.", "El fichero temporal no existe.");
+            RetornoBase retorno_escritura_esqueleto = Ficheros.EscribirFichero(_metadatos.RutaDirectorioFicheros, "cs", param_esqueleto);
+            if (!File.Exists(retorno_escritura_esqueleto.TextoDesarrollador))
+                return new RetornoBase(false, "No se ha podido generar el código.", "No se ha podido crear el fichero temporal con el código esqueleto.");
 
             try
             {
-                // Crear contexto
-                RetornoBase retorno_subida_json = await SubirFichero(param_ruta_json);
+                RetornoFicheroIA retorno_subida_json = await SubirFichero(param_ruta_json);
                 if (!retorno_subida_json.Exito)
                     return retorno_subida_json;
+                _metadatos.InformacionJSON = retorno_subida_json.InformacionFichero;
 
-                RetornoBase retorno_subida_esqueleto = await SubirFichero(ruta_esqueleto);
+                RetornoFicheroIA retorno_subida_esqueleto = await SubirFichero(retorno_escritura_esqueleto.TextoDesarrollador);
                 if (!retorno_subida_esqueleto.Exito)
                     return retorno_subida_esqueleto;
+                retorno_subida_esqueleto.InformacionFichero.IdClaseDelEsqueleto = param_clase.Id;
+                _metadatos.InformacionFicherosEsqueleto.Add(retorno_subida_esqueleto.InformacionFichero);
 
-                // Ejecutar petición
-                #pragma warning disable OPENAI001 // Este tipo se incluye solo con fines de evaluación y está sujeto a cambios o a que se elimine en próximas actualizaciones. Suprima este diagnóstico para continuar.
-                ResponsesClient cliente = new ResponsesClient(Token);
-     
-                ResponseContentPart[] contenido = new ResponseContentPart[]
-                {
-                    ResponseContentPart.CreateInputTextPart("ARCHIVO DE PROYECTO: el siguiente archivo contiene el JSON estructurado completo de ProyectoBase."),
-                    ResponseContentPart.CreateInputFilePart(retorno_subida_json.TextoDesarrollador),
+                RetornoBase retorno_codigo_ia = await EjecutarConsulta(param_clase.Id);
+                if (!retorno_codigo_ia.Exito)
+                    return retorno_codigo_ia;
 
-                    ResponseContentPart.CreateInputTextPart("ARCHIVO DE CÓDIGO ESQUELETO: el siguiente archivo contiene la clase C# cuyos métodos identificados deben implementarse."),
-                    ResponseContentPart.CreateInputFilePart(retorno_subida_esqueleto.TextoDesarrollador)
-                };
+                BorrarFicherosEsqueletoIA();
 
-                ResponseItem[] elementos_entrada = new ResponseItem[]
-                {
-                    ResponseItem.CreateUserMessageItem(contenido)
-                };
-
-                CreateResponseOptions opciones = new CreateResponseOptions("gpt-5.6-luna", elementos_entrada)
-                {
-                    Instructions = Prompt,
-                    MaxOutputTokenCount = 32000
-                };
-
-                ResponseResult respuesta = await cliente.CreateResponseAsync(opciones);
-
-                string resultado = respuesta.GetOutputText();
-                #pragma warning restore OPENAI001 // Este tipo se incluye solo con fines de evaluación y está sujeto a cambios o a que se elimine en próximas actualizaciones. Suprima este diagnóstico para continuar.
-
-
-                if (string.IsNullOrWhiteSpace(resultado))
-                {
-                    return new RetornoBase(
-                        false,
-                        "La inteligencia artificial no ha devuelto contenido.",
-                        string.Empty);
-                }
-
-
-                // Devolver la respuesta
-                return new RetornoBase(true, string.Empty, resultado);
+                return retorno_codigo_ia;
             }
             catch (ClientResultException e)
             {
                 return ControlarExcepcion(e);
             }
+        }
+
+        private async Task<RetornoBase> EjecutarConsulta(string param_id_clase)
+        {
+            #pragma warning disable OPENAI001 // Este tipo se incluye solo con fines de evaluación y está sujeto a cambios o a que se elimine en próximas actualizaciones. Suprima este diagnóstico para continuar.
+            ResponsesClient cliente = new ResponsesClient(Token);
+
+            ResponseContentPart[] contenido = new ResponseContentPart[]
+            {
+                    ResponseContentPart.CreateInputTextPart("ARCHIVO DE PROYECTO: el siguiente archivo contiene el JSON estructurado completo de ProyectoBase."),
+                    ResponseContentPart.CreateInputFilePart(_metadatos.InformacionJSON.IdFicheroOpenAI),
+
+                    ResponseContentPart.CreateInputTextPart("ARCHIVO DE CÓDIGO ESQUELETO: el siguiente archivo contiene la clase C# cuyos métodos identificados deben implementarse."),
+                    ResponseContentPart.CreateInputFilePart(ObtenerInformacionFichero(param_id_clase).IdFicheroOpenAI)
+            };
+
+            ResponseItem[] elementos_entrada = new ResponseItem[]
+            {
+                    ResponseItem.CreateUserMessageItem(contenido)
+            };
+
+            CreateResponseOptions opciones = new CreateResponseOptions("gpt-5.6-luna", elementos_entrada)
+            {
+                Instructions = Prompt,
+                MaxOutputTokenCount = 32000
+            };
+
+            ResponseResult respuesta = await cliente.CreateResponseAsync(opciones);
+            #pragma warning restore OPENAI001 // Este tipo se incluye solo con fines de evaluación y está sujeto a cambios o a que se elimine en próximas actualizaciones. Suprima este diagnóstico para continuar.
+
+            return new RetornoBase(true, string.Empty, respuesta.GetOutputText());
+        }
+
+        private async void BorrarFicherosEsqueletoIA()
+        {
+            foreach (InformacionFichero informacion in _metadatos.InformacionFicherosEsqueleto)
+            {
+                try
+                {
+                    RetornoBase retorno_borrado = await BorrarFichero(informacion.IdFicheroOpenAI);
+                    if (retorno_borrado.Exito)
+                    {
+                        informacion.IdFicheroOpenAI = string.Empty;
+                    }
+                }
+                catch { /*No se hace nada, pero se evita lanzar la excepción*/ }
+            }            
         }
 
         private RetornoBase ControlarExcepcion(ClientResultException param_excepcion)
@@ -743,7 +765,14 @@ Devuelve exclusivamente el objeto JSON.";
             return new RetornoBase(false, mensajeUsuario, detalleTecnico);
         }
 
-        private async Task<RetornoBase> SubirFichero(string param_ruta_fichero)
+        #region "Gestión de ficheros en OpenAI"
+
+        /// <summary>
+        /// Método encargado de subir ficheros a OpenAI y devolver el Id del fichero subido.
+        /// </summary>
+        /// <param name="param_ruta_fichero">Ruta donde se encuentra el fichero a subir.</param>
+        /// <returns>Objeto de tipo RetornoFicheroIA con información del proceso y, si todo ha ido bien, un objeto con la ruta del fichero y el ID de este en OpenAI.</returns>
+        private async Task<RetornoFicheroIA> SubirFichero(string param_ruta_fichero)
         {
             try
             {
@@ -755,12 +784,46 @@ Devuelve exclusivamente el objeto JSON.";
                 OpenAIFile archivo = await cliente_de_ficheros.UploadFileAsync(param_ruta_fichero, FileUploadPurpose.Assistants);
 
                 // Devolver el Id del fichero
-                return new RetornoBase(true, "Fichero subido correctamente.", archivo.Id);
+                return new RetornoFicheroIA(true, "Fichero subido correctamente.", "", new InformacionFichero(param_ruta_fichero, archivo.Id));
+            }
+            catch (ClientResultException e)
+            {
+                return (RetornoFicheroIA)ControlarExcepcion(e);
+            }
+        }
+
+        /// <summary>
+        /// Método encargado de borrar ficheros de OpenAI a partir del Id del fichero.
+        /// </summary>
+        /// <param name="param_id_fichero">Id del fichero a borrar.</param>
+        /// <returns>Objeto de tipo RetornoBase con información del proceso.</returns>
+        private async Task<RetornoBase> BorrarFichero(string param_id_fichero)
+        {
+            try
+            {
+                OpenAIClient cliente = new OpenAIClient(Token);
+                // Crear cliente de archivos
+                OpenAIFileClient cliente_de_ficheros = cliente.GetOpenAIFileClient();
+                // Borrar el fichero
+                await cliente_de_ficheros.DeleteFileAsync(param_id_fichero);
+                // Devolver éxito
+                return new RetornoBase(true, "Fichero borrado correctamente.", "");
             }
             catch (ClientResultException e)
             {
                 return ControlarExcepcion(e);
             }
         }
+
+        #endregion
+
+        #region "Métodos de búsqueda"
+
+        private InformacionFichero ObtenerInformacionFichero(string param_id_clase)
+        {
+            return _metadatos.InformacionFicherosEsqueleto.FirstOrDefault(f => f.IdClaseDelEsqueleto == param_id_clase);
+        }
+
+        #endregion
     }
 }
