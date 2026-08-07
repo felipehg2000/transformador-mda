@@ -1,12 +1,14 @@
 ﻿using System;
+using System.IO;
 using System.Windows.Forms;
+using transformador_mda.src.Dominio.Retornos;
 
-namespace transformador_mda.src.Features.ExploradorFicheros
+namespace transformador_mda.src.Features.Utilidades
 {
     /// <summary>
     /// Clase para gestionar diferentes operaciones relacionadas con archivos.
     /// </summary>
-    internal class Files
+    internal class Ficheros
     {
         #region "File explorer"
 
@@ -76,6 +78,53 @@ namespace transformador_mda.src.Features.ExploradorFicheros
         static public void WriteFileText(string param_path, string param_text)
         {
             System.IO.File.WriteAllText(param_path, param_text);
+        }
+
+        /// <summary>
+        /// Escribe un fichero temporal con el contenido pasado por parámetro, en la ruta pasada por parámetros, con la extensión pasada por parámetro. Genera el nombre de manera automática.
+        /// </summary>
+        /// <param name="param_ruta">Directorio donde se almacenará el fichero.</param>
+        /// <param name="param_extension">Extensión del fichero.</param>
+        /// <param name="param_contenido">Contenido del fichero.</param>
+        /// <returns>Objeto RetornoBase con el resultado de la operación o información del proceso.</returns>
+        static public RetornoBase EscribirFichero(string param_ruta, string param_extension, string param_contenido)
+        {
+            try
+            {
+                string nombre_fichero = DateTime.Now.ToString("yyyyMMddHHmmss") + "." + param_extension;
+                string ruta_completa = Path.Combine(param_ruta, nombre_fichero);
+                File.WriteAllText(ruta_completa, param_contenido);
+                return new RetornoBase(true, string.Empty, ruta_completa);
+            }
+            catch (Exception e)
+            {
+                return new RetornoBase(false, "No se ha podido crear el fichero temporal con el código esqueleto.", e.Message);
+            }
+        }
+
+        /// <summary>
+        /// Borra un fichero en la ruta pasada por parámetro, si existe.
+        /// </summary>
+        /// <param name="param_ruta">Ruta del fichero a borrar.</param>
+        /// <returns>True si el fichero fue borrado, false en caso contrario.</returns>
+        static public bool BorrarFichero(string param_ruta)
+        {
+            try
+            {
+                if (File.Exists(param_ruta))
+                {
+                    File.Delete(param_ruta);
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            catch (Exception)
+            {
+                return false;
+            }
         }
 
         #endregion "File reading and writing"

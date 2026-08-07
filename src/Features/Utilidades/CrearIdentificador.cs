@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace transformador_mda.src.Features.CrearIds
+namespace transformador_mda.src.Features.Utilidades
 {
     /// <summary>
     /// Clase para generar distintos tipos de identificadores.
