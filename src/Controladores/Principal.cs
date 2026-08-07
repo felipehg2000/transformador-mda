@@ -3,8 +3,6 @@ using System.Threading.Tasks;
 using transformador_mda.src.Dominio;
 using transformador_mda.src.Dominio.ElementosUML;
 using transformador_mda.src.Dominio.Retornos;
-using transformador_mda.src.Features.CrearIds;
-using transformador_mda.src.Features.ExploradorFicheros;
 using transformador_mda.src.Features.GenerarSalida;
 using transformador_mda.src.Features.DAO;
 using transformador_mda.src.Features.IntegracionIA;
@@ -61,7 +59,7 @@ namespace transformador_mda.src.Controladores
             else if (Configuracion.TipoFicheroEntrada == EnumTipoFicheroEntrada.XMI)
                 extensiones_soportadas = "Archivos XMI (*.xmi) | *.xmi| Archivos XML (*.xml) | *.xml| Todos los archivos (*.*) | *.*";
             
-            string ruta_fichero = Files.GetFilePath("Buscar fichero de entrada.", extensiones_soportadas);
+            string ruta_fichero = Ficheros.GetFilePath("Buscar fichero de entrada.", extensiones_soportadas);
             if (string.IsNullOrEmpty(ruta_fichero))
                 return new RetornoMultiple(true,
                     RetornoMultiple.EnumEstado.CANCELADO_POR_USUARIO,
@@ -128,7 +126,7 @@ namespace transformador_mda.src.Controladores
         /// <returns>False si el usuario ha cancelado el proceso true si ha ido todo bien.</returns>
         public bool ImportarConfiguracion()
         {
-            string nombre_fichero = Files.GetFilePath("Buscar fichero XMI.",
+            string nombre_fichero = Ficheros.GetFilePath("Buscar fichero XMI.",
                 "Archivos JSON (*.json) | *.json| Todos los archivos (*.*) | *.*");
             if (string.IsNullOrEmpty(nombre_fichero))
                 return false;
