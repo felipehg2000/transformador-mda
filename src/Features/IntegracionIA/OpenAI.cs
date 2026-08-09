@@ -22,8 +22,8 @@ namespace transformador_mda.src.Features.IntegracionIA
         /// <summary>
         /// Clave de la API de OpenAI.
         /// </summary>
-        //private const string Token = "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";
-        private const string Token = "TOKEN_CAPADO";
+        private const string Token = "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";
+        //private const string Token = "TOKEN_CAPADO";
         /// <summary>
         /// Texto que se envía a la inteligencia artificial para indicarle cómo debe generar el código de los métodos identificados en el esqueleto.
         /// </summary>
@@ -612,15 +612,20 @@ Devuelve exclusivamente el objeto JSON.";
         /// <param name="param_ruta_json">Ruta del archivo JSON que contiene la información del proyecto.</param>
         /// <param name="param_esqueleto">Código esqueleto de la clase cuyo código completo se va a generar.</param>
         /// <returns></returns>
-        public async Task<RetornoBase> GenerarCodigo(Clase param_clase, string param_ruta_json, string param_esqueleto)
+        public async Task<RetornoBase> GenerarCodigo(ProyectoBase param_proyecto, Clase param_clase, string param_esqueleto)
         {
-            RetornoBase retorno_escritura_esqueleto = Ficheros.EscribirFichero(_metadatos.RutaDirectorioFicheros, "cs", param_esqueleto);
+            RetornoBase retorno_escritura_esqueleto = Ficheros.EscribirFichero(_metadatos.RutaDirectorioFicheros, "txt", param_esqueleto);
             if (!File.Exists(retorno_escritura_esqueleto.TextoDesarrollador))
                 return new RetornoBase(false, "No se ha podido generar el código.", "No se ha podido crear el fichero temporal con el código esqueleto.");
 
+
+            RetornoBase retorno_escritura_json = Ficheros.EscribirFichero(_metadatos.RutaDirectorioFicheros, "json", JsonSerializer.Serialize(param_proyecto));
+            if (!File.Exists(retorno_escritura_json.TextoDesarrollador))
+                return new RetornoBase(false, "No se ha podido generar el código.", "No se ha podido crear el fichero temporal con el JSON del proyecto.");
+
             try
             {
-                RetornoFicheroIA retorno_subida_json = await SubirFichero(param_ruta_json);
+                RetornoFicheroIA retorno_subida_json = await SubirFichero(retorno_escritura_json.TextoDesarrollador);
                 if (!retorno_subida_json.Exito)
                     return retorno_subida_json;
                 _metadatos.InformacionJSON = retorno_subida_json.InformacionFichero;
@@ -634,6 +639,15 @@ Devuelve exclusivamente el objeto JSON.";
                 RetornoBase retorno_codigo_ia = await EjecutarConsulta(param_clase.Id);
                 if (!retorno_codigo_ia.Exito)
                     return retorno_codigo_ia;
+
+                try
+                {
+                    await BorrarFichero(_metadatos.InformacionJSON.IdFicheroOpenAI);
+                }
+                catch (Exception)
+                {
+                    // Ignorar errores al borrar el fichero JSON
+                }
 
                 BorrarFicherosEsqueletoIA();
 

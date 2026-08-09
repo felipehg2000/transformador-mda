@@ -299,16 +299,14 @@ namespace transformador_mda.src.Controladores
             return GenerarCodigo(param_clase);
         }
 
-        public async Task<RetornoBase> GenerarCodigoIA(string param_ruta_proyecto_json, Clase param_clase)
+        public async Task<RetornoBase> GenerarCodigoIA(Clase param_clase)
         {
             IProveedorIA proveedorIA = FactoriaProveedorIA.CrearProveedorIA(ProveedorIA.OpenAI);
             RetornoBase retorno_sin_ia = GenerarCodigo(param_clase);
             if (!retorno_sin_ia.Exito)
                 return retorno_sin_ia;
 
-            RetornoBase retorno_con_ia = await proveedorIA.GenerarCodigo(param_clase,
-                param_ruta_proyecto_json,
-                retorno_sin_ia.TextoDesarrollador);
+            RetornoBase retorno_con_ia = await proveedorIA.GenerarCodigo(Configuracion.Proyecto, param_clase, retorno_sin_ia.TextoDesarrollador);
             if (!retorno_con_ia.Exito)
                 return retorno_con_ia;
 

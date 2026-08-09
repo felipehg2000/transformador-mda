@@ -877,7 +877,17 @@ namespace transformador_mda.src.Vistas
                 return;
             }
 
-            RetornoBase retorno_codigo = await _controlador.GenerarCodigoIA(_controlador.Configuracion.RutaFicheroJSON, clase_seleccionada);
+            RetornoBase retorno_codigo = await _controlador.GenerarCodigoIA(clase_seleccionada);
+            if (!retorno_codigo.Exito)
+            {
+                MessageBox.Show(retorno_codigo.TextoUsuario,
+                    "Error",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+                //return;
+            }
+
+            richTextBoxCodigo.Text = retorno_codigo.TextoDesarrollador;
         }
 
 
