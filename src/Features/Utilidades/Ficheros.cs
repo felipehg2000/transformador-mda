@@ -89,6 +89,11 @@ namespace transformador_mda.src.Features.Utilidades
         /// <returns>Objeto RetornoBase con el resultado de la operación o información del proceso.</returns>
         static public RetornoBase EscribirFichero(string param_ruta, string param_extension, string param_contenido)
         {
+            if (!Directory.Exists(param_ruta))
+            {
+                Directory.CreateDirectory(param_ruta);
+            }
+
             try
             {
                 string nombre_fichero = DateTime.Now.ToString("yyyyMMddHHmmss") + "." + param_extension;
