@@ -3,12 +3,12 @@ using System.IO;
 using System.Text.Json;
 using transformador_mda.src.Dominio;
 
-namespace transformador_mda.src.Features.GestionConfiguracion
+namespace transformador_mda.src.Features.DAO
 {
     /// <summary>
     /// Clase para controlar la serialización y deserialización a JSON.
     /// </summary>
-    public class DAO
+    public class ConfiguracionDAO
     {
         /// <summary>
         /// Importación de JSON a objeto Configuración.

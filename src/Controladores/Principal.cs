@@ -1,13 +1,18 @@
 ﻿using System.IO;
+using System.Threading.Tasks;
 using transformador_mda.src.Dominio;
-using transformador_mda.src.Dominio.Retornos;
-using transformador_mda.src.Features.CrearIds;
-using transformador_mda.src.Features.Utilidades;
 using transformador_mda.src.Dominio.ElementosUML;
+using transformador_mda.src.Dominio.Retornos;
 using transformador_mda.src.Features.GenerarSalida;
+using transformador_mda.src.Features.DAO;
+using transformador_mda.src.Features.IntegracionIA;
 using transformador_mda.src.Features.ParserEntrada;
-using transformador_mda.src.Features.ExploradorFicheros;
-using transformador_mda.src.Features.GestionConfiguracion;
+using transformador_mda.src.Features.Utilidades;
+using System.Windows.Forms;
+using System.Text.Json.Nodes;
+using System.Text.Json;
+using System.Linq;
+using System;
 
 namespace transformador_mda.src.Controladores
 {
@@ -32,7 +37,7 @@ namespace transformador_mda.src.Controladores
         /// </summary>
         public Principal()
         {
-            Configuracion = new Configuracion();
+            Configuracion = new Dominio.Configuracion();
         }
 
         #endregion
@@ -54,7 +59,7 @@ namespace transformador_mda.src.Controladores
             else if (Configuracion.TipoFicheroEntrada == EnumTipoFicheroEntrada.XMI)
                 extensiones_soportadas = "Archivos XMI (*.xmi) | *.xmi| Archivos XML (*.xml) | *.xml| Todos los archivos (*.*) | *.*";
             
-            string ruta_fichero = Files.GetFilePath("Buscar fichero de entrada.", extensiones_soportadas);
+            string ruta_fichero = Ficheros.GetFilePath("Buscar fichero de entrada.", extensiones_soportadas);
             if (string.IsNullOrEmpty(ruta_fichero))
                 return new RetornoMultiple(true,
                     RetornoMultiple.EnumEstado.CANCELADO_POR_USUARIO,
@@ -93,10 +98,10 @@ namespace transformador_mda.src.Controladores
             return new RetornoMultiple(true, RetornoMultiple.EnumEstado.CORRECTO, "Directorio seleccionado correctamente.");
         }
 
-        public RetornoBase GenerarCodigo(Clase param_clase)
+        public RetornoBase GenerarCodigo(Clase param_proyecto)
         {
             GenerarSalidaBase generador = FactoriaSalida.CrearGenerarSalida(Configuracion);
-            string texto = generador.GenerarTexto(param_clase).TextoDesarrollador;
+            string texto = generador.GenerarTexto(param_proyecto).TextoDesarrollador;
 
             return new RetornoBase(true, "Generación correcta", texto);
         }
@@ -111,7 +116,7 @@ namespace transformador_mda.src.Controladores
             if (string.IsNullOrEmpty(ruta_directorio))
                 return false;
 
-            DAO.Exportar(Configuracion, ruta_directorio);
+            ConfiguracionDAO.Exportar(Configuracion, ruta_directorio);
             return true;
         }
 
@@ -121,12 +126,12 @@ namespace transformador_mda.src.Controladores
         /// <returns>False si el usuario ha cancelado el proceso true si ha ido todo bien.</returns>
         public bool ImportarConfiguracion()
         {
-            string nombre_fichero = Files.GetFilePath("Buscar fichero XMI.",
+            string nombre_fichero = Ficheros.GetFilePath("Buscar fichero XMI.",
                 "Archivos JSON (*.json) | *.json| Todos los archivos (*.*) | *.*");
             if (string.IsNullOrEmpty(nombre_fichero))
                 return false;
 
-            Configuracion = DAO.Importar(nombre_fichero);
+            Configuracion = ConfiguracionDAO.Importar(nombre_fichero);
             return true;
         }
 
@@ -264,7 +269,116 @@ namespace transformador_mda.src.Controladores
             literal.Comentario = param_descripcion;
             return true;
         }
-        
+
         #endregion
+
+        public async Task<RetornoBase> GenerarCodigoProyectoCompleto()
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<RetornoBase> GenerarCodigoClase(Clase param_clase, bool param_generar_json)
+        {
+            if (param_generar_json && string.IsNullOrEmpty(Configuracion.RutaFicheroJSON))
+            {
+                if (Configuracion.Proyecto == null)
+                    return new RetornoBase(false, "No se ha podido generar el código de la clase.", "El proyecto está vacío.");
+
+                RetornoBase retorno_exportacion = ProyectoDAO.Exportar(Configuracion.Proyecto, Application.StartupPath);
+                if (!retorno_exportacion.Exito)
+                    return retorno_exportacion;
+
+                Configuracion.RutaFicheroJSON = retorno_exportacion.TextoDesarrollador;
+            }
+            else
+            {
+                return new RetornoBase(false, "No se ha podido generar el código de la clase.", "La ruta del fichero JSON no está definida.");
+            }
+
+            if (!File.Exists(Configuracion.RutaFicheroJSON))
+                return new RetornoBase(false, "No se ha podido generar el código de la clase.", "El fichero JSON no existe en la ruta: " + Configuracion.RutaFicheroJSON);
+
+            return await GenerarCodigoIA(Configuracion.RutaFicheroJSON, param_clase);
+        }
+
+        private async Task<RetornoBase> GenerarCodigoIA(string param_ruta_proyecto_json, Clase param_clase)
+        {
+            IProveedorIA proveedorIA = FactoriaProveedorIA.CrearProveedorIA(ProveedorIA.OpenAI);
+            RetornoBase retorno_sin_ia = GenerarCodigo(param_clase);
+            if (!retorno_sin_ia.Exito)
+                return retorno_sin_ia;
+
+            RetornoBase retorno_con_ia = await proveedorIA.GenerarCodigo(param_clase,
+                param_ruta_proyecto_json, 
+                retorno_sin_ia.TextoDesarrollador);
+            if (!retorno_con_ia.Exito)
+                return retorno_con_ia;
+
+            RetornoBase retorno_completo = GenerarCodigoCompleto(retorno_sin_ia.TextoDesarrollador, 
+                retorno_con_ia.TextoDesarrollador);
+
+            return retorno_completo;
+        }
+
+        private RetornoBase GenerarCodigoCompleto(string param_codigo_sin_ia, string param_codigo_con_ia)
+        {
+            if (string.IsNullOrEmpty(param_codigo_sin_ia))
+                return new RetornoBase(false, "No se ha podido generar el código completo.", "El código base está vacío.");
+
+            if (string.IsNullOrWhiteSpace(param_codigo_con_ia))
+                return new RetornoBase(false, "No se ha podido generar el código completo.", "La respuesta de la IA está vacía.");
+
+            try
+            {
+                using (JsonDocument json_document = JsonDocument.Parse(param_codigo_con_ia))
+                {
+                    JsonElement elemento_raiz = json_document.RootElement;
+
+                    if (!elemento_raiz.TryGetProperty("codigo", out JsonElement json_codigo) || json_codigo.ValueKind != JsonValueKind.Array)
+                    {
+                        return new RetornoBase(false,
+                            "El JSON generado por la IA no tiene el formato esperado.",
+                            "No se ha encontrado la propiedad 'codigo' o no contiene un array.");
+                    }
+
+                    string codigo_completo = param_codigo_sin_ia;
+                    foreach (JsonElement elemento_json in json_codigo.EnumerateArray())
+                    {
+                        if (!elemento_json.TryGetProperty("id", out JsonElement json_id) || 
+                            !elemento_json.TryGetProperty("codigo", out JsonElement json_contenido))
+                        {
+                            return new RetornoBase(false,
+                                "El JSON generado por la IA no tiene el formato esperado.",
+                                "Uno de los elementos no contiene las propiedades 'id' y 'codigo'.");
+                        }
+
+                        string id = json_id.GetString();
+                        string codigo = json_contenido.GetString();
+                        if (string.IsNullOrWhiteSpace(id))
+                        {
+                            return new RetornoBase(false,
+                                "El JSON generado por la IA contiene un identificador vacío.",
+                                "No se puede sustituir un método sin identificador.");
+                        }
+
+                        string indicador = $"{{{{{id}}}}}";
+                        if (!codigo_completo.Contains(indicador))
+                        {
+                            return new RetornoBase(false,
+                                "No se ha podido insertar todo el código generado por la IA.",
+                                "No se ha encontrado el indicador " + indicador + "en el código base.");
+                        }
+
+                        codigo_completo = codigo_completo.Replace(indicador, codigo ?? string.Empty);
+                    }
+
+                    return new RetornoBase(true, "Generación correcta.", codigo_completo);
+                }
+            }
+            catch (JsonException ex)
+            {
+                return new RetornoBase(false, "Error al interpretar el JSON generado por la IA.", ex.Message);
+            }
+        }
     }
 }

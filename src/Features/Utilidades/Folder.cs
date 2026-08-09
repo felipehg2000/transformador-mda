@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows.Forms;
 
-namespace transformador_mda.src.Features.ExploradorFicheros
+namespace transformador_mda.src.Features.Utilidades
 {
     /// <summary>
     /// Clase para gestionar diferentes operaciones relacionadas con carpetas.
