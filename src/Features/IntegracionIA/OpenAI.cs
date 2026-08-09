@@ -1,28 +1,24 @@
-﻿using OpenAI;
-using OpenAI.Chat;
-using OpenAI.Files;
-using OpenAI.Responses;
-using System;
-using System.ClientModel;
-using System.Collections.Generic;
-using System.Diagnostics;
+﻿using System;
+using OpenAI;
 using System.IO;
 using System.Linq;
-using System.Runtime.Remoting.Contexts;
-using System.Security.Principal;
-using System.Text;
+using OpenAI.Files;
 using System.Text.Json;
-using System.Threading.Tasks;
+using OpenAI.Responses;
+using System.ClientModel;
 using System.Windows.Forms;
-using transformador_mda.src.Dominio.ElementosUML;
+using System.Threading.Tasks;
 using transformador_mda.src.Dominio.Retornos;
-using transformador_mda.src.Features.IntegracionIA.Dominio;
 using transformador_mda.src.Features.Utilidades;
+using transformador_mda.src.Dominio.ElementosUML;
+using transformador_mda.src.Features.IntegracionIA.Dominio;
 
 namespace transformador_mda.src.Features.IntegracionIA
 {
     public class OpenAI : IProveedorIA
     {
+        #region "Constantes"
+
         /// <summary>
         /// Clave de la API de OpenAI.
         /// </summary>
@@ -583,11 +579,18 @@ Antes de responder, comprueba internamente que:
 19. No existe ningún texto fuera del JSON.
 
 Devuelve exclusivamente el objeto JSON.";
+        #endregion
+
+        #region "Atributos"
 
         /// <summary>
         /// Objeto que contiene la información de los ficheros subidos a OpenAI y la ruta donde se almacenan los ficheros temporales.
         /// </summary>
         private InformacionIA _metadatos;
+
+        #endregion
+
+        #region "Constructor"
 
         /// <summary>
         /// Constructor de la clase, inicializa atributos a vacío.
@@ -598,6 +601,17 @@ Devuelve exclusivamente el objeto JSON.";
             _metadatos.RutaDirectorioFicheros = Path.Combine(Application.StartupPath, "FicherosIA");
         }
 
+        #endregion
+
+        #region "Métodos públicos"
+
+        /// <summary>
+        /// Método principal de generación de código IA para una clase. Se encarga de coordinar los distintos pasos para obtener el código de una clase generado por IA completo.
+        /// </summary>
+        /// <param name="param_clase">Objeto de tipo clase con la información de la clase cuyo código se va a generar.</param>
+        /// <param name="param_ruta_json">Ruta del archivo JSON que contiene la información del proyecto.</param>
+        /// <param name="param_esqueleto">Código esqueleto de la clase cuyo código completo se va a generar.</param>
+        /// <returns></returns>
         public async Task<RetornoBase> GenerarCodigo(Clase param_clase, string param_ruta_json, string param_esqueleto)
         {
             RetornoBase retorno_escritura_esqueleto = Ficheros.EscribirFichero(_metadatos.RutaDirectorioFicheros, "cs", param_esqueleto);
@@ -631,6 +645,15 @@ Devuelve exclusivamente el objeto JSON.";
             }
         }
 
+        #endregion
+
+        #region "Métodos privados"
+
+        /// <summary>
+        /// Método encargado de montar y ejecutar la consulta a la IA para generar el código de los métodos de la clase objetivo.
+        /// </summary>
+        /// <param name="param_id_clase">Identificador de la clase cuyo código se va a generar.</param>
+        /// <returns>Objeto de tipo RetornoBase con el resultado de la consula o información del proceso.</returns>
         private async Task<RetornoBase> EjecutarConsulta(string param_id_clase)
         {
             #pragma warning disable OPENAI001 // Este tipo se incluye solo con fines de evaluación y está sujeto a cambios o a que se elimine en próximas actualizaciones. Suprima este diagnóstico para continuar.
@@ -662,6 +685,9 @@ Devuelve exclusivamente el objeto JSON.";
             return new RetornoBase(true, string.Empty, respuesta.GetOutputText());
         }
 
+        /// <summary>
+        /// Método encargado de borrar los ficheros de código esqueleto subidos a OpenAI para liberar espacio y evitar consumir cuota innecesaria.
+        /// </summary>
         private async void BorrarFicherosEsqueletoIA()
         {
             foreach (InformacionFichero informacion in _metadatos.InformacionFicherosEsqueleto)
@@ -678,6 +704,11 @@ Devuelve exclusivamente el objeto JSON.";
             }            
         }
 
+        /// <summary>
+        /// Método encargado de controlar las excepciones lanzadas por la API de OpenAI y devolver un mensaje de error más comprensible para el usuario.
+        /// </summary>
+        /// <param name="param_excepcion">Excepción lanzada por la API de OpenAI.</param>
+        /// <returns>Objeto de tipo RetornoBase con la información del error.</returns>
         private RetornoBase ControlarExcepcion(ClientResultException param_excepcion)
         {
             // Datos del error
@@ -765,6 +796,8 @@ Devuelve exclusivamente el objeto JSON.";
             return new RetornoBase(false, mensajeUsuario, detalleTecnico);
         }
 
+        #endregion
+
         #region "Gestión de ficheros en OpenAI"
 
         /// <summary>
@@ -819,6 +852,11 @@ Devuelve exclusivamente el objeto JSON.";
 
         #region "Métodos de búsqueda"
 
+        /// <summary>
+        /// Método encargado de obtener la información del fichero de código esqueleto asociado a una clase concreta a partir del Id de la clase.
+        /// </summary>
+        /// <param name="param_id_clase">Identificador de la clase cuyo esqueleto se desea obtener.</param>
+        /// <returns>Objeto de tipo InformacionFichero con la información del fichero.</returns>
         private InformacionFichero ObtenerInformacionFichero(string param_id_clase)
         {
             return _metadatos.InformacionFicherosEsqueleto.FirstOrDefault(f => f.IdClaseDelEsqueleto == param_id_clase);
