@@ -106,7 +106,7 @@ namespace transformador_mda.src.Features.Utilidades
             foreach (Directorio directorio in param_proyecto.Directorios)
             {
                 Clase clase = BuscarClase(directorio, param_id);
-                if (clase != null) 
+                if (clase != null)
                     return clase;
             }
 
@@ -142,7 +142,7 @@ namespace transformador_mda.src.Features.Utilidades
         /// <param name="param_id">Identificador del método a buscar.</param>
         /// <returns>Elemento UML con identificador igual al pasado por parámetros.</returns>
         static public Metodo BuscarMetodo(ProyectoBase param_proyecto, string param_id)
-        { 
+        {
             foreach (Directorio directorio in param_proyecto.Directorios)
             {
                 Metodo metodo = BuscarMetodo(directorio, param_id);
@@ -168,7 +168,7 @@ namespace transformador_mda.src.Features.Utilidades
                     return metodo;
             }
 
-            foreach(Directorio subdirectorio in param_directorio.Subdirectorios)
+            foreach (Directorio subdirectorio in param_directorio.Subdirectorios)
             {
                 Metodo metodo = BuscarMetodo(subdirectorio, param_id);
                 if (metodo != null)

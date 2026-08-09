@@ -56,7 +56,7 @@ namespace transformador_mda.src.Dominio.ElementosUML
         /// Constructor de la clase Asociacion que inicializa las propiedades con valores predeterminados.
         /// </summary>
         [JsonConstructor]
-        public Asociacion() : base() 
+        public Asociacion() : base()
         {
             Tipo = EnumTipoElemento.ASOCIACION;
             TipoAsociacion = EnumTipoAsociacion.NO_DEFINIDA;

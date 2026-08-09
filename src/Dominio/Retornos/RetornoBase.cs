@@ -16,7 +16,7 @@ namespace transformador_mda.src.Dominio.Retornos
         /// Mensaje para el usuario que describe el resultado de la operación.
         /// </summary>
         public string TextoUsuario { get; set; }
-        
+
         /// <summary>
         /// Mensaje para el desarrollador que proporciona información adicional sobre el resultado de la operación.
         /// </summary> 

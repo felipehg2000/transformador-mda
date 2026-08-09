@@ -22,7 +22,7 @@ namespace transformador_mda.src.Dominio
         /// Tipo de salida a generar, se utiliza para las factorías de generación de código.
         /// </summary>
         public EnumTipoSalida TipoSalida { get; set; }
-        
+
         /// <summary>
         /// Información relativa al proyecto a generar y a los artefactos a crear y sus relaciones.
         /// </summary>

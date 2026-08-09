@@ -31,7 +31,7 @@ namespace transformador_mda.src.Dominio.ElementosUML
         /// Constructor por defecto de la clase ElementoBase, inicializa los atributos a vacío.
         /// </summary>
         [JsonConstructor]
-        public ElementoBase() 
+        public ElementoBase()
         {
             Id = string.Empty;
             Nombre = string.Empty;

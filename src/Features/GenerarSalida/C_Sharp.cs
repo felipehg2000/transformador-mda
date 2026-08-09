@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using transformador_mda.src.Dominio.ElementosUML;
 using transformador_mda.src.Dominio.Retornos;
 using transformador_mda.src.Features.Utilidades;
-using transformador_mda.src.Dominio.ElementosUML;
 
 namespace transformador_mda.src.Features.GenerarSalida
 {
@@ -17,7 +17,7 @@ namespace transformador_mda.src.Features.GenerarSalida
         /// Constructor de la clase, inicializa variables.
         /// </summary>
         /// <param name="param_proyecto">Información del proyecto que la aplicación está gestionando.</param>
-        public C_Sharp(ProyectoBase param_proyecto) : 
+        public C_Sharp(ProyectoBase param_proyecto) :
             base(param_proyecto)
         {
 
@@ -45,8 +45,8 @@ namespace transformador_mda.src.Features.GenerarSalida
         public override RetornoBase GenerarTexto(Clase param_clase)
         {
             if (param_clase == null || _proyecto == null)
-                return new RetornoBase(false, 
-                    "No se ha podido generar el código correctamente.", 
+                return new RetornoBase(false,
+                    "No se ha podido generar el código correctamente.",
                     "En el método GenerarTexto de C_Sharp el parámetro param_clase es nulo.");
 
             return GenerarCodigoClases(_proyecto, param_clase);
@@ -79,12 +79,12 @@ namespace transformador_mda.src.Features.GenerarSalida
                 else
                     texto_atributos += ";\n\n";
 
-            }             
+            }
 
             texto_atributos += "\t\t#endregion";
 
-            return new RetornoBase(true, 
-                "Código generado correctamente.", 
+            return new RetornoBase(true,
+                "Código generado correctamente.",
                 texto_atributos);
         }
 
@@ -117,7 +117,7 @@ namespace transformador_mda.src.Features.GenerarSalida
                 "{\n" +
                 "\t" + ObtenerTipoVisibilidad(param_clase.Visibilidad) + " " + ObtenerTipoClase(param_clase.TipoClase) + " " + param_clase.Nombre;
 
-            texto_clases += texto_herencia != string.Empty ? ": " + texto_herencia + "\n" : "\n"; 
+            texto_clases += texto_herencia != string.Empty ? ": " + texto_herencia + "\n" : "\n";
             texto_clases += "\t{\n";
 
 
@@ -126,7 +126,7 @@ namespace transformador_mda.src.Features.GenerarSalida
                 texto_clases += GenerarCodigoLiterales(param_clase.Literales).TextoDesarrollador +
                     "\t}\n" +
                     "}\n\n";
-                
+
                 return new RetornoBase(true, "Código generado correctamente.", texto_clases);
             }
 
@@ -147,7 +147,7 @@ namespace transformador_mda.src.Features.GenerarSalida
                     "\t}\n" +
                     "}\n\n";
 
-            return new RetornoBase(true, "Código generado correctamente.", texto_clases);            
+            return new RetornoBase(true, "Código generado correctamente.", texto_clases);
         }
 
         /// <summary>
@@ -192,8 +192,8 @@ namespace transformador_mda.src.Features.GenerarSalida
                             texto_metodos_internos += texto_metodo;
                             break;
                         default:
-                            return new RetornoBase(false, 
-                                "No se ha podido generar el código.", 
+                            return new RetornoBase(false,
+                                "No se ha podido generar el código.",
                                 "Método GenerarCodigoMetodo, se ha encontrado una clave de visibilidad no soportada por el programa: " + metodo.Visibilidad);
                     }
                 }
@@ -231,7 +231,7 @@ namespace transformador_mda.src.Features.GenerarSalida
 
             string comentarios = string.Empty;
             string parametros = string.Empty;
-            
+
             foreach (Parametro parametro in param_parametros)
             {
                 // <param name="param_parametros"></param>
@@ -242,8 +242,8 @@ namespace transformador_mda.src.Features.GenerarSalida
                 parametros += ObtenerTipoDato(parametro.TipoDato) + " " + parametro.Nombre;
             }
 
-            return new RetornoBase(true, 
-                "Código generado correctamente.", 
+            return new RetornoBase(true,
+                "Código generado correctamente.",
                 comentarios + "--{{texto_separacion}}--" + parametros);
         }
 
@@ -258,7 +258,7 @@ namespace transformador_mda.src.Features.GenerarSalida
                 return new RetornoBase(true, "Código generado correctamente.", "");
 
             string texto_literales = string.Empty;
-            foreach(ElementoBase literal in param_literales)
+            foreach (ElementoBase literal in param_literales)
             {
                 texto_literales += "\t\t" + literal.Nombre + ",\t\t\t/// <summary>" + literal.Comentario + "</summary>\n";
             }
@@ -287,8 +287,8 @@ namespace transformador_mda.src.Features.GenerarSalida
                     return new RetornoBase(true, "", texto_namespace + "." + directorio.Nombre + "." + retorno.TextoDesarrollador);
             }
 
-            return new RetornoBase(false, 
-                "No se ha podido generar el texto correctamente.", 
+            return new RetornoBase(false,
+                "No se ha podido generar el texto correctamente.",
                 "No se ha podido generar el namespace correctamente. GenerarNamespace de la clase C_Sharp.");
         }
 
@@ -334,8 +334,8 @@ namespace transformador_mda.src.Features.GenerarSalida
                 Clase clase_destino = BuscarComponentes.BuscarClase(param_proyecto, herencia.IdClaseDestino);
 
                 if (clase_origen == null || clase_destino == null)
-                    return new RetornoBase(false, 
-                        "No se ha podido generar el código correctamente.", 
+                    return new RetornoBase(false,
+                        "No se ha podido generar el código correctamente.",
                         "Clase C_Sharp, método generar herencia, asociación con id = " + herencia.Id + " la clase origen o la clase destino son null");
 
                 if (clase_destino.Id != param_clase_id)
@@ -344,8 +344,8 @@ namespace transformador_mda.src.Features.GenerarSalida
                 if (clase_origen.TipoClase != EnumTiposClases.INTERFAZ)
                 {
                     if (clase_herenciada)
-                        return new RetornoBase(false, 
-                            "No se ha podido generar el código correctamente.", 
+                        return new RetornoBase(false,
+                            "No se ha podido generar el código correctamente.",
                             "Clase C_Sharp, método generar herencia, una misma clase hereda de dos clases (no interfaces) simultaneamente.");
                     else
                         clase_herenciada = true;
@@ -503,8 +503,8 @@ namespace transformador_mda.src.Features.GenerarSalida
             else if (param_clase.TipoClase == EnumTiposClases.CLASE_ABSTRACTA && !param_metodo.EsConstructor && !param_metodo.EsDestructor)
             {
                 if (param_metodo.Visibilidad == EnumTipoVisibilidad.PRIVADO)
-                    return new RetornoBase(false, 
-                        "No se ha podido generar el código correctamente", 
+                    return new RetornoBase(false,
+                        "No se ha podido generar el código correctamente",
                         "Un método abstracto es privado.");
 
                 texto_metodo = "\t\t/// <summary>" + "\n" +
@@ -530,7 +530,7 @@ namespace transformador_mda.src.Features.GenerarSalida
 
             if (texto_metodo != string.Empty)
             {
-                if (param_clase.TipoClase == EnumTiposClases.INTERFAZ || 
+                if (param_clase.TipoClase == EnumTiposClases.INTERFAZ ||
                     (param_clase.TipoClase == EnumTiposClases.CLASE_ABSTRACTA && (param_metodo.EsConstructor || param_metodo.EsDestructor)))
                 {
                     texto_metodo += ";\n\n";
@@ -538,6 +538,7 @@ namespace transformador_mda.src.Features.GenerarSalida
                 else
                 {
                     texto_metodo += "\n\t\t{\n\n" +
+                        "\t\t\t//{{" + param_metodo.Id + "}}\n" +
                         "\t\t}\n\n";
                 }
             }
@@ -587,7 +588,7 @@ namespace transformador_mda.src.Features.GenerarSalida
                 case EnumTipoVisibilidad.PROTEGIDO:
                     return "protected";
                 case EnumTipoVisibilidad.INTERNA:
-                    return "internal"; 
+                    return "internal";
                 default:
                     return "public";
             }
@@ -624,8 +625,8 @@ namespace transformador_mda.src.Features.GenerarSalida
                     return "void";
             }
         }
-        
+
         #endregion
-    
+
     }
 }

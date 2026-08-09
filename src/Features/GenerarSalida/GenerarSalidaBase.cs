@@ -1,6 +1,4 @@
-﻿using System.IO;
-using System.Collections.Generic;
-using transformador_mda.src.Dominio.ElementosUML;
+﻿using transformador_mda.src.Dominio.ElementosUML;
 using transformador_mda.src.Dominio.Retornos;
 
 namespace transformador_mda.src.Features.GenerarSalida
