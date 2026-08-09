@@ -538,6 +538,7 @@ namespace transformador_mda.src.Features.GenerarSalida
                 else
                 {
                     texto_metodo += "\n\t\t{\n\n" +
+                        "\t\t\t//{{" + param_metodo.Id + "}}\n" +
                         "\t\t}\n\n";
                 }
             }

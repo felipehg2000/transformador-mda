@@ -359,7 +359,7 @@ namespace transformador_mda.src.Controladores
                                 "No se puede sustituir un método sin identificador.");
                         }
 
-                        string indicador = $"{{{{{id}}}}}";
+                        string indicador = "//{{" + id + "}}";
                         if (!codigo_completo.Contains(indicador))
                         {
                             return new RetornoBase(false,
