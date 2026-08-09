@@ -69,7 +69,7 @@ namespace transformador_mda.src.Features.Utilidades
         {
             System.IO.File.WriteAllLines(param_path, param_lines);
         }
-        
+
         /// <summary>
         /// Escribe el texto pasado por parámetro en un archivo, en la ruta pasada por parámetros.
         /// </summary>

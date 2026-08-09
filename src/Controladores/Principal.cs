@@ -1,18 +1,16 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
+using System.Text.Json;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 using transformador_mda.src.Dominio;
 using transformador_mda.src.Dominio.ElementosUML;
 using transformador_mda.src.Dominio.Retornos;
-using transformador_mda.src.Features.GenerarSalida;
 using transformador_mda.src.Features.DAO;
+using transformador_mda.src.Features.GenerarSalida;
 using transformador_mda.src.Features.IntegracionIA;
 using transformador_mda.src.Features.ParserEntrada;
 using transformador_mda.src.Features.Utilidades;
-using System.Windows.Forms;
-using System.Text.Json.Nodes;
-using System.Text.Json;
-using System.Linq;
-using System;
 
 namespace transformador_mda.src.Controladores
 {
@@ -52,13 +50,13 @@ namespace transformador_mda.src.Controladores
         {
             string extensiones_soportadas = string.Empty;
             if (Configuracion.TipoFicheroEntrada == EnumTipoFicheroEntrada.NULO)
-                return new RetornoMultiple(false, 
+                return new RetornoMultiple(false,
                     RetornoMultiple.EnumEstado.ERROR,
                     "No se ha podido leer el fichero correctamente.",
                     "El tipo de dato que define el formato del fichero de entrada no está definido.");
             else if (Configuracion.TipoFicheroEntrada == EnumTipoFicheroEntrada.XMI)
                 extensiones_soportadas = "Archivos XMI (*.xmi) | *.xmi| Archivos XML (*.xml) | *.xml| Todos los archivos (*.*) | *.*";
-            
+
             string ruta_fichero = Ficheros.GetFilePath("Buscar fichero de entrada.", extensiones_soportadas);
             if (string.IsNullOrEmpty(ruta_fichero))
                 return new RetornoMultiple(true,
@@ -73,12 +71,12 @@ namespace transformador_mda.src.Controladores
                 TextoDesarrollador = retorno.TextoDesarrollador,
                 Estado = retorno.Exito ? RetornoMultiple.EnumEstado.CORRECTO : RetornoMultiple.EnumEstado.ERROR
             };
-                        
+
             if (ret_retorno.Exito)
                 Configuracion.RutaFicheroEntrada = ruta_fichero;
 
             return ret_retorno;
-        }      
+        }
 
         /// <summary>
         /// Muestra el selector de directorios y, si el proyecto no está nombrado coge el nombre del directorio como nombre del proyecto.
@@ -298,10 +296,10 @@ namespace transformador_mda.src.Controladores
             if (!File.Exists(Configuracion.RutaFicheroJSON))
                 return new RetornoBase(false, "No se ha podido generar el código de la clase.", "El fichero JSON no existe en la ruta: " + Configuracion.RutaFicheroJSON);
 
-            return await GenerarCodigoIA(Configuracion.RutaFicheroJSON, param_clase);
+            return GenerarCodigo(param_clase);
         }
 
-        private async Task<RetornoBase> GenerarCodigoIA(string param_ruta_proyecto_json, Clase param_clase)
+        public async Task<RetornoBase> GenerarCodigoIA(string param_ruta_proyecto_json, Clase param_clase)
         {
             IProveedorIA proveedorIA = FactoriaProveedorIA.CrearProveedorIA(ProveedorIA.OpenAI);
             RetornoBase retorno_sin_ia = GenerarCodigo(param_clase);
@@ -309,12 +307,12 @@ namespace transformador_mda.src.Controladores
                 return retorno_sin_ia;
 
             RetornoBase retorno_con_ia = await proveedorIA.GenerarCodigo(param_clase,
-                param_ruta_proyecto_json, 
+                param_ruta_proyecto_json,
                 retorno_sin_ia.TextoDesarrollador);
             if (!retorno_con_ia.Exito)
                 return retorno_con_ia;
 
-            RetornoBase retorno_completo = GenerarCodigoCompleto(retorno_sin_ia.TextoDesarrollador, 
+            RetornoBase retorno_completo = GenerarCodigoCompleto(retorno_sin_ia.TextoDesarrollador,
                 retorno_con_ia.TextoDesarrollador);
 
             return retorno_completo;
@@ -344,7 +342,7 @@ namespace transformador_mda.src.Controladores
                     string codigo_completo = param_codigo_sin_ia;
                     foreach (JsonElement elemento_json in json_codigo.EnumerateArray())
                     {
-                        if (!elemento_json.TryGetProperty("id", out JsonElement json_id) || 
+                        if (!elemento_json.TryGetProperty("id", out JsonElement json_id) ||
                             !elemento_json.TryGetProperty("codigo", out JsonElement json_contenido))
                         {
                             return new RetornoBase(false,

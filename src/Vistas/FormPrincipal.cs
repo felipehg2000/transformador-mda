@@ -1,13 +1,10 @@
 ﻿using System;
 using System.Drawing;
 using System.Runtime.InteropServices;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using transformador_mda.src.Controladores;
 using transformador_mda.src.Dominio.ElementosUML;
 using transformador_mda.src.Dominio.Retornos;
-using transformador_mda.src.Features.IntegracionIA;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.Window;
 
 namespace transformador_mda.src.Vistas
 {
@@ -138,7 +135,7 @@ namespace transformador_mda.src.Vistas
             tableLayoutPanelInicio.BringToFront();
 
             // Ajusta las columnas 
-            AjustarAnchoTablas();  
+            AjustarAnchoTablas();
         }
 
         #endregion
@@ -551,11 +548,11 @@ namespace transformador_mda.src.Vistas
             switch (param_clase.TipoClase)
             {
                 case EnumTiposClases.INTERFAZ:
-                    return (int) EnumIndiceImagenes.INTERFAZ;
+                    return (int)EnumIndiceImagenes.INTERFAZ;
                 case EnumTiposClases.ENUMERACION:
                     return (int)EnumIndiceImagenes.ENUMERACION;
                 default:
-                    return (int) EnumIndiceImagenes.CLASE;
+                    return (int)EnumIndiceImagenes.CLASE;
             }
         }
 
@@ -805,7 +802,7 @@ namespace transformador_mda.src.Vistas
 
             RetornoBase retorno = await _controlador.GenerarCodigoClase(clase_seleccionada, true);
             if (!retorno.Exito)
-                MessageBox.Show(retorno.TextoUsuario,
+                MessageBox.Show(retorno.TextoDesarrollador,
                     "Error",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Error);
@@ -816,7 +813,7 @@ namespace transformador_mda.src.Vistas
         #endregion
 
         #region "Traducir enumeraciones"
-        
+
         /// <summary>
         /// Traduce los valores de una enumeración a lenguaje natural.
         /// </summary>
@@ -880,9 +877,9 @@ namespace transformador_mda.src.Vistas
                 return;
             }
 
-            throw new NotImplementedException();
+            RetornoBase retorno_codigo = await _controlador.GenerarCodigoIA(_controlador.Configuracion.RutaFicheroJSON, clase_seleccionada);
         }
 
-       
+
     }
 }

@@ -27,7 +27,7 @@ namespace transformador_mda.src.Dominio.Retornos
         /// Constructor, inicializa atributos a vacío.
         /// </summary>
         [JsonConstructor]
-        public RetornoMultiple() 
+        public RetornoMultiple()
         {
             Estado = EnumEstado.NO_DEFINIDO;
         }
@@ -39,13 +39,13 @@ namespace transformador_mda.src.Dominio.Retornos
         /// <param name="param_estado">Situación de fin del proceso lógico.</param>
         /// <param name="param_texto_usuario">Texto a mostrar al usuario, sin información relevante del proceso lógico.</param>
         /// <param name="param_texto_desarrollador">Texto a disposición del desarrollador, para devolver información o datos.</param>
-        public RetornoMultiple(bool param_exito, 
+        public RetornoMultiple(bool param_exito,
             EnumEstado param_estado,
-            string param_texto_usuario, 
-            string param_texto_desarrollador = null) : 
-                base(param_exito, 
-                    param_texto_usuario, 
-                    param_texto_desarrollador) 
+            string param_texto_usuario,
+            string param_texto_desarrollador = null) :
+                base(param_exito,
+                    param_texto_usuario,
+                    param_texto_desarrollador)
         {
             Estado = param_estado;
         }

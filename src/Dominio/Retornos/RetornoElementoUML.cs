@@ -29,12 +29,12 @@ namespace transformador_mda.src.Dominio.Retornos
         /// <param name="param_texto_usuario">Mensaje para el usuario</param>
         /// <param name="param_elemento">Elemento UML que se devuelve</param>
         /// <param name="param_texto_desarrollador">Mensaje para el desarrollador</param>
-        public RetornoElementoUML(bool param_exito, 
-            string param_texto_usuario, 
+        public RetornoElementoUML(bool param_exito,
+            string param_texto_usuario,
             ElementoBase param_elemento,
-            string param_texto_desarrollador = null) : 
-            base(param_exito, 
-                param_texto_usuario, 
+            string param_texto_desarrollador = null) :
+            base(param_exito,
+                param_texto_usuario,
                 param_texto_desarrollador)
         {
             Elemento = param_elemento;

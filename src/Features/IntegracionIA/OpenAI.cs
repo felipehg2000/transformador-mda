@@ -1,17 +1,17 @@
-﻿using System;
-using OpenAI;
+﻿using OpenAI;
+using OpenAI.Files;
+using OpenAI.Responses;
+using System;
+using System.ClientModel;
 using System.IO;
 using System.Linq;
-using OpenAI.Files;
 using System.Text.Json;
-using OpenAI.Responses;
-using System.ClientModel;
-using System.Windows.Forms;
 using System.Threading.Tasks;
-using transformador_mda.src.Dominio.Retornos;
-using transformador_mda.src.Features.Utilidades;
+using System.Windows.Forms;
 using transformador_mda.src.Dominio.ElementosUML;
+using transformador_mda.src.Dominio.Retornos;
 using transformador_mda.src.Features.IntegracionIA.Dominio;
+using transformador_mda.src.Features.Utilidades;
 
 namespace transformador_mda.src.Features.IntegracionIA
 {
@@ -22,8 +22,8 @@ namespace transformador_mda.src.Features.IntegracionIA
         /// <summary>
         /// Clave de la API de OpenAI.
         /// </summary>
-        private const string Token = "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";
-
+        //private const string Token = "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";
+        private const string Token = "TOKEN_CAPADO";
         /// <summary>
         /// Texto que se envía a la inteligencia artificial para indicarle cómo debe generar el código de los métodos identificados en el esqueleto.
         /// </summary>
@@ -656,7 +656,7 @@ Devuelve exclusivamente el objeto JSON.";
         /// <returns>Objeto de tipo RetornoBase con el resultado de la consula o información del proceso.</returns>
         private async Task<RetornoBase> EjecutarConsulta(string param_id_clase)
         {
-            #pragma warning disable OPENAI001 // Este tipo se incluye solo con fines de evaluación y está sujeto a cambios o a que se elimine en próximas actualizaciones. Suprima este diagnóstico para continuar.
+#pragma warning disable OPENAI001 // Este tipo se incluye solo con fines de evaluación y está sujeto a cambios o a que se elimine en próximas actualizaciones. Suprima este diagnóstico para continuar.
             ResponsesClient cliente = new ResponsesClient(Token);
 
             ResponseContentPart[] contenido = new ResponseContentPart[]
@@ -680,7 +680,7 @@ Devuelve exclusivamente el objeto JSON.";
             };
 
             ResponseResult respuesta = await cliente.CreateResponseAsync(opciones);
-            #pragma warning restore OPENAI001 // Este tipo se incluye solo con fines de evaluación y está sujeto a cambios o a que se elimine en próximas actualizaciones. Suprima este diagnóstico para continuar.
+#pragma warning restore OPENAI001 // Este tipo se incluye solo con fines de evaluación y está sujeto a cambios o a que se elimine en próximas actualizaciones. Suprima este diagnóstico para continuar.
 
             return new RetornoBase(true, string.Empty, respuesta.GetOutputText());
         }
@@ -701,7 +701,7 @@ Devuelve exclusivamente el objeto JSON.";
                     }
                 }
                 catch { /*No se hace nada, pero se evita lanzar la excepción*/ }
-            }            
+            }
         }
 
         /// <summary>

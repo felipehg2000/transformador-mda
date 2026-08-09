@@ -1,10 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
-using System.Collections.Generic;
+using transformador_mda.src.Dominio.ElementosUML;
 using transformador_mda.src.Dominio.Retornos;
 using transformador_mda.src.Features.Utilidades;
-using transformador_mda.src.Dominio.ElementosUML;
 
 namespace transformador_mda.src.Features.ParserEntrada
 {
@@ -82,7 +82,7 @@ namespace transformador_mda.src.Features.ParserEntrada
             _documento = XDocument.Load(_ruta_fichero);
             if (_documento == null)
                 return new RetornoElementoUML(false, "No se pudo cargar el documento XMI.", null);
-            
+
             if (!EsFormatoValido())
                 return new RetornoElementoUML(false, "El formato del documento XMI no es válido.", null);
 
@@ -135,8 +135,8 @@ namespace transformador_mda.src.Features.ParserEntrada
         {
             XElement modelo = _documento.Descendants().FirstOrDefault(e => e.Name.LocalName == "Model");
             if (modelo == null)
-                return new RetornoElementoUML(false, 
-                    "No se ha podido procesar el documento correctamente.", 
+                return new RetornoElementoUML(false,
+                    "No se ha podido procesar el documento correctamente.",
                     null,
                     "No se encontró el elemento 'Model' en el documento XMI.");
 
@@ -148,14 +148,14 @@ namespace transformador_mda.src.Features.ParserEntrada
                 RetornoElementoUML resultado = ProcesarElemento();
                 if (!resultado.Exito)
                     return resultado;
-                
+
                 if (resultado.Elemento is Directorio directorio)
                     _proyecto.Directorios.Add(directorio);
                 else if (resultado.Elemento is Clase clase)
                     _proyecto.Directorios.FirstOrDefault()?.Clases.Add(clase);
                 else if (resultado.Elemento is Asociacion asociacion)
                     _asociaciones_pendientes.Add(asociacion);
-            } 
+            }
 
             EnlazarAsociacionesPendientes();
 
@@ -245,7 +245,7 @@ namespace transformador_mda.src.Features.ParserEntrada
             {
                 _elemento_actual = hijo;
                 _clave_actual = ClavesSoportadasXMI.ObtenerEnumClave(ObtenerClaveXMI(hijo));
-                
+
                 RetornoElementoUML resultado = ProcesarElemento();
                 if (!resultado.Exito)
                     return resultado;
@@ -313,7 +313,7 @@ namespace transformador_mda.src.Features.ParserEntrada
                     nuevo_nodo.Literales.Add(literal);
             }
 
-            return new RetornoElementoUML() { Exito = true, Elemento = nuevo_nodo };    
+            return new RetornoElementoUML() { Exito = true, Elemento = nuevo_nodo };
         }
 
         /// <summary>
@@ -330,7 +330,7 @@ namespace transformador_mda.src.Features.ParserEntrada
                 Tipo = EnumTipoElemento.ATRIBUTO,
                 TipoDato = ObtenerTipoDeDato(_elemento_actual),
                 Visibilidad = ObtenerVisibilidad(_elemento_actual)
-            };  
+            };
 
             return new RetornoElementoUML() { Exito = true, Elemento = nuevo_nodo };
         }
@@ -384,7 +384,7 @@ namespace transformador_mda.src.Features.ParserEntrada
                 Nombre = ObtenerNombre(_elemento_actual),
                 Comentario = ObtenerComentario(_elemento_actual),
                 TipoDato = ObtenerTipoDeDato(_elemento_actual),
-                Tipo = _elemento_actual.Attributes().FirstOrDefault(a => a.Name.LocalName == "direction")?.Value == "return" ? 
+                Tipo = _elemento_actual.Attributes().FirstOrDefault(a => a.Name.LocalName == "direction")?.Value == "return" ?
                     EnumTipoElemento.RETORNO : EnumTipoElemento.PARAMETRO
             };
 
@@ -1039,7 +1039,7 @@ namespace transformador_mda.src.Features.ParserEntrada
         #endregion
 
         #region "Transformacion de enumeraciones"
-        
+
         /// <summary>
         /// Traduce un texto de XMI de tipo de asociación a la enumeración soportada por la solución.
         /// </summary>
@@ -1176,7 +1176,7 @@ namespace transformador_mda.src.Features.ParserEntrada
                 {
                     string id_operacion = ObtenerAtributo(estereotipo, "base_Operation");
 
-                    return new RetornoBase(false, 
+                    return new RetornoBase(false,
                         "No se ha podido procesar un constructor o destructor.",
                         "No se encontró la operación referenciada por base_Operation: " + id_operacion);
                 }

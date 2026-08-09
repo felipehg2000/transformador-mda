@@ -2,8 +2,8 @@
 using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using transformador_mda.src.Dominio.Retornos;
 using transformador_mda.src.Dominio.ElementosUML;
+using transformador_mda.src.Dominio.Retornos;
 
 namespace transformador_mda.src.Features.DAO
 {
@@ -44,9 +44,9 @@ namespace transformador_mda.src.Features.DAO
             try
             {
                 JsonSerializerOptions opciones = new JsonSerializerOptions
-                    {
-                        WriteIndented = true
-                    };
+                {
+                    WriteIndented = true
+                };
 
                 opciones.Converters.Add(new JsonStringEnumConverter());
 

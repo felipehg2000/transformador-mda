@@ -1,5 +1,4 @@
-﻿using transformador_mda.src.Dominio.ElementosUML;
-using transformador_mda.src.Dominio.Retornos;
+﻿using transformador_mda.src.Dominio.Retornos;
 
 namespace transformador_mda.src.Features.ParserEntrada
 {
