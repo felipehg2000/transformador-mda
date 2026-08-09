@@ -157,7 +157,6 @@
     <Compile Include="src\Features\GenerarSalida\C_Sharp.cs" />
     <Compile Include="src\Features\GenerarSalida\FactoriaSalida.cs" />
     <Compile Include="src\Features\GenerarSalida\GenerarSalidaBase.cs" />
-    <Compile Include="src\Features\GenerarSalida\Plantillas\PlantillasC_Sharp.cs" />
     <Compile Include="src\Features\ParserEntrada\FactoríaParser.cs" />
     <Compile Include="src\Features\ParserEntrada\ParserUMLBase.cs" />
     <Compile Include="src\Features\ParserEntrada\ParserXMI.cs" />
