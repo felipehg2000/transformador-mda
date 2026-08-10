@@ -277,8 +277,13 @@ namespace transformador_mda.src.Controladores
 
         public async Task<RetornoBase> GenerarCodigoClase(Clase param_clase, bool param_generar_json)
         {
-            if (param_generar_json && string.IsNullOrEmpty(Configuracion.RutaFicheroJSON))
+            if (param_generar_json)
             {
+                if (File.Exists(Configuracion.RutaFicheroJSON))
+                {
+                    File.Delete(Configuracion.RutaFicheroJSON);
+                }
+
                 if (Configuracion.Proyecto == null)
                     return new RetornoBase(false, "No se ha podido generar el código de la clase.", "El proyecto está vacío.");
 
@@ -287,10 +292,6 @@ namespace transformador_mda.src.Controladores
                     return retorno_exportacion;
 
                 Configuracion.RutaFicheroJSON = retorno_exportacion.TextoDesarrollador;
-            }
-            else
-            {
-                return new RetornoBase(false, "No se ha podido generar el código de la clase.", "La ruta del fichero JSON no está definida.");
             }
 
             if (!File.Exists(Configuracion.RutaFicheroJSON))
