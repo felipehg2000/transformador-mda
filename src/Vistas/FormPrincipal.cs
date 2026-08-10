@@ -103,8 +103,6 @@ namespace transformador_mda.src.Vistas
         /// </summary>
         private const int AnchoPanelIzquierdoMinimo = 150;
 
-        private Clase _clase_mostrada;
-
         #endregion
 
         #region "Move Form Info"
@@ -133,6 +131,8 @@ namespace transformador_mda.src.Vistas
             tableLayoutPanelInicio.Visible = true;
             tableLayoutPanelInicio.Enabled = true;
             tableLayoutPanelInicio.BringToFront();
+
+            ActivarPantallaTrabajo(true);
 
             // Ajusta las columnas 
             AjustarAnchoTablas();
@@ -783,12 +783,14 @@ namespace transformador_mda.src.Vistas
         /// <param name="e">Argumentos asociados al evento.</param>
         private async void generarEsqueletoToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            ActivarPantallaTrabajo(false);
             if (treeView.Nodes.Count <= 0)
             {
                 MessageBox.Show("Debe seleccionar un fichero XMI o un proyecto y una clase en el explorador de soluicones para poder generar código.",
                     "Aviso",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Information);
+                ActivarPantallaTrabajo(true);
                 return;
             }
             if (!(treeView.SelectedNode.Tag is Clase clase_seleccionada))
@@ -797,10 +799,11 @@ namespace transformador_mda.src.Vistas
                     "Aviso",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Information);
+                ActivarPantallaTrabajo(true);
                 return;
             }
 
-            RetornoBase retorno = await _controlador.GenerarCodigoClase(clase_seleccionada, true);
+            RetornoBase retorno = await _controlador.GenerarCodigoClase(clase_seleccionada, toolStripProgressBar);
             if (!retorno.Exito)
                 MessageBox.Show(retorno.TextoDesarrollador,
                     "Error",
@@ -808,6 +811,9 @@ namespace transformador_mda.src.Vistas
                     MessageBoxIcon.Error);
 
             richTextBoxCodigo.Text = retorno.TextoDesarrollador;
+            ActivarPantallaTrabajo(true);
+            toolStripProgressBar.Value = 0;
+            toolStripProgressBar.Maximum = 0;
         }
 
         #endregion
@@ -860,12 +866,14 @@ namespace transformador_mda.src.Vistas
 
         private async void pruebaIAToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            ActivarPantallaTrabajo(false);
             if (treeView.Nodes.Count <= 0)
             {
                 MessageBox.Show("Debe seleccionar un fichero XMI o un proyecto y una clase en el explorador de soluicones para poder generar código.",
                     "Aviso",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Information);
+                ActivarPantallaTrabajo(true);
                 return;
             }
             if (!(treeView.SelectedNode.Tag is Clase clase_seleccionada))
@@ -874,22 +882,47 @@ namespace transformador_mda.src.Vistas
                     "Aviso",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Information);
+                ActivarPantallaTrabajo(true);
                 return;
             }
 
-            RetornoBase retorno_codigo = await _controlador.GenerarCodigoIA(clase_seleccionada);
+            RetornoBase retorno_codigo = await _controlador.GenerarCodigoIA(clase_seleccionada, true, toolStripProgressBar);
             if (!retorno_codigo.Exito)
             {
                 MessageBox.Show(retorno_codigo.TextoUsuario,
                     "Error",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Error);
-                //return;
             }
 
             richTextBoxCodigo.Text = retorno_codigo.TextoDesarrollador;
+            ActivarPantallaTrabajo(true);
+            toolStripProgressBar.Value = 0;
+            toolStripProgressBar.Maximum = 0;
+        }
+
+        private void panelBloqueo_MouseHover(object sender, EventArgs e)
+        {
+            Cursor.Current = Cursors.WaitCursor;
         }
 
 
+        private void ActivarPantallaTrabajo(bool param_activar)
+        {
+            menuStrip.Enabled = param_activar;
+            panelIzquierdo.Enabled = param_activar;
+            treeView.Enabled = param_activar;
+            splitContainer.Enabled = param_activar;
+            panelSelClase.Enabled = param_activar;
+
+            if (param_activar)
+            {
+                this.Cursor = Cursors.Default;
+            }
+            else
+            {
+                this.Cursor = Cursors.WaitCursor;
+            }
+        }
     }
 }

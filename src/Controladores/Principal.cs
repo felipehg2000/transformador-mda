@@ -96,10 +96,10 @@ namespace transformador_mda.src.Controladores
             return new RetornoMultiple(true, RetornoMultiple.EnumEstado.CORRECTO, "Directorio seleccionado correctamente.");
         }
 
-        public RetornoBase GenerarCodigo(Clase param_proyecto)
+        public RetornoBase GenerarCodigo(Clase param_proyecto, ToolStripProgressBar param_barra_progreso)
         {
             GenerarSalidaBase generador = FactoriaSalida.CrearGenerarSalida(Configuracion);
-            string texto = generador.GenerarTexto(param_proyecto).TextoDesarrollador;
+            string texto = generador.GenerarTexto(param_proyecto, param_barra_progreso).TextoDesarrollador;
 
             return new RetornoBase(true, "Generación correcta", texto);
         }
@@ -275,8 +275,15 @@ namespace transformador_mda.src.Controladores
             throw new NotImplementedException();
         }
 
-        public async Task<RetornoBase> GenerarCodigoClase(Clase param_clase, bool param_generar_json)
+        public async Task<RetornoBase> GenerarCodigoClase(Clase param_clase, ToolStripProgressBar param_barra_progreso)
         {
+            return GenerarCodigo(param_clase, param_barra_progreso);
+        }
+
+        public async Task<RetornoBase> GenerarCodigoIA(Clase param_clase, bool param_generar_json, ToolStripProgressBar param_barra_progreso)
+        {
+            param_barra_progreso.Maximum = 10;
+            param_barra_progreso.Value = 0;
             if (param_generar_json)
             {
                 if (File.Exists(Configuracion.RutaFicheroJSON))
@@ -296,23 +303,21 @@ namespace transformador_mda.src.Controladores
 
             if (!File.Exists(Configuracion.RutaFicheroJSON))
                 return new RetornoBase(false, "No se ha podido generar el código de la clase.", "El fichero JSON no existe en la ruta: " + Configuracion.RutaFicheroJSON);
+            param_barra_progreso.Value++;
 
-            return GenerarCodigo(param_clase);
-        }
-
-        public async Task<RetornoBase> GenerarCodigoIA(Clase param_clase)
-        {
             IProveedorIA proveedorIA = FactoriaProveedorIA.CrearProveedorIA(ProveedorIA.OpenAI);
-            RetornoBase retorno_sin_ia = GenerarCodigo(param_clase);
+            RetornoBase retorno_sin_ia = GenerarCodigo(param_clase, null);
             if (!retorno_sin_ia.Exito)
                 return retorno_sin_ia;
+            param_barra_progreso.Value++;
 
-            RetornoBase retorno_con_ia = await proveedorIA.GenerarCodigo(Configuracion.Proyecto, param_clase, retorno_sin_ia.TextoDesarrollador);
+            RetornoBase retorno_con_ia = await proveedorIA.GenerarCodigo(Configuracion.Proyecto, param_clase, retorno_sin_ia.TextoDesarrollador, param_barra_progreso);
             if (!retorno_con_ia.Exito)
                 return retorno_con_ia;
 
             RetornoBase retorno_completo = GenerarCodigoCompleto(retorno_sin_ia.TextoDesarrollador,
                 retorno_con_ia.TextoDesarrollador);
+            param_barra_progreso.Value++;
 
             return retorno_completo;
         }
