@@ -340,6 +340,18 @@ El código generado debe:
 
 25. No utilizar métodos, clases o APIs inexistentes en C# 7.3 o en el proyecto proporcionado.
 
+26. No utilizar APIs obsoletas salvo que el proyecto las utilice expresamente.
+
+27. Tabular el código generado con sangrías de 4 espacios.
+
+28. Tabular correctamente los bloques de código anidados.
+
+29. Mantener la legibilidad del código generado.
+
+30. Si el código generado es muy largo, comenta brevemente los bloques indicando su propósito y funcionalidad.
+
+31. No generes código que pueda provocar errores de compilación, advertencias o excepciones en tiempo de ejecución.
+
 ==================================================
 COMPORTAMIENTO INCOMPLETAMENTE ESPECIFICADO
 ==================================================
