@@ -140,7 +140,7 @@ namespace transformador_mda.src.Vistas
 
         #endregion
 
-        #region "Menú"
+        #region "Menú Configuración"
 
         /// <summary>
         /// Evento para exportar la configuración que está usando el generador.
@@ -774,16 +774,87 @@ namespace transformador_mda.src.Vistas
 
         #endregion
 
-        #region "Generación de código"
+        #region "Generación de código de una clase"
 
         /// <summary>
-        /// Genera el esqueleto del código y lo muestra.
+        /// Genera el código esqueleto de la clase que el usuario está visualizando.
         /// </summary>
         /// <param name="sender">Componente que lanza el evento.</param>
         /// <param name="e">Argumentos asociados al evento.</param>
-        private async void generarEsqueletoToolStripMenuItem_Click(object sender, EventArgs e)
+        private void generarEsqueletoToolStripMenuItem1_Click(object sender, EventArgs e)
         {
             ActivarPantallaTrabajo(false);
+            Clase clase_seleccionada = ObtenerClaseSeleccionada();
+            if (clase_seleccionada == null)
+                return;
+
+            RetornoBase retorno = _controlador.GenerarEsqueletoClase(clase_seleccionada, toolStripProgressBar);
+            if (!retorno.Exito)
+                MessageBox.Show(retorno.TextoUsuario,
+                    "Error",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+
+            PrepararVistaDespuesDeGenerarCodigo(retorno.TextoDesarrollador, retorno.Exito);
+        }
+
+        /// <summary>
+        /// Genera el código completo de la clase que el usuario está visualizando.
+        /// </summary>
+        /// <param name="sender">Componente que lanza el evento.</param>
+        /// <param name="e">Argumentos asociados al evento.</param>
+        private async void generarCódigoCompletoToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ActivarPantallaTrabajo(false);
+            Clase clase_seleccionada = ObtenerClaseSeleccionada();
+            if (clase_seleccionada == null)
+            {
+                ActivarPantallaTrabajo(true);
+                return;
+            }
+
+            RetornoMultiple retorno = await _controlador.GenerarCodigoIAClase(clase_seleccionada, true, toolStripProgressBar);
+            do
+            {
+                if (retorno.Exito)
+                    break;
+
+                if (retorno.Estado == RetornoMultiple.EnumEstado.CONFIRMACION_USUARIO)
+                {
+                    DialogResult respuesta = MessageBox.Show(retorno.TextoDesarrollador,
+                        "Aviso",
+                        MessageBoxButtons.YesNo,
+                        MessageBoxIcon.Information);
+
+                    if (respuesta == DialogResult.No)
+                    {
+                        ActivarPantallaTrabajo(true);
+                        return;
+                    }
+
+                    retorno = await _controlador.GenerarCodigoIAClase(clase_seleccionada, true, toolStripProgressBar, true);
+                }
+                else
+                {
+                    MessageBox.Show(retorno.TextoUsuario,
+                        "Error",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Error);
+                    ActivarPantallaTrabajo(true);
+                    return;
+                }
+            }
+            while (true);
+
+            PrepararVistaDespuesDeGenerarCodigo(retorno.TextoDesarrollador, retorno.Exito);
+        }
+
+        /// <summary>
+        /// Obtiene la clase que el usuario está visualizando.
+        /// </summary>
+        /// <returns>Null si no tienen ninguna clase abierta o el objeto clase que esté visualizando.</returns>
+        private Clase ObtenerClaseSeleccionada()
+        {
             if (treeView.Nodes.Count <= 0)
             {
                 MessageBox.Show("Debe seleccionar un fichero XMI o un proyecto y una clase en el explorador de soluicones para poder generar código.",
@@ -791,26 +862,31 @@ namespace transformador_mda.src.Vistas
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Information);
                 ActivarPantallaTrabajo(true);
-                return;
+                return null;
             }
-            if (!(treeView.SelectedNode.Tag is Clase clase_seleccionada))
+            if (!(treeView.SelectedNode.Tag is Clase ret_clase))
             {
                 MessageBox.Show("Debe seleccionar una clase en el explorador de soluicones para poder generar código.",
                     "Aviso",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Information);
                 ActivarPantallaTrabajo(true);
-                return;
+                return null;
             }
 
-            RetornoBase retorno = await _controlador.GenerarCodigoClase(clase_seleccionada, toolStripProgressBar);
-            if (!retorno.Exito)
-                MessageBox.Show(retorno.TextoDesarrollador,
-                    "Error",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
+            return ret_clase;
+        }
 
-            richTextBoxCodigo.Text = retorno.TextoDesarrollador;
+        /// <summary>
+        /// Después de la generación de código activa la pantalla de trabajo y rellena el rich text.
+        /// </summary>
+        /// <param name="param_texto">Texto a mostrar en el rich text.</param>
+        /// <param name="param_mostrar_texto">True para mostrar el texto, false para no mostrarlo.</param>
+        private void PrepararVistaDespuesDeGenerarCodigo(string param_texto, bool param_mostrar_texto)
+        {
+            if (param_mostrar_texto)
+                richTextBoxCodigo.Text = param_texto;
+
             ActivarPantallaTrabajo(true);
             toolStripProgressBar.Value = 0;
             toolStripProgressBar.Maximum = 0;
@@ -849,64 +925,9 @@ namespace transformador_mda.src.Vistas
         #region "Métodos auxiliares"
 
         /// <summary>
-        /// Método auxiliar para centrar los paneles a visualizar.
+        /// Activa y desactiva los paneles de trabajo para que el usuario no pueda interactuar con ella si hay un proceso en marcha.
         /// </summary>
-        /// <param name="param_panel">Panel a centrar en mitad de su contenedor.</param>
-        private void CentrarPanel(Panel param_panel)
-        {
-            if (param_panel.Parent == null)
-                return;
-
-            Control contenedor = param_panel.Parent;
-            param_panel.Location = new Point((contenedor.ClientSize.Width - param_panel.Width) / 2,
-                (contenedor.ClientSize.Height - param_panel.Height) / 2);
-        }
-
-        #endregion
-
-        private async void pruebaIAToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            ActivarPantallaTrabajo(false);
-            if (treeView.Nodes.Count <= 0)
-            {
-                MessageBox.Show("Debe seleccionar un fichero XMI o un proyecto y una clase en el explorador de soluicones para poder generar código.",
-                    "Aviso",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Information);
-                ActivarPantallaTrabajo(true);
-                return;
-            }
-            if (!(treeView.SelectedNode.Tag is Clase clase_seleccionada))
-            {
-                MessageBox.Show("Debe seleccionar una clase en el explorador de soluicones para poder generar código.",
-                    "Aviso",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Information);
-                ActivarPantallaTrabajo(true);
-                return;
-            }
-
-            RetornoBase retorno_codigo = await _controlador.GenerarCodigoIA(clase_seleccionada, true, toolStripProgressBar);
-            if (!retorno_codigo.Exito)
-            {
-                MessageBox.Show(retorno_codigo.TextoUsuario,
-                    "Error",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
-            }
-
-            richTextBoxCodigo.Text = retorno_codigo.TextoDesarrollador;
-            ActivarPantallaTrabajo(true);
-            toolStripProgressBar.Value = 0;
-            toolStripProgressBar.Maximum = 0;
-        }
-
-        private void panelBloqueo_MouseHover(object sender, EventArgs e)
-        {
-            Cursor.Current = Cursors.WaitCursor;
-        }
-
-
+        /// <param name="param_activar">True para activar el espacio de trabajo, false para desactivarlo.</param>
         private void ActivarPantallaTrabajo(bool param_activar)
         {
             menuStrip.Enabled = param_activar;
@@ -924,5 +945,22 @@ namespace transformador_mda.src.Vistas
                 this.Cursor = Cursors.WaitCursor;
             }
         }
+
+        /// <summary>
+        /// Método auxiliar para centrar los paneles a visualizar.
+        /// </summary>
+        /// <param name="param_panel">Panel a centrar en mitad de su contenedor.</param>
+        private void CentrarPanel(Panel param_panel)
+        {
+            if (param_panel.Parent == null)
+                return;
+
+            Control contenedor = param_panel.Parent;
+            param_panel.Location = new Point((contenedor.ClientSize.Width - param_panel.Width) / 2,
+                (contenedor.ClientSize.Height - param_panel.Height) / 2);
+        }
+
+        #endregion
+       
     }
 }
