@@ -296,7 +296,7 @@ El código generado debe:
 
 3. Compilar al sustituir cada indicador por su código correspondiente.
 
-4. Utilizar exclusivamente elementos existentes en los archivos proporcionados.
+4. Utilizar exclusivamente elementos existentes en los archivos proporcionados, salvo las funciones auxiliares estrictamente necesarias permitidas por este prompt.
 
 5. Respetar el carácter síncrono o asíncrono de cada método.
 
@@ -350,7 +350,7 @@ El código generado debe:
 
 30. Si el código generado es muy largo, comenta brevemente los bloques indicando su propósito y funcionalidad.
 
-31. No generes código que pueda provocar errores de compilación, advertencias o excepciones en tiempo de ejecución.
+31. No generes código que previsiblemente provoque errores de compilación o excepciones evitables en tiempo de ejecución.
 
 ==================================================
 COMPORTAMIENTO INCOMPLETAMENTE ESPECIFICADO
@@ -380,9 +380,11 @@ Si un comportamiento no está completamente especificado:
 FUNCIONES AUXILIARES
 ==================================================
 
+El campo ""funcionesAuxiliares"" es una única cadena de texto que contiene directamente el código C# que debe añadirse a la clase.
+
 1. Evita crear funciones auxiliares.
 
-2. Solo crea una función auxiliar cuando sea estrictamente necesaria para:
+2. Solo crea funciones auxiliares cuando sean estrictamente necesarias para:
 
    - Evitar una duplicación significativa.
    - Separar una operación compleja.
@@ -390,70 +392,128 @@ FUNCIONES AUXILIARES
 
 3. Toda función auxiliar generada debe:
 
-   - Ser private.
+   - Ser obligatoriamente private.
    - Ser compatible con C# 7.3.
-   - Ser autocontenida.
+   - Incluir su firma completa.
+   - Incluir sus llaves exteriores.
+   - Ser código C# directamente insertable dentro de la clase.
    - Utilizar únicamente miembros disponibles.
    - Ser utilizada al menos por uno de los métodos generados.
-   - Incluirse completamente en ""funcionesAuxiliares"".
-   - Incluir su firma y sus llaves exteriores.
 
 4. No generes funciones auxiliares sin uso.
 
 5. No generes una función auxiliar cuando la misma funcionalidad ya exista en el proyecto.
 
-6. Cada elemento de ""funcionesAuxiliares"" debe contener una única función auxiliar completa.
+6. Todas las funciones auxiliares deben incluirse juntas dentro de la única cadena ""funcionesAuxiliares"".
+
+7. Si existen varias funciones auxiliares, sepáralas mediante dos saltos de línea.
+
+8. No utilices arrays, objetos JSON internos ni propiedades adicionales para representar las funciones auxiliares.
+
+9. El contenido de ""funcionesAuxiliares"" debe poder insertarse directamente dentro de la clase sin ninguna transformación adicional distinta de interpretar los caracteres escapados del JSON.
+
+10. Si no son necesarias funciones auxiliares, devuelve:
+
+""funcionesAuxiliares"": """"
 
 ==================================================
-LIBRERÍAS Y PAQUETES
+LIBRERÍAS NECESARIAS
 ==================================================
+
+El campo ""libreriasNecesarias"" es una única cadena de texto que contiene directamente las cláusulas using que deben añadirse al código.
 
 1. No incluyas cláusulas using dentro del código de los métodos.
 
-2. Incluye en ""libreriasNecesarias"" únicamente los using adicionales que:
+2. Incluye únicamente cláusulas using que:
 
-   - Sean realmente necesarios.
-   - No aparezcan ya en el esqueleto.
-   - Sean compatibles con C# 7.3 y el proyecto.
+   - Sean realmente necesarias para compilar el código generado.
+   - No aparezcan ya en el código esqueleto.
+   - Sean compatibles con C# 7.3 y con el proyecto.
 
-3. Cada elemento de ""libreriasNecesarias"" debe contener una cláusula using completa, incluyendo el punto y coma.
+3. Cada cláusula debe contener la instrucción completa, incluyendo:
 
-4. Utiliza preferentemente:
+   - La palabra using.
+   - El namespace.
+   - El punto y coma final.
 
-   - La biblioteca estándar de .NET.
-   - Las dependencias ya declaradas.
-   - Las clases y servicios existentes en el proyecto.
+4. Si son necesarias varias librerías, inclúyelas todas dentro de la misma cadena y sepáralas mediante un único salto de línea.
 
-5. Solo recomienda un paquete NuGet cuando la funcionalidad no pueda implementarse razonablemente mediante:
+5. El contenido debe poder añadirse directamente a la zona de using del archivo C# sin realizar ninguna transformación adicional distinta de interpretar los caracteres escapados del JSON.
 
-   - La biblioteca estándar de .NET.
-   - Las dependencias ya declaradas.
-   - Una implementación sencilla y mantenible.
+6. No utilices arrays, objetos ni ninguna estructura adicional.
 
-6. En ""paquetesNuGet"":
+7. No incluyas librerías que ya aparezcan en el código esqueleto.
 
-   - Incluye únicamente paquetes imprescindibles.
-   - Utiliza el nombre real del paquete.
-   - Indica una versión compatible únicamente cuando pueda determinarse con seguridad.
-   - Si la versión no puede determinarse con seguridad, utiliza una cadena vacía.
-   - Explica brevemente por qué resulta imprescindible.
+8. No incluyas librerías que no sean utilizadas realmente por el código generado.
 
-7. No recomiendes paquetes únicamente para simplificar unas pocas líneas de código.
+9. Ejemplo conceptual del valor cuando son necesarias varias librerías:
+
+""libreriasNecesarias"": ""using System.Linq;\nusing System.Globalization;""
+
+10. Si no es necesaria ninguna librería adicional, devuelve:
+
+""libreriasNecesarias"": """"
+
+==================================================
+PAQUETES NUGET
+==================================================
+
+No existe una propiedad independiente para los paquetes NuGet.
+
+Si resulta imprescindible instalar uno o varios paquetes NuGet para que el código generado funcione correctamente, debes indicarlos exclusivamente dentro de ""comentarioPrincipal"".
+
+Solo considera necesario un paquete NuGet cuando la funcionalidad no pueda implementarse razonablemente mediante:
+
+- La biblioteca estándar de .NET.
+- Las dependencias ya existentes en el proyecto.
+- Una implementación sencilla, mantenible y compatible con C# 7.3.
+
+No recomiendes paquetes NuGet únicamente para simplificar unas pocas líneas de código.
+
+Para cada paquete NuGet necesario debes indicar en ""comentarioPrincipal"":
+
+- Nombre exacto del paquete.
+- Versión compatible, únicamente si puede determinarse con seguridad.
+- Motivo por el que resulta necesario.
+- Cualquier configuración adicional imprescindible para utilizarlo.
+
+Si la versión exacta no puede determinarse con seguridad, no inventes una versión.
 
 ==================================================
 COMENTARIO PRINCIPAL
 ==================================================
 
-El campo ""comentarioPrincipal"" debe contener únicamente información necesaria para integrar o utilizar correctamente el código generado:
+El campo ""comentarioPrincipal"" es una única cadena de texto destinada a colocarse directamente en la parte superior de la clase generada.
 
-- Suposiciones inevitables.
+Debe contener un comentario C# válido y directamente insertable en el código.
+
+Utiliza preferentemente un comentario de bloque con el formato:
+
+/*
+Información relevante...
+*/
+
+Incluye únicamente información necesaria para integrar, configurar o utilizar correctamente el código generado.
+
+Puede incluir:
+
+- Paquetes NuGet que sea imprescindible instalar.
+- Motivo por el que se necesita cada paquete NuGet.
+- Configuración necesaria para dichos paquetes.
+- Suposiciones inevitables realizadas.
 - Contradicciones detectadas.
 - Referencias que no han podido resolverse.
-- Configuración necesaria.
-- Limitaciones.
+- Configuración externa necesaria.
+- Limitaciones relevantes.
 - Dependencias externas.
-- Paquetes NuGet necesarios.
-- Requisitos para el funcionamiento.
+- Requisitos necesarios para el correcto funcionamiento.
+
+Cuando existan paquetes NuGet necesarios, utiliza dentro del comentario una estructura clara similar a:
+
+PAQUETES NUGET NECESARIOS:
+- Nombre.Del.Paquete
+  Motivo: explicación breve.
+  Versión: versión compatible, únicamente si se conoce con seguridad.
 
 No incluyas:
 
@@ -461,9 +521,14 @@ No incluyas:
 - Un resumen de cada método.
 - Razonamientos internos.
 - Alternativas descartadas.
-- Texto innecesario.
+- Información irrelevante.
+- Markdown.
 
-Si no existe información relevante, devuelve una cadena vacía.
+El contenido de ""comentarioPrincipal"" debe poder insertarse directamente en el código C#.
+
+Si no existe ninguna información relevante ni ningún paquete NuGet necesario, devuelve:
+
+""comentarioPrincipal"": """"
 
 ==================================================
 FORMATO DE RESPUESTA OBLIGATORIO
@@ -478,22 +543,9 @@ Devuelve exclusivamente un único objeto JSON válido con esta estructura exacta
       ""codigo"": ""CUERPO_DEL_METODO""
     }
   ],
-  ""libreriasNecesarias"": [
-    ""using Namespace.Necesario;""
-  ],
-  ""funcionesAuxiliares"": [
-    {
-      ""codigo"": ""FUNCION_AUXILIAR_PRIVADA_COMPLETA""
-    }
-  ],
-  ""paquetesNuGet"": [
-    {
-      ""nombre"": ""Nombre.Del.Paquete"",
-      ""version"": ""VersionCompatible"",
-      ""motivo"": ""Razón por la que resulta imprescindible""
-    }
-  ],
-  ""comentarioPrincipal"": """"
+  ""libreriasNecesarias"": ""using Namespace.Necesario;\nusing Otro.Namespace;"",
+  ""funcionesAuxiliares"": ""private Tipo MetodoAuxiliar(...)\n{\n    // Código\n}"",
+  ""comentarioPrincipal"": ""/* Información necesaria para integrar el código. */""
 }
 
 ==================================================
@@ -502,49 +554,97 @@ RESTRICCIONES DEL JSON
 
 1. La raíz debe ser un objeto JSON.
 
-2. Debe contener siempre y únicamente estas cinco propiedades:
+2. Debe contener siempre y únicamente estas cuatro propiedades:
 
    - ""codigo"".
    - ""libreriasNecesarias"".
    - ""funcionesAuxiliares"".
-   - ""paquetesNuGet"".
    - ""comentarioPrincipal"".
 
 3. ""codigo"" debe ser siempre un array.
 
-4. ""libreriasNecesarias"" debe ser siempre un array de cadenas.
+4. Cada elemento de ""codigo"" debe contener exactamente:
 
-5. ""funcionesAuxiliares"" debe ser siempre un array.
+   - ""id"": cadena con el identificador exacto.
+   - ""codigo"": cadena con el cuerpo del método.
 
-6. ""paquetesNuGet"" debe ser siempre un array.
+5. ""libreriasNecesarias"" debe ser siempre una cadena.
+
+6. ""funcionesAuxiliares"" debe ser siempre una cadena.
 
 7. ""comentarioPrincipal"" debe ser siempre una cadena.
 
-8. Cuando no haya elementos, devuelve arrays vacíos.
+8. No existe ninguna propiedad ""paquetesNuGet"".
 
-9. No utilices null en lugar de arrays o cadenas vacías.
+9. La información sobre paquetes NuGet debe incluirse exclusivamente dentro de ""comentarioPrincipal"".
 
-10. Los saltos de línea contenidos dentro de cadenas JSON deben representarse mediante \n.
+10. Cuando no haya contenido para una propiedad de tipo cadena, devuelve una cadena vacía """". No utilices null.
 
-11. Las comillas contenidas dentro del código C# deben escaparse correctamente para producir JSON válido.
+11. Los saltos de línea contenidos dentro de las cadenas JSON deben representarse obligatoriamente mediante \n.
 
-12. Las barras invertidas deben escaparse correctamente.
+12. Las tabulaciones, si son necesarias, deben representarse mediante \t.
 
-13. No añadas propiedades diferentes.
+13. Las comillas contenidas dentro del código C# deben escaparse correctamente para producir JSON válido.
 
-14. No escribas texto antes ni después del objeto JSON.
+14. Las barras invertidas deben escaparse correctamente conforme al formato JSON.
 
-15. No utilices Markdown.
+15. No añadas propiedades diferentes.
 
-16. No incluyas comentarios JSON.
+16. No escribas texto antes ni después del objeto JSON.
 
-17. No devuelvas varias alternativas.
+17. No utilices Markdown.
 
-18. No incluyas comas finales después de la última propiedad de un objeto o del último elemento de un array.
+18. No incluyas comentarios JSON.
 
-19. Verifica que la respuesta completa pueda procesarse mediante:
+19. No devuelvas varias alternativas.
+
+20. No incluyas comas finales después de la última propiedad de un objeto o del último elemento de un array.
+
+21. No conviertas ""libreriasNecesarias"" en un array aunque existan varias librerías.
+
+22. No conviertas ""funcionesAuxiliares"" en un array aunque existan varias funciones auxiliares.
+
+23. No crees una propiedad independiente para los paquetes NuGet.
+
+24. Verifica que la respuesta completa pueda procesarse mediante:
 
 System.Text.Json.JsonDocument.Parse
+
+==================================================
+EJEMPLO SIN ELEMENTOS ADICIONALES
+==================================================
+
+Si el código no necesita librerías adicionales, funciones auxiliares, paquetes NuGet ni comentarios relevantes, la respuesta debe tener este formato:
+
+{
+  ""codigo"": [
+    {
+      ""id"": ""IDENTIFICADOR_EXACTO"",
+      ""codigo"": ""return valor;""
+    }
+  ],
+  ""libreriasNecesarias"": """",
+  ""funcionesAuxiliares"": """",
+  ""comentarioPrincipal"": """"
+}
+
+==================================================
+EJEMPLO CON ELEMENTOS ADICIONALES
+==================================================
+
+Si fueran necesarias dos librerías, una función auxiliar y un paquete NuGet, la estructura sería:
+
+{
+  ""codigo"": [
+    {
+      ""id"": ""IDENTIFICADOR_EXACTO"",
+      ""codigo"": ""return MetodoAuxiliar();""
+    }
+  ],
+  ""libreriasNecesarias"": ""using System.Linq;\nusing Newtonsoft.Json;"",
+  ""funcionesAuxiliares"": ""private string MetodoAuxiliar()\n{\n    return \""valor\"";\n}"",
+  ""comentarioPrincipal"": ""/*\nPAQUETES NUGET NECESARIOS:\n- Newtonsoft.Json\n  Motivo: necesario para la serialización JSON utilizada por la implementación.\n\nDebe instalarse el paquete antes de compilar el proyecto.\n*/""
+}
 
 ==================================================
 COMPROBACIÓN FINAL INTERNA
@@ -578,17 +678,29 @@ Antes de responder, comprueba internamente que:
 
 13. Todo el código es compatible con C# 7.3.
 
-14. Todas las funciones auxiliares son private.
+14. ""libreriasNecesarias"" es una cadena y contiene únicamente using directamente insertables en el código.
 
-15. Todas las funciones auxiliares son utilizadas.
+15. Si existen varias librerías, están separadas mediante \n dentro de la misma cadena.
 
-16. Las librerías indicadas son realmente necesarias.
+16. ""funcionesAuxiliares"" es una cadena que contiene todas las funciones auxiliares completas.
 
-17. Los paquetes NuGet indicados son imprescindibles.
+17. Todas las funciones auxiliares son private.
 
-18. La respuesta completa es JSON válido.
+18. Todas las funciones auxiliares son utilizadas.
 
-19. No existe ningún texto fuera del JSON.
+19. Si existen varias funciones auxiliares, están separadas mediante dos saltos de línea dentro de la misma cadena.
+
+20. No existe la propiedad ""paquetesNuGet"".
+
+21. Cualquier paquete NuGet imprescindible aparece explicado en ""comentarioPrincipal"".
+
+22. ""comentarioPrincipal"", si no está vacío, contiene un comentario C# válido directamente insertable en la parte superior de la clase.
+
+23. Las cuatro propiedades obligatorias existen siempre.
+
+24. La respuesta completa es JSON válido.
+
+25. No existe ningún texto fuera del JSON.
 
 Devuelve exclusivamente el objeto JSON.";
         #endregion

@@ -11,6 +11,7 @@ using transformador_mda.src.Dominio.ElementosUML;
 using transformador_mda.src.Features.GenerarSalida;
 using transformador_mda.src.Features.IntegracionIA;
 using transformador_mda.src.Features.ParserEntrada;
+using System;
 
 namespace transformador_mda.src.Controladores
 {
@@ -291,49 +292,25 @@ namespace transformador_mda.src.Controladores
             {
                 using (JsonDocument json_document = JsonDocument.Parse(param_codigo_con_ia))
                 {
-                    JsonElement elemento_raiz = json_document.RootElement;
+                    RetornoMultiple retorno = GenerarClasesCompletas(json_document, param_codigo_sin_ia);
+                    if (!retorno.Exito)
+                        return retorno;
+                    string codigo_completo = retorno.TextoDesarrollador;
 
-                    if (!elemento_raiz.TryGetProperty("codigo", out JsonElement json_codigo) || json_codigo.ValueKind != JsonValueKind.Array)
-                    {
-                        return new RetornoMultiple(false,
-                            RetornoMultiple.EnumEstado.ERROR,
-                            "El JSON generado por la IA no tiene el formato esperado.",
-                            "No se ha encontrado la propiedad 'codigo' o no contiene un array.");
-                    }
+                    retorno = GenerarClasesLibreria(json_document, codigo_completo);
+                    if (!retorno.Exito)
+                        return retorno;
+                    codigo_completo = retorno.TextoDesarrollador;
 
-                    string codigo_completo = param_codigo_sin_ia;
-                    foreach (JsonElement elemento_json in json_codigo.EnumerateArray())
-                    {
-                        if (!elemento_json.TryGetProperty("id", out JsonElement json_id) ||
-                            !elemento_json.TryGetProperty("codigo", out JsonElement json_contenido))
-                        {
-                            return new RetornoMultiple(false,
-                                RetornoMultiple.EnumEstado.ERROR,
-                                "El JSON generado por la IA no tiene el formato esperado.",
-                                "Uno de los elementos no contiene las propiedades 'id' y 'codigo'.");
-                        }
+                    retorno = GenerarClasesFuncAux(json_document, codigo_completo);
+                    if (!retorno.Exito)
+                        return retorno;
+                    codigo_completo = retorno.TextoDesarrollador;
 
-                        string id = json_id.GetString();
-                        string codigo = json_contenido.GetString();
-                        if (string.IsNullOrWhiteSpace(id))
-                        {
-                            return new RetornoMultiple(false,
-                                RetornoMultiple.EnumEstado.ERROR,
-                                "El JSON generado por la IA contiene un identificador vacío.",
-                                "No se puede sustituir un método sin identificador.");
-                        }
-
-                        string indicador = "//{{" + id + "}}";
-                        if (!codigo_completo.Contains(indicador))
-                        {
-                            return new RetornoMultiple(false,
-                                RetornoMultiple.EnumEstado.ERROR,
-                                "No se ha podido insertar todo el código generado por la IA.",
-                                "No se ha encontrado el indicador " + indicador + "en el código base.");
-                        }
-
-                        codigo_completo = codigo_completo.Replace(indicador, codigo ?? string.Empty);
-                    }
+                    retorno = GenerarClasesComentario(json_document, codigo_completo);
+                    if (!retorno.Exito)
+                        return retorno;
+                    codigo_completo = retorno.TextoDesarrollador;
 
                     return new RetornoMultiple(true,
                         RetornoMultiple.EnumEstado.CORRECTO,
@@ -348,6 +325,124 @@ namespace transformador_mda.src.Controladores
                     "Error al interpretar el JSON generado por la IA.",
                     ex.Message);
             }
+        }
+
+        private RetornoMultiple GenerarClasesCompletas(JsonDocument param_json_document, string param_codigo_sin_ia)
+        {
+            JsonElement elemento_raiz = param_json_document.RootElement;
+
+            if (!elemento_raiz.TryGetProperty("codigo", out JsonElement json_codigo) || json_codigo.ValueKind != JsonValueKind.Array)
+            {
+                return new RetornoMultiple(false,
+                    RetornoMultiple.EnumEstado.ERROR,
+                    "El JSON generado por la IA no tiene el formato esperado.",
+                    "No se ha encontrado la propiedad 'codigo' o no contiene un array.");
+            }
+
+            string codigo_completo = param_codigo_sin_ia;
+            foreach (JsonElement elemento_json in json_codigo.EnumerateArray())
+            {
+                if (!elemento_json.TryGetProperty("id", out JsonElement json_id) ||
+                    !elemento_json.TryGetProperty("codigo", out JsonElement json_contenido))
+                {
+                    return new RetornoMultiple(false,
+                        RetornoMultiple.EnumEstado.ERROR,
+                        "El JSON generado por la IA no tiene el formato esperado.",
+                        "Uno de los elementos no contiene las propiedades 'id' y 'codigo'.");
+                }
+
+                string id = json_id.GetString();
+                string codigo = json_contenido.GetString();
+                if (string.IsNullOrWhiteSpace(id))
+                {
+                    return new RetornoMultiple(false,
+                        RetornoMultiple.EnumEstado.ERROR,
+                        "El JSON generado por la IA contiene un identificador vacío.",
+                        "No se puede sustituir un método sin identificador.");
+                }
+
+                string indicador = "//{{" + id + "}}";
+                if (!codigo_completo.Contains(indicador))
+                {
+                    return new RetornoMultiple(false,
+                        RetornoMultiple.EnumEstado.ERROR,
+                        "No se ha podido insertar todo el código generado por la IA.",
+                        "No se ha encontrado el indicador " + indicador + "en el código base.");
+                }
+
+                codigo_completo = codigo_completo.Replace(indicador, codigo ?? string.Empty);
+            }
+
+            return new RetornoMultiple(true, 
+                RetornoMultiple.EnumEstado.CORRECTO, 
+                string.Empty, 
+                codigo_completo);
+        }
+
+        private RetornoMultiple GenerarClasesLibreria(JsonDocument param_json, string param_codigo)
+        {
+            JsonElement elemento_raiz = param_json.RootElement;
+
+            if (!elemento_raiz.TryGetProperty("libreriasNecesarias", out JsonElement json_librerias) ||
+                json_librerias.ValueKind != JsonValueKind.String)
+            {
+                return new RetornoMultiple(false,
+                    RetornoMultiple.EnumEstado.ERROR,
+                    "El JSON generado por la IA no tiene el formato esperado.",
+                    "No se ha encontrado la propiedad 'libreriasNecesarias' o no contiene una cadena.");
+            }
+
+            string librerias_necesarias = json_librerias.GetString() ?? string.Empty;
+            param_codigo = param_codigo.Replace("//{{libreriasUsadasPorIA}}", librerias_necesarias);
+
+            return new RetornoMultiple(true,
+                RetornoMultiple.EnumEstado.CORRECTO,
+                string.Empty,
+                param_codigo);
+        }
+
+        private RetornoMultiple GenerarClasesFuncAux(JsonDocument param_json, string param_codigo)
+        {
+            JsonElement elemento_raiz = param_json.RootElement;
+
+            if (!elemento_raiz.TryGetProperty("funcionesAuxiliares", out JsonElement json_funciones) ||
+                json_funciones.ValueKind != JsonValueKind.String)
+            {
+                return new RetornoMultiple(false,
+                    RetornoMultiple.EnumEstado.ERROR,
+                    "El JSON generado por la IA no tiene el formato esperado.",
+                    "No se ha encontrado la propiedad 'libreriasNecesarias' o no contiene una cadena.");
+            }
+
+            string funciones = json_funciones.GetString() ?? string.Empty;
+            param_codigo = param_codigo.Replace("//{{MetodosAuxiliares}}", funciones);
+
+            return new RetornoMultiple(true,
+                RetornoMultiple.EnumEstado.CORRECTO,
+                string.Empty,
+                param_codigo);
+        }
+
+        private RetornoMultiple GenerarClasesComentario(JsonDocument param_json, string param_codigo)
+        {
+            JsonElement elemento_raiz = param_json.RootElement;
+
+            if (!elemento_raiz.TryGetProperty("comentarioPrincipal", out JsonElement json_comentario) ||
+                json_comentario.ValueKind != JsonValueKind.String)
+            {
+                return new RetornoMultiple(false,
+                    RetornoMultiple.EnumEstado.ERROR,
+                    "El JSON generado por la IA no tiene el formato esperado.",
+                    "No se ha encontrado la propiedad 'libreriasNecesarias' o no contiene una cadena.");
+            }
+
+            string comentario = json_comentario.GetString() ?? string.Empty;
+            param_codigo = param_codigo.Replace("{{ComentarioIA}}", comentario);
+
+            return new RetornoMultiple(true,
+                RetornoMultiple.EnumEstado.CORRECTO,
+                string.Empty,
+                param_codigo);
         }
 
         #endregion

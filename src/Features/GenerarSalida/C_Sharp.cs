@@ -120,7 +120,7 @@ namespace transformador_mda.src.Features.GenerarSalida
             RetornoBase retorno_namespace = GenerarNamespace(param_proyecto, param_clase);
             if (!retorno_namespace.Exito)
                 return retorno_namespace;
-            string texto_clases = texto_librerias + "\n" +
+            string texto_clases = "/*\n{{ComentarioIA}}\n*/\n" + texto_librerias + "//{{libreriasUsadasPorIA}}\n" +
                 "namespace " + retorno_namespace.TextoDesarrollador + "\n" +
                 "{\n" +
                 "\t" + ObtenerTipoVisibilidad(param_clase.Visibilidad) + " " + ObtenerTipoClase(param_clase.TipoClase) + " " + param_clase.Nombre;
@@ -158,6 +158,7 @@ namespace transformador_mda.src.Features.GenerarSalida
                 return retorno_metodos;
 
             texto_clases += retorno_metodos.TextoDesarrollador + "\n" +
+                    "\n\t\t#region \"Métodos IA\"\n\n//{{MetodosAuxiliares}} \n\n\t\t#endregion\n\n" +
                     "\t}\n" +
                     "}\n\n";
             if (param_barra_progreso != null)
