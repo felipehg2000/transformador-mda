@@ -27,6 +27,8 @@ namespace transformador_mda.src.Controladores
         /// </summary>
         public Configuracion Configuracion { get; set; }
 
+        public string ClaveOpenAI { get; set; }
+
         #endregion
 
         #region "Constructor"
@@ -37,6 +39,7 @@ namespace transformador_mda.src.Controladores
         public Principal()
         {
             Configuracion = new Dominio.Configuracion();
+            ClaveOpenAI = string.Empty;
         }
 
         #endregion
@@ -225,7 +228,7 @@ namespace transformador_mda.src.Controladores
             param_barra_progreso.Value++;
 
             // Generación de código IA
-            IProveedorIA proveedorIA = FactoriaProveedorIA.CrearProveedorIA(ProveedorIA.OpenAI);
+            IProveedorIA proveedorIA = FactoriaProveedorIA.CrearProveedorIA(ProveedorIA.OpenAI, ClaveOpenAI);
             RetornoBase retorno_con_ia = await proveedorIA.GenerarCodigo(Configuracion.Proyecto, param_clase, retorno_sin_ia.TextoDesarrollador, param_barra_progreso);
             if (!retorno_con_ia.Exito)
                 return new RetornoMultiple(retorno_con_ia.Exito,
@@ -755,6 +758,42 @@ namespace transformador_mda.src.Controladores
             }
 
             return new RetornoMultiple(true, RetornoMultiple.EnumEstado.CORRECTO, string.Empty);
+        }
+
+        #endregion
+
+        #region "Gestionar clave OpenAI"
+
+        /// <summary>
+        /// Guarda la clave de open AI en un fichero externo para persistir entre ejecuciones.
+        /// </summary>
+        /// <returns>Información del proceso.</returns>
+        public RetornoBase GuardarClave()
+        { 
+            string directorio = Path.Combine(Application.StartupPath, "ClaveIA");
+            if (!Directory.Exists(directorio))
+                Directory.CreateDirectory(directorio);
+
+            string fichero = Path.Combine(directorio, "CLAVE.txt");
+            File.WriteAllText(fichero, ClaveOpenAI);
+
+            return new RetornoBase(true, string.Empty);
+        }
+
+        /// <summary>
+        /// Carga la clave de OpenAI persistida si existe.
+        /// </summary>
+        /// <returns>Información del proceso.</returns>
+        public RetornoBase CargarClave()
+        {
+            string directorio = Path.Combine(Application.StartupPath, "ClaveIA");
+            string fichero = Path.Combine(directorio, "CLAVE.txt");
+            if (!File.Exists(fichero))
+                return new RetornoBase(false, string.Empty);
+
+            ClaveOpenAI = File.ReadAllText(fichero);
+
+            return new RetornoBase(true, string.Empty);
         }
 
         #endregion

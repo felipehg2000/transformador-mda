@@ -20,10 +20,10 @@ namespace transformador_mda.src.Features.IntegracionIA
         #region "Constantes"
 
         /// <summary>
-        /// Clave de la API de OpenAI.
+        /// Token de OpenAI
         /// </summary>
-        private const string Token = "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";
-        //private const string Token = "TOKEN_CAPADO";
+        public string Token { get; set; }
+
         /// <summary>
         /// Texto que se envía a la inteligencia artificial para indicarle cómo debe generar el código de los métodos identificados en el esqueleto.
         /// </summary>
@@ -719,10 +719,12 @@ Devuelve exclusivamente el objeto JSON.";
         /// <summary>
         /// Constructor de la clase, inicializa atributos a vacío.
         /// </summary>
-        public OpenAI()
+        /// <param name="param_token">Token de OpenAI</param>
+        public OpenAI(string param_token)
         {
             _metadatos = new InformacionIA();
             _metadatos.RutaDirectorioFicheros = Path.Combine(Application.StartupPath, "FicherosIA");
+            Token = param_token;
         }
 
         #endregion

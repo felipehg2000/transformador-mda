@@ -128,6 +128,9 @@ namespace transformador_mda.src.Vistas
 
             _controlador = new Principal();
 
+            _controlador.CargarClave();
+            richTextBoxClaveOpenAI.Text = _controlador.ClaveOpenAI;
+
             // Mostrar panel adecuado
             tableLayoutPanelInicio.Visible = true;
             tableLayoutPanelInicio.Enabled = true;
@@ -825,6 +828,15 @@ namespace transformador_mda.src.Vistas
         /// <param name="e">Argumentos asociados al evento.</param>
         private async void generarCódigoCompletoToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            if (string.IsNullOrEmpty(_controlador.ClaveOpenAI))
+            {
+                MessageBox.Show("Es necesario configurar una clave de OpenAI para generar el código completo",
+                    "Aviso",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information);
+                return;
+            }
+
             ActivarPantallaTrabajo(false);
             Clase clase_seleccionada = ObtenerClaseSeleccionada();
             if (clase_seleccionada == null)
@@ -982,5 +994,71 @@ namespace transformador_mda.src.Vistas
 
         #endregion
 
+        #region "Panel de ClaveOpenAI"
+
+        /// <summary>
+        /// Cierra el panel.
+        /// </summary>
+        /// <param name="sender">Componente que lanza el evento.</param>
+        /// <param name="e">Argumentos asociados al evento.</param>
+        private void buttonClaveOpenAICerrar_Click(object sender, EventArgs e)
+        {
+            panelClaveOpenAI.Enabled = false;
+            panelClaveOpenAI.Visible = false;
+            panelClaveOpenAI.SendToBack();
+            ActivarPantallaTrabajo(true);
+        }
+
+        /// <summary>
+        /// Centra y muestra el panel
+        /// </summary>
+        /// <param name="sender">Componente que lanza el evento.</param>
+        /// <param name="e">Argumentos asociados al evento.</param>
+        private void añadirClaveOpenAIToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ActivarPantallaTrabajo(false);
+            CentrarPanel(panelClaveOpenAI);
+            panelClaveOpenAI.Enabled = true;
+            panelClaveOpenAI.Visible = true;
+            panelClaveOpenAI.BringToFront();
+        }
+
+        /// <summary>
+        /// Cambia el icono del cursor
+        /// </summary>
+        /// <param name="sender">Componente que lanza el evento.</param>
+        /// <param name="e">Argumentos asociados al evento.</param>
+        private void panelClaveOpenAICentral_MouseHover(object sender, EventArgs e)
+        {
+            this.Cursor = Cursors.Default;
+        }
+
+        /// <summary>
+        /// Permite que el panel se mueva por la pantalla
+        /// </summary>
+        /// <param name="sender">Componente que lanza el evento.</param>
+        /// <param name="e">Argumentos asociados al evento.</param>
+        private void labelClaveOpenAI_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
+            {
+                ReleaseCapture();
+                SendMessage(panelClaveOpenAI.Handle, WM_NCLBUTTONDOWN, HTCAPTION, 0);
+            }
+        }
+
+        /// <summary>
+        /// Graba la clave open ai en la instalación
+        /// </summary>
+        /// <param name="sender">Componente que lanza el evento.</param>
+        /// <param name="e">Argumentos asociados al evento.</param>
+        private void buttonClaveOpenAIGrabar_Click(object sender, EventArgs e)
+        {
+            _controlador.ClaveOpenAI = richTextBoxClaveOpenAI.Text;
+            _controlador.GuardarClave();
+            buttonClaveOpenAICerrar_Click(sender, e);
+        }
+
+        #endregion
     }
 }
