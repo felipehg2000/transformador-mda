@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Drawing;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using transformador_mda.src.Controladores;
 using transformador_mda.src.Dominio.ElementosUML;
@@ -209,6 +210,25 @@ namespace transformador_mda.src.Vistas
             panelAbrirXMI.BringToFront();
 
             panelPrincipal.Enabled = false;
+        }
+
+        /// <summary>
+        /// Copia el código generado en el portapapeles.
+        /// </summary>
+        /// <param name="sender">Componente que lanza el evento.</param>
+        /// <param name="e">Argumentos asociados al evento.</param>
+        private async void buttonCopiar_Click(object sender, EventArgs e)
+        {
+            if (string.IsNullOrEmpty(richTextBoxCodigo.Text))
+                return;
+
+            Clipboard.SetText(richTextBoxCodigo.Text);
+
+            // Efecto visual
+            Color colorOriginal = richTextBoxCodigo.BackColor;
+            richTextBoxCodigo.BackColor = SystemColors.Control;
+            await Task.Delay(150);
+            richTextBoxCodigo.BackColor = colorOriginal;
         }
 
         #endregion
@@ -961,6 +981,6 @@ namespace transformador_mda.src.Vistas
         }
 
         #endregion
-       
+
     }
 }
