@@ -1,16 +1,17 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using System.Text.Json;
-using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Threading.Tasks;
+using System.Collections.Generic;
 using transformador_mda.src.Dominio;
-using transformador_mda.src.Dominio.ElementosUML;
-using transformador_mda.src.Dominio.Retornos;
 using transformador_mda.src.Features.DAO;
+using transformador_mda.src.Dominio.Retornos;
+using transformador_mda.src.Features.Utilidades;
+using transformador_mda.src.Dominio.ElementosUML;
 using transformador_mda.src.Features.GenerarSalida;
 using transformador_mda.src.Features.IntegracionIA;
 using transformador_mda.src.Features.ParserEntrada;
-using transformador_mda.src.Features.Utilidades;
+using System;
 
 namespace transformador_mda.src.Controladores
 {
@@ -26,6 +27,8 @@ namespace transformador_mda.src.Controladores
         /// </summary>
         public Configuracion Configuracion { get; set; }
 
+        public string ClaveOpenAI { get; set; }
+
         #endregion
 
         #region "Constructor"
@@ -36,6 +39,7 @@ namespace transformador_mda.src.Controladores
         public Principal()
         {
             Configuracion = new Dominio.Configuracion();
+            ClaveOpenAI = string.Empty;
         }
 
         #endregion
@@ -94,14 +98,6 @@ namespace transformador_mda.src.Controladores
                 Configuracion.Proyecto.Nombre = Path.GetFileName(ruta_directorio);
 
             return new RetornoMultiple(true, RetornoMultiple.EnumEstado.CORRECTO, "Directorio seleccionado correctamente.");
-        }
-
-        public RetornoBase GenerarCodigo(Clase param_proyecto)
-        {
-            GenerarSalidaBase generador = FactoriaSalida.CrearGenerarSalida(Configuracion);
-            string texto = generador.GenerarTexto(param_proyecto).TextoDesarrollador;
-
-            return new RetornoBase(true, "Generación correcta", texto);
         }
 
         /// <summary>
@@ -165,6 +161,291 @@ namespace transformador_mda.src.Controladores
             Configuracion.Proyecto.Id = CrearIdentificador.CrearGUID();
 
             return new RetornoBase(true, "El fichero se ha leido correctamente.");
+        }
+
+        #endregion
+
+        #region "Métodos de generación de código"
+
+        /// <summary>
+        /// A partir de una instancia del objeto Clase genera el esqueleto de una clase.
+        /// </summary>
+        /// <param name="param_clase">Información de un objeto de tipo clase.</param>
+        /// <param name="param_barra_progreso">Barra de progreso de la vista para que el usuario vea que el proceso no está bloqueado.</param>
+        /// <returns>Objeto con información del proceso, si todo sale bien el esqueleto de la clase, si hay error información sobre el error.</returns>
+        public RetornoBase GenerarEsqueletoClase(Clase param_clase, ToolStripProgressBar param_barra_progreso)
+        {
+            GenerarSalidaBase generador = FactoriaSalida.CrearGenerarSalida(Configuracion);
+            string texto = generador.GenerarTexto(param_clase, param_barra_progreso).TextoDesarrollador;
+
+            return new RetornoBase(true, "Generación correcta", texto);
+        }
+
+        /// <summary>
+        /// A partir de una instancia del objeto clase genera el código completo de una clase. 
+        /// </summary>
+        /// <param name="param_clase">Información de un objeto de tipo clase cuyo código se va a generar.</param>
+        /// <param name="param_generar_json">True para generar el fichero JSON del proyecto, false para no generarlo.</param>
+        /// <param name="param_barra_progreso">Barra de progreso de la vista para que el usuario vea que el proceso no está bloqueado.</param>
+        /// <param name="param_forzar">True para forzar la generación del código si no están todos los comentarios, false para obligar a que estén los comentarios</param>
+        /// <returns>Objeto con información del proceso, si todo sale bien el esqueleto de la clase, si hay error información sobre el error.</returns>
+        public async Task<RetornoMultiple> GenerarCodigoIAClase(Clase param_clase, bool param_generar_json, ToolStripProgressBar param_barra_progreso, bool param_forzar = false)
+        {
+            // Barra de carga
+            param_barra_progreso.Maximum = 11;
+            param_barra_progreso.Value = 0;
+
+            // Comprobación de comentarios
+            if (!param_forzar)
+            {
+                RetornoMultiple retorno_comprobacion = ComprobarComentarios();
+                if (!retorno_comprobacion.Exito)
+                    return retorno_comprobacion;
+            }
+            param_barra_progreso.Value++;
+
+            // Generación de JSON del proyecto
+            if (param_generar_json)
+            {
+                RetornoMultiple retorno_generacion = GenerarFicheroProyecto();
+                if (!retorno_generacion.Exito)
+                    return retorno_generacion;
+            }
+            if (!File.Exists(Configuracion.RutaFicheroJSON))
+                return new RetornoMultiple(false,
+                    RetornoMultiple.EnumEstado.ERROR,
+                    "No se ha podido generar el código de la clase.",
+                    "El fichero JSON no existe en la ruta: " + Configuracion.RutaFicheroJSON);
+            param_barra_progreso.Value++;
+
+            // Generación de esqueleto
+            RetornoBase retorno_sin_ia = GenerarEsqueletoClase(param_clase, null);
+            if (!retorno_sin_ia.Exito)
+                return new RetornoMultiple(retorno_sin_ia.Exito,
+                    RetornoMultiple.EnumEstado.ERROR,
+                    retorno_sin_ia.TextoUsuario,
+                    retorno_sin_ia.TextoDesarrollador);
+            param_barra_progreso.Value++;
+
+            // Generación de código IA
+            IProveedorIA proveedorIA = FactoriaProveedorIA.CrearProveedorIA(ProveedorIA.OpenAI, ClaveOpenAI);
+            RetornoBase retorno_con_ia = await proveedorIA.GenerarCodigo(Configuracion.Proyecto, param_clase, retorno_sin_ia.TextoDesarrollador, param_barra_progreso);
+            if (!retorno_con_ia.Exito)
+                return new RetornoMultiple(retorno_con_ia.Exito,
+                    RetornoMultiple.EnumEstado.ERROR,
+                    retorno_con_ia.TextoUsuario,
+                    retorno_con_ia.TextoDesarrollador);
+
+            // Combinación de código
+            return GenerarCodigoCompleto(retorno_sin_ia.TextoDesarrollador,
+                retorno_con_ia.TextoDesarrollador);
+        }
+
+        /// <summary>
+        /// Método para generar el fichero JSON del proyecto.
+        /// </summary>
+        /// <returns>Retorno con información del proceso.</returns>
+        private RetornoMultiple GenerarFicheroProyecto()
+        {
+            if (File.Exists(Configuracion.RutaFicheroJSON))
+            {
+                File.Delete(Configuracion.RutaFicheroJSON);
+            }
+
+            if (Configuracion.Proyecto == null)
+                return new RetornoMultiple(false,
+                    RetornoMultiple.EnumEstado.ERROR,
+                    "No se ha podido generar el código de la clase.",
+                    "El proyecto está vacío.");
+
+            RetornoBase retorno_exportacion = ProyectoDAO.Exportar(Configuracion.Proyecto, Application.StartupPath);
+            if (!retorno_exportacion.Exito)
+            {
+                return new RetornoMultiple(retorno_exportacion.Exito,
+                    RetornoMultiple.EnumEstado.ERROR,
+                    retorno_exportacion.TextoUsuario,
+                    retorno_exportacion.TextoDesarrollador);
+            }
+
+            Configuracion.RutaFicheroJSON = retorno_exportacion.TextoDesarrollador;
+            return new RetornoMultiple(true, RetornoMultiple.EnumEstado.CORRECTO, string.Empty);
+        }
+
+        /// <summary>
+        /// Método para combinar el esqueleto y el código generado por la IA. 
+        /// </summary>
+        /// <param name="param_codigo_sin_ia">Código esqueleto de una clase.</param>
+        /// <param name="param_codigo_con_ia">Código generado por la IA de una clase.</param>
+        /// <returns>Objeto con información del proceso, si todo sale bien el esqueleto de la clase, si hay error información sobre el error.</returns>
+        private RetornoMultiple GenerarCodigoCompleto(string param_codigo_sin_ia, string param_codigo_con_ia)
+        {
+            if (string.IsNullOrEmpty(param_codigo_sin_ia))
+                return new RetornoMultiple(false,
+                    RetornoMultiple.EnumEstado.ERROR,
+                    "No se ha podido generar el código completo.",
+                    "El código base está vacío.");
+
+            if (string.IsNullOrWhiteSpace(param_codigo_con_ia))
+                return new RetornoMultiple(false,
+                    RetornoMultiple.EnumEstado.ERROR,
+                    "No se ha podido generar el código completo.",
+                    "La respuesta de la IA está vacía.");
+
+            try
+            {
+                using (JsonDocument json_document = JsonDocument.Parse(param_codigo_con_ia))
+                {
+                    RetornoMultiple retorno = GenerarClasesCompletas(json_document, param_codigo_sin_ia);
+                    if (!retorno.Exito)
+                        return retorno;
+                    string codigo_completo = retorno.TextoDesarrollador;
+
+                    retorno = GenerarClasesLibreria(json_document, codigo_completo);
+                    if (!retorno.Exito)
+                        return retorno;
+                    codigo_completo = retorno.TextoDesarrollador;
+
+                    retorno = GenerarClasesFuncAux(json_document, codigo_completo);
+                    if (!retorno.Exito)
+                        return retorno;
+                    codigo_completo = retorno.TextoDesarrollador;
+
+                    retorno = GenerarClasesComentario(json_document, codigo_completo);
+                    if (!retorno.Exito)
+                        return retorno;
+                    codigo_completo = retorno.TextoDesarrollador;
+
+                    return new RetornoMultiple(true,
+                        RetornoMultiple.EnumEstado.CORRECTO,
+                        "Generación correcta.",
+                        codigo_completo);
+                }
+            }
+            catch (JsonException ex)
+            {
+                return new RetornoMultiple(false,
+                    RetornoMultiple.EnumEstado.ERROR,
+                    "Error al interpretar el JSON generado por la IA.",
+                    ex.Message);
+            }
+        }
+
+        private RetornoMultiple GenerarClasesCompletas(JsonDocument param_json_document, string param_codigo_sin_ia)
+        {
+            JsonElement elemento_raiz = param_json_document.RootElement;
+
+            if (!elemento_raiz.TryGetProperty("codigo", out JsonElement json_codigo) || json_codigo.ValueKind != JsonValueKind.Array)
+            {
+                return new RetornoMultiple(false,
+                    RetornoMultiple.EnumEstado.ERROR,
+                    "El JSON generado por la IA no tiene el formato esperado.",
+                    "No se ha encontrado la propiedad 'codigo' o no contiene un array.");
+            }
+
+            string codigo_completo = param_codigo_sin_ia;
+            foreach (JsonElement elemento_json in json_codigo.EnumerateArray())
+            {
+                if (!elemento_json.TryGetProperty("id", out JsonElement json_id) ||
+                    !elemento_json.TryGetProperty("codigo", out JsonElement json_contenido))
+                {
+                    return new RetornoMultiple(false,
+                        RetornoMultiple.EnumEstado.ERROR,
+                        "El JSON generado por la IA no tiene el formato esperado.",
+                        "Uno de los elementos no contiene las propiedades 'id' y 'codigo'.");
+                }
+
+                string id = json_id.GetString();
+                string codigo = json_contenido.GetString();
+                if (string.IsNullOrWhiteSpace(id))
+                {
+                    return new RetornoMultiple(false,
+                        RetornoMultiple.EnumEstado.ERROR,
+                        "El JSON generado por la IA contiene un identificador vacío.",
+                        "No se puede sustituir un método sin identificador.");
+                }
+
+                string indicador = "//{{" + id + "}}";
+                if (!codigo_completo.Contains(indicador))
+                {
+                    return new RetornoMultiple(false,
+                        RetornoMultiple.EnumEstado.ERROR,
+                        "No se ha podido insertar todo el código generado por la IA.",
+                        "No se ha encontrado el indicador " + indicador + "en el código base.");
+                }
+
+                codigo_completo = codigo_completo.Replace(indicador, codigo ?? string.Empty);
+            }
+
+            return new RetornoMultiple(true, 
+                RetornoMultiple.EnumEstado.CORRECTO, 
+                string.Empty, 
+                codigo_completo);
+        }
+
+        private RetornoMultiple GenerarClasesLibreria(JsonDocument param_json, string param_codigo)
+        {
+            JsonElement elemento_raiz = param_json.RootElement;
+
+            if (!elemento_raiz.TryGetProperty("libreriasNecesarias", out JsonElement json_librerias) ||
+                json_librerias.ValueKind != JsonValueKind.String)
+            {
+                return new RetornoMultiple(false,
+                    RetornoMultiple.EnumEstado.ERROR,
+                    "El JSON generado por la IA no tiene el formato esperado.",
+                    "No se ha encontrado la propiedad 'libreriasNecesarias' o no contiene una cadena.");
+            }
+
+            string librerias_necesarias = json_librerias.GetString() ?? string.Empty;
+            param_codigo = param_codigo.Replace("//{{libreriasUsadasPorIA}}", librerias_necesarias);
+
+            return new RetornoMultiple(true,
+                RetornoMultiple.EnumEstado.CORRECTO,
+                string.Empty,
+                param_codigo);
+        }
+
+        private RetornoMultiple GenerarClasesFuncAux(JsonDocument param_json, string param_codigo)
+        {
+            JsonElement elemento_raiz = param_json.RootElement;
+
+            if (!elemento_raiz.TryGetProperty("funcionesAuxiliares", out JsonElement json_funciones) ||
+                json_funciones.ValueKind != JsonValueKind.String)
+            {
+                return new RetornoMultiple(false,
+                    RetornoMultiple.EnumEstado.ERROR,
+                    "El JSON generado por la IA no tiene el formato esperado.",
+                    "No se ha encontrado la propiedad 'libreriasNecesarias' o no contiene una cadena.");
+            }
+
+            string funciones = json_funciones.GetString() ?? string.Empty;
+            param_codigo = param_codigo.Replace("//{{MetodosAuxiliares}}", funciones);
+
+            return new RetornoMultiple(true,
+                RetornoMultiple.EnumEstado.CORRECTO,
+                string.Empty,
+                param_codigo);
+        }
+
+        private RetornoMultiple GenerarClasesComentario(JsonDocument param_json, string param_codigo)
+        {
+            JsonElement elemento_raiz = param_json.RootElement;
+
+            if (!elemento_raiz.TryGetProperty("comentarioPrincipal", out JsonElement json_comentario) ||
+                json_comentario.ValueKind != JsonValueKind.String)
+            {
+                return new RetornoMultiple(false,
+                    RetornoMultiple.EnumEstado.ERROR,
+                    "El JSON generado por la IA no tiene el formato esperado.",
+                    "No se ha encontrado la propiedad 'libreriasNecesarias' o no contiene una cadena.");
+            }
+
+            string comentario = json_comentario.GetString() ?? string.Empty;
+            param_codigo = param_codigo.Replace("{{ComentarioIA}}", comentario);
+
+            return new RetornoMultiple(true,
+                RetornoMultiple.EnumEstado.CORRECTO,
+                string.Empty,
+                param_codigo);
         }
 
         #endregion
@@ -270,111 +551,251 @@ namespace transformador_mda.src.Controladores
 
         #endregion
 
-        public async Task<RetornoBase> GenerarCodigoProyectoCompleto()
+        #region "Comprobar comentarios"
+
+        /// <summary>
+        /// Método principal para comprobar los comentarios de todo el objeto Proyecto.
+        /// </summary>
+        /// <returns>Objeto con información del proceso y el resultado de la comprobación.</returns>
+        private RetornoMultiple ComprobarComentarios()
         {
-            throw new NotImplementedException();
+            if (Configuracion.Proyecto == null)
+                return new RetornoMultiple(false, 
+                    RetornoMultiple.EnumEstado.CONFIRMACION_USUARIO, 
+                    "No se ha podido generar el código de la clase.", 
+                    "El proyecto está vacío.");
+
+            string mensaje_usuario = "La generación de código con IA funciona mejor si todos los elementos están comentados.\n" +
+                        "¿Quiere continuar el proceso sin comentar todos los elementos UML?";
+
+            /* No se permite al usuario rellenar este parámetro aún
+            if (string.IsNullOrEmpty(Configuracion.Proyecto.Comentario))
+                return new RetornoMultiple(false,
+                    RetornoMultiple.EnumEstado.CONFIRMACION_USUARIO, 
+                    mensaje_usuario, 
+                    "El proyecto no tiene descripción.");*/
+
+            foreach (Directorio directorio in Configuracion.Proyecto.Directorios)
+            {
+                RetornoMultiple retorno_recursivo = ComprobarComentarios(directorio, mensaje_usuario);
+                if (!retorno_recursivo.Exito)
+                    return retorno_recursivo;
+            }
+
+            return new RetornoMultiple(true, RetornoMultiple.EnumEstado.CORRECTO, string.Empty);
         }
 
-        public async Task<RetornoBase> GenerarCodigoClase(Clase param_clase, bool param_generar_json)
+        /// <summary>
+        /// Método recursivo, comprueba el comentario de un directorio y todos sus elementos UML y hace un bucle revursivo por sus subdirectorios.
+        /// </summary>
+        /// <param name="param_directorio">Elemento UML a comprobar.</param>
+        /// <param name="param_mensaje_usuario">Mensaje de error a devolver si hay algún elemento sin comentario.</param>
+        /// <returns>Objeto con información del proceso y el resultado de la comprobación.</returns>
+        private RetornoMultiple ComprobarComentarios(Directorio param_directorio, string param_mensaje_usuario)
         {
-            if (param_generar_json && string.IsNullOrEmpty(Configuracion.RutaFicheroJSON))
+            /* No se permite al usuario modificar este parámetro aún
+            if (string.IsNullOrEmpty(param_directorio.Comentario))
+                return new RetornoMultiple(false,
+                    RetornoMultiple.EnumEstado.CONFIRMACION_USUARIO,
+                    param_mensaje_usuario,
+                    "El directorio " + param_directorio.Nombre + " no tiene descripción");*/
+
+            foreach (Clase clase in param_directorio.Clases)
             {
-                if (Configuracion.Proyecto == null)
-                    return new RetornoBase(false, "No se ha podido generar el código de la clase.", "El proyecto está vacío.");
+                RetornoMultiple retorno_temporal = ComprobarComentarios(clase, param_mensaje_usuario);
+                if (!retorno_temporal.Exito)
+                    return retorno_temporal;
 
-                RetornoBase retorno_exportacion = ProyectoDAO.Exportar(Configuracion.Proyecto, Application.StartupPath);
-                if (!retorno_exportacion.Exito)
-                    return retorno_exportacion;
+                retorno_temporal = ComprobarComentarios(clase.Atributos, param_mensaje_usuario);
+                if (!retorno_temporal.Exito)
+                    return retorno_temporal;
 
-                Configuracion.RutaFicheroJSON = retorno_exportacion.TextoDesarrollador;
+                retorno_temporal = ComprobarComentarios(clase.Literales, param_mensaje_usuario);
+                if (!retorno_temporal.Exito)
+                    return retorno_temporal;
+
+                retorno_temporal = ComprobarComentarios(clase.Asociaciones, param_mensaje_usuario);
+                if (!retorno_temporal.Exito)
+                    return retorno_temporal;
+
+                retorno_temporal = ComprobarComentarios(clase.Metodos, param_mensaje_usuario);
+                if (!retorno_temporal.Exito)
+                    return retorno_temporal;
             }
-            else
+
+            foreach (Directorio subdirectorio in param_directorio.Subdirectorios)
             {
-                return new RetornoBase(false, "No se ha podido generar el código de la clase.", "La ruta del fichero JSON no está definida.");
+                RetornoMultiple retorno_temporal = ComprobarComentarios(subdirectorio, param_mensaje_usuario);
+                if (!retorno_temporal.Exito)
+                    return retorno_temporal;
             }
 
-            if (!File.Exists(Configuracion.RutaFicheroJSON))
-                return new RetornoBase(false, "No se ha podido generar el código de la clase.", "El fichero JSON no existe en la ruta: " + Configuracion.RutaFicheroJSON);
-
-            return GenerarCodigo(param_clase);
+            return new RetornoMultiple(true, RetornoMultiple.EnumEstado.CORRECTO, string.Empty);
         }
 
-        public async Task<RetornoBase> GenerarCodigoIA(Clase param_clase)
+        /// <summary>
+        /// Método que comprueba el comentario de una clase.
+        /// </summary>
+        /// <param name="param_clase">Elemento UML a comprobar.</param>
+        /// <param name="param_mensaje_usuario">Mensaje de error a devolver si hay algún elemento sin comentario.</param>
+        /// <returns>Objeto con información del proceso y el resultado de la comprobación.</returns>
+        private RetornoMultiple ComprobarComentarios(Clase param_clase, string param_mensaje_usuario)
         {
-            IProveedorIA proveedorIA = FactoriaProveedorIA.CrearProveedorIA(ProveedorIA.OpenAI);
-            RetornoBase retorno_sin_ia = GenerarCodigo(param_clase);
-            if (!retorno_sin_ia.Exito)
-                return retorno_sin_ia;
+            if (string.IsNullOrEmpty(param_clase.Comentario))
+                return new RetornoMultiple(false,
+                    RetornoMultiple.EnumEstado.CONFIRMACION_USUARIO,
+                    param_mensaje_usuario,
+                    "La clase " + param_clase.Nombre + " no tiene descripción.");
 
-            RetornoBase retorno_con_ia = await proveedorIA.GenerarCodigo(Configuracion.Proyecto, param_clase, retorno_sin_ia.TextoDesarrollador);
-            if (!retorno_con_ia.Exito)
-                return retorno_con_ia;
-
-            RetornoBase retorno_completo = GenerarCodigoCompleto(retorno_sin_ia.TextoDesarrollador,
-                retorno_con_ia.TextoDesarrollador);
-
-            return retorno_completo;
+            return new RetornoMultiple(true, RetornoMultiple.EnumEstado.CORRECTO, string.Empty);
         }
 
-        private RetornoBase GenerarCodigoCompleto(string param_codigo_sin_ia, string param_codigo_con_ia)
+        /// <summary>
+        /// Método que comprueba el comentario de un listado de atributos
+        /// </summary>
+        /// <param name="param_atributos">Elemento UML a comprobar.</param>
+        /// <param name="param_mensaje_usuario">Mensaje de error a devolver si hay algún elemento sin comentario.</param>
+        /// <returns>Objeto con información del proceso y el resultado de la comprobación.</returns>
+        private RetornoMultiple ComprobarComentarios(List<Atributo> param_atributos, string param_mensaje_usuario)
         {
-            if (string.IsNullOrEmpty(param_codigo_sin_ia))
-                return new RetornoBase(false, "No se ha podido generar el código completo.", "El código base está vacío.");
-
-            if (string.IsNullOrWhiteSpace(param_codigo_con_ia))
-                return new RetornoBase(false, "No se ha podido generar el código completo.", "La respuesta de la IA está vacía.");
-
-            try
+            foreach (Atributo atributo in param_atributos)
             {
-                using (JsonDocument json_document = JsonDocument.Parse(param_codigo_con_ia))
-                {
-                    JsonElement elemento_raiz = json_document.RootElement;
-
-                    if (!elemento_raiz.TryGetProperty("codigo", out JsonElement json_codigo) || json_codigo.ValueKind != JsonValueKind.Array)
-                    {
-                        return new RetornoBase(false,
-                            "El JSON generado por la IA no tiene el formato esperado.",
-                            "No se ha encontrado la propiedad 'codigo' o no contiene un array.");
-                    }
-
-                    string codigo_completo = param_codigo_sin_ia;
-                    foreach (JsonElement elemento_json in json_codigo.EnumerateArray())
-                    {
-                        if (!elemento_json.TryGetProperty("id", out JsonElement json_id) ||
-                            !elemento_json.TryGetProperty("codigo", out JsonElement json_contenido))
-                        {
-                            return new RetornoBase(false,
-                                "El JSON generado por la IA no tiene el formato esperado.",
-                                "Uno de los elementos no contiene las propiedades 'id' y 'codigo'.");
-                        }
-
-                        string id = json_id.GetString();
-                        string codigo = json_contenido.GetString();
-                        if (string.IsNullOrWhiteSpace(id))
-                        {
-                            return new RetornoBase(false,
-                                "El JSON generado por la IA contiene un identificador vacío.",
-                                "No se puede sustituir un método sin identificador.");
-                        }
-
-                        string indicador = "//{{" + id + "}}";
-                        if (!codigo_completo.Contains(indicador))
-                        {
-                            return new RetornoBase(false,
-                                "No se ha podido insertar todo el código generado por la IA.",
-                                "No se ha encontrado el indicador " + indicador + "en el código base.");
-                        }
-
-                        codigo_completo = codigo_completo.Replace(indicador, codigo ?? string.Empty);
-                    }
-
-                    return new RetornoBase(true, "Generación correcta.", codigo_completo);
-                }
+                if (string.IsNullOrEmpty(atributo.Comentario))
+                    return new RetornoMultiple(false,
+                        RetornoMultiple.EnumEstado.CONFIRMACION_USUARIO,
+                        param_mensaje_usuario,
+                        "El atributo " + atributo.Nombre + " no tiene descripción.");
             }
-            catch (JsonException ex)
-            {
-                return new RetornoBase(false, "Error al interpretar el JSON generado por la IA.", ex.Message);
-            }
+
+            return new RetornoMultiple(true, RetornoMultiple.EnumEstado.CORRECTO, string.Empty);
         }
+
+        /// <summary>
+        /// Método que comprueba el comentario de un listado de literales
+        /// </summary>
+        /// <param name="param_literales">Elemento UML a comprobar.</param>
+        /// <param name="param_mensaje_usuario">Mensaje de error a devolver si hay algún elemento sin comentario.</param>
+        /// <returns>Objeto con información del proceso y el resultado de la comprobación.</returns>
+        private RetornoMultiple ComprobarComentarios(List<ElementoBase> param_literales, string param_mensaje_usuario)
+        {
+            foreach (ElementoBase literal in param_literales)
+            {
+                if (string.IsNullOrEmpty(literal.Comentario))
+                    return new RetornoMultiple(false,
+                        RetornoMultiple.EnumEstado.CONFIRMACION_USUARIO,
+                        param_mensaje_usuario,
+                        "El literal " + literal.Nombre + " no tiene descripción.");
+            }
+
+            return new RetornoMultiple(true, RetornoMultiple.EnumEstado.CORRECTO, string.Empty);
+        }
+
+        /// <summary>
+        /// Método que comprueba el comentario de un listado de asociaciones
+        /// </summary>
+        /// <param name="param_asociaciones">Elemento UML a comprobar.</param>
+        /// <param name="param_mensaje_usuario">Mensaje de error a devolver si hay algún elemento sin comentario.</param>
+        /// <returns>Objeto con información del proceso y el resultado de la comprobación.</returns>
+        private RetornoMultiple ComprobarComentarios(List<Asociacion> param_asociaciones, string param_mensaje_usuario)
+        {
+            foreach (Asociacion asociacion in param_asociaciones)
+            {
+                if (string.IsNullOrEmpty(asociacion.Comentario))
+                    return new RetornoMultiple(false,
+                        RetornoMultiple.EnumEstado.CONFIRMACION_USUARIO,
+                        param_mensaje_usuario,
+                        "La asociación " + asociacion.Nombre + " no tiene descripción.");
+            }
+
+            return new RetornoMultiple(true, RetornoMultiple.EnumEstado.CORRECTO, string.Empty);
+        }
+
+        /// <summary>
+        /// Método que comprueba el comentario de un listado de métodos y de sus elementos UML.
+        /// </summary>
+        /// <param name="param_metodos">Elemento UML a comprobar.</param>
+        /// <param name="param_mensaje_usuario">Mensaje de error a devolver si hay algún elemento sin comentario.</param>
+        /// <returns>Objeto con información del proceso y el resultado de la comprobación.</returns>
+        private RetornoMultiple ComprobarComentarios(List<Metodo> param_metodos, string param_mensaje_usuario)
+        {
+            foreach (Metodo metodo in param_metodos)
+            {
+                if (string.IsNullOrEmpty(metodo.Comentario))
+                    return new RetornoMultiple(false,
+                        RetornoMultiple.EnumEstado.CONFIRMACION_USUARIO,
+                        param_mensaje_usuario,
+                        "El método " + metodo.Nombre + " no tiene descripción.");
+
+                if (string.IsNullOrEmpty(metodo.Retorno.Comentario) && metodo.Retorno.TipoDato != EnumTipoDato.NO_DEFINIDO)
+                    return new RetornoMultiple(false,
+                        RetornoMultiple.EnumEstado.CONFIRMACION_USUARIO,
+                        param_mensaje_usuario,
+                        "El retorno del método " + metodo.Nombre + " no tiene descripción.");
+
+                RetornoMultiple retorno_temporal = ComprobarComentarios(metodo.Parametros, param_mensaje_usuario);
+                if (!retorno_temporal.Exito)
+                    return retorno_temporal;
+            }
+
+            return new RetornoMultiple(true, RetornoMultiple.EnumEstado.CORRECTO, string.Empty);
+        }
+
+        /// <summary>
+        /// Método que comprueba el comentario de un listado de parámetros
+        /// </summary>
+        /// <param name="param_parametros">Elemento UML a comprobar.</param>
+        /// <param name="param_mensaje_usuario">Mensaje de error a devolver si hay algún elemento sin comentario.</param>
+        /// <returns>Objeto con información del proceso y el resultado de la comprobación.</returns>
+        private RetornoMultiple ComprobarComentarios(List<Parametro> param_parametros, string param_mensaje_usuario)
+        {
+            foreach (Parametro parametro in param_parametros)
+            {
+                if (string.IsNullOrEmpty(parametro.Comentario))
+                    return new RetornoMultiple(false,
+                        RetornoMultiple.EnumEstado.CONFIRMACION_USUARIO,
+                        param_mensaje_usuario,
+                        "El parámentro " + parametro.Nombre + " no tiene descripción.");
+            }
+
+            return new RetornoMultiple(true, RetornoMultiple.EnumEstado.CORRECTO, string.Empty);
+        }
+
+        #endregion
+
+        #region "Gestionar clave OpenAI"
+
+        /// <summary>
+        /// Guarda la clave de open AI en un fichero externo para persistir entre ejecuciones.
+        /// </summary>
+        /// <returns>Información del proceso.</returns>
+        public RetornoBase GuardarClave()
+        { 
+            string directorio = Path.Combine(Application.StartupPath, "ClaveIA");
+            if (!Directory.Exists(directorio))
+                Directory.CreateDirectory(directorio);
+
+            string fichero = Path.Combine(directorio, "CLAVE.txt");
+            File.WriteAllText(fichero, ClaveOpenAI);
+
+            return new RetornoBase(true, string.Empty);
+        }
+
+        /// <summary>
+        /// Carga la clave de OpenAI persistida si existe.
+        /// </summary>
+        /// <returns>Información del proceso.</returns>
+        public RetornoBase CargarClave()
+        {
+            string directorio = Path.Combine(Application.StartupPath, "ClaveIA");
+            string fichero = Path.Combine(directorio, "CLAVE.txt");
+            if (!File.Exists(fichero))
+                return new RetornoBase(false, string.Empty);
+
+            ClaveOpenAI = File.ReadAllText(fichero);
+
+            return new RetornoBase(true, string.Empty);
+        }
+
+        #endregion
     }
 }

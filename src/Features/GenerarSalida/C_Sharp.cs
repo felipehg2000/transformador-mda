@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Windows.Forms;
 using transformador_mda.src.Dominio.ElementosUML;
 using transformador_mda.src.Dominio.Retornos;
 using transformador_mda.src.Features.Utilidades;
@@ -42,14 +43,14 @@ namespace transformador_mda.src.Features.GenerarSalida
         /// </summary>
         /// <param name="param_clase">Objeto de tipo clase del cual se generará el código.</param>
         /// <returns>Objeto con el código generado e información del proceso.</returns>
-        public override RetornoBase GenerarTexto(Clase param_clase)
+        public override RetornoBase GenerarTexto(Clase param_clase, ToolStripProgressBar param_barra_progreso)
         {
             if (param_clase == null || _proyecto == null)
                 return new RetornoBase(false,
                     "No se ha podido generar el código correctamente.",
                     "En el método GenerarTexto de C_Sharp el parámetro param_clase es nulo.");
 
-            return GenerarCodigoClases(_proyecto, param_clase);
+            return GenerarCodigoClases(_proyecto, param_clase, param_barra_progreso);
         }
 
         #endregion
@@ -94,31 +95,40 @@ namespace transformador_mda.src.Features.GenerarSalida
         /// <param name="param_proyecto">Datos de todo el proyecto.</param>
         /// <param name="param_clase">Datos de la clase cuyo código debe generarse.</param>
         /// <returns>Objecto con el código de una clase e información del proceso de generación.</returns>
-        static private RetornoBase GenerarCodigoClases(ProyectoBase param_proyecto, Clase param_clase)
+        static private RetornoBase GenerarCodigoClases(ProyectoBase param_proyecto, Clase param_clase, ToolStripProgressBar param_barra_progreso)
         {
+            if (param_barra_progreso != null)
+            {
+                param_barra_progreso.Maximum = 6;
+                param_barra_progreso.Value = 0;
+            }
+
             RetornoBase retorno_herencia = GenerarHerencia(param_proyecto, param_clase.Id, param_clase.Asociaciones);
             if (!retorno_herencia.Exito)
                 return retorno_herencia;
-
             string texto_herencia = retorno_herencia.TextoDesarrollador;
+            if (param_barra_progreso != null)
+                param_barra_progreso.Value++;
 
             RetornoBase retorno_librerias = GenerarAsociaciones(param_proyecto, param_clase.Id, param_clase.Asociaciones);
             if (!retorno_librerias.Exito)
                 return retorno_librerias;
-
             string texto_librerias = retorno_librerias.TextoDesarrollador;
+            if (param_barra_progreso != null)
+                param_barra_progreso.Value++;
 
             RetornoBase retorno_namespace = GenerarNamespace(param_proyecto, param_clase);
             if (!retorno_namespace.Exito)
                 return retorno_namespace;
-
-            string texto_clases = texto_librerias + "\n" +
+            string texto_clases = "/*\n{{ComentarioIA}}\n*/\n" + texto_librerias + "//{{libreriasUsadasPorIA}}\n" +
                 "namespace " + retorno_namespace.TextoDesarrollador + "\n" +
                 "{\n" +
                 "\t" + ObtenerTipoVisibilidad(param_clase.Visibilidad) + " " + ObtenerTipoClase(param_clase.TipoClase) + " " + param_clase.Nombre;
 
             texto_clases += texto_herencia != string.Empty ? ": " + texto_herencia + "\n" : "\n";
             texto_clases += "\t{\n";
+            if (param_barra_progreso != null)
+                param_barra_progreso.Value++;
 
 
             if (param_clase.TipoClase == EnumTiposClases.ENUMERACION)
@@ -129,6 +139,8 @@ namespace transformador_mda.src.Features.GenerarSalida
 
                 return new RetornoBase(true, "Código generado correctamente.", texto_clases);
             }
+            if (param_barra_progreso != null)
+                param_barra_progreso.Value++;
 
             if (param_clase.TipoClase != EnumTiposClases.INTERFAZ)
             {
@@ -138,14 +150,19 @@ namespace transformador_mda.src.Features.GenerarSalida
 
                 texto_clases += retorno_atributos.TextoDesarrollador;
             }
+            if (param_barra_progreso != null)
+                param_barra_progreso.Value++;
 
             RetornoBase retorno_metodos = GenerarCodigoMetodo(param_clase.Metodos, param_clase);
             if (!retorno_metodos.Exito)
                 return retorno_metodos;
 
             texto_clases += retorno_metodos.TextoDesarrollador + "\n" +
+                    "\n\t\t#region \"Métodos IA\"\n\n//{{MetodosAuxiliares}} \n\n\t\t#endregion\n\n" +
                     "\t}\n" +
                     "}\n\n";
+            if (param_barra_progreso != null)
+                param_barra_progreso.Value++;
 
             return new RetornoBase(true, "Código generado correctamente.", texto_clases);
         }

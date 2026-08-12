@@ -1,4 +1,5 @@
-﻿using transformador_mda.src.Dominio.ElementosUML;
+﻿using System.Windows.Forms;
+using transformador_mda.src.Dominio.ElementosUML;
 using transformador_mda.src.Dominio.Retornos;
 
 namespace transformador_mda.src.Features.GenerarSalida
@@ -58,7 +59,7 @@ namespace transformador_mda.src.Features.GenerarSalida
         /// <returns>True si todo es correcto, false si no.</returns>
         public abstract RetornoBase GenerarSalida();
 
-        public abstract RetornoBase GenerarTexto(Clase param_clase);
+        public abstract RetornoBase GenerarTexto(Clase param_clase, ToolStripProgressBar param_barra_progreso);
         #endregion
 
     }

@@ -54,16 +54,6 @@ namespace transformador_mda.src.Features.ParserEntrada
             _proyecto = new ProyectoBase();
             _proyecto.Nombre = param_nombre;
             _asociaciones_pendientes = new List<Asociacion>();
-
-            Directorio directorio = new Directorio()
-            {
-                Tipo = EnumTipoElemento.DIRECTORIO,
-                Id = CrearIdentificador.CrearGUID(),
-                Namespace = param_nombre,
-                Clases = new List<Clase>()
-            };
-
-            _proyecto.Directorios.Add(directorio);
         }
 
         #endregion

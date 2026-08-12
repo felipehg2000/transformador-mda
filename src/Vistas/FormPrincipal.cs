@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Drawing;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using transformador_mda.src.Controladores;
 using transformador_mda.src.Dominio.ElementosUML;
@@ -103,8 +104,6 @@ namespace transformador_mda.src.Vistas
         /// </summary>
         private const int AnchoPanelIzquierdoMinimo = 150;
 
-        private Clase _clase_mostrada;
-
         #endregion
 
         #region "Move Form Info"
@@ -129,10 +128,15 @@ namespace transformador_mda.src.Vistas
 
             _controlador = new Principal();
 
+            _controlador.CargarClave();
+            richTextBoxClaveOpenAI.Text = _controlador.ClaveOpenAI;
+
             // Mostrar panel adecuado
             tableLayoutPanelInicio.Visible = true;
             tableLayoutPanelInicio.Enabled = true;
             tableLayoutPanelInicio.BringToFront();
+
+            ActivarPantallaTrabajo(true);
 
             // Ajusta las columnas 
             AjustarAnchoTablas();
@@ -140,7 +144,7 @@ namespace transformador_mda.src.Vistas
 
         #endregion
 
-        #region "Menú"
+        #region "Menú Configuración"
 
         /// <summary>
         /// Evento para exportar la configuración que está usando el generador.
@@ -209,6 +213,25 @@ namespace transformador_mda.src.Vistas
             panelAbrirXMI.BringToFront();
 
             panelPrincipal.Enabled = false;
+        }
+
+        /// <summary>
+        /// Copia el código generado en el portapapeles.
+        /// </summary>
+        /// <param name="sender">Componente que lanza el evento.</param>
+        /// <param name="e">Argumentos asociados al evento.</param>
+        private async void buttonCopiar_Click(object sender, EventArgs e)
+        {
+            if (string.IsNullOrEmpty(richTextBoxCodigo.Text))
+                return;
+
+            Clipboard.SetText(richTextBoxCodigo.Text);
+
+            // Efecto visual
+            Color colorOriginal = richTextBoxCodigo.BackColor;
+            richTextBoxCodigo.BackColor = SystemColors.Control;
+            await Task.Delay(150);
+            richTextBoxCodigo.BackColor = colorOriginal;
         }
 
         #endregion
@@ -774,14 +797,95 @@ namespace transformador_mda.src.Vistas
 
         #endregion
 
-        #region "Generación de código"
+        #region "Generación de código de una clase"
 
         /// <summary>
-        /// Genera el esqueleto del código y lo muestra.
+        /// Genera el código esqueleto de la clase que el usuario está visualizando.
         /// </summary>
         /// <param name="sender">Componente que lanza el evento.</param>
         /// <param name="e">Argumentos asociados al evento.</param>
-        private async void generarEsqueletoToolStripMenuItem_Click(object sender, EventArgs e)
+        private void generarEsqueletoToolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+            ActivarPantallaTrabajo(false);
+            Clase clase_seleccionada = ObtenerClaseSeleccionada();
+            if (clase_seleccionada == null)
+                return;
+
+            RetornoBase retorno = _controlador.GenerarEsqueletoClase(clase_seleccionada, toolStripProgressBar);
+            if (!retorno.Exito)
+                MessageBox.Show(retorno.TextoUsuario,
+                    "Error",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+
+            PrepararVistaDespuesDeGenerarCodigo(retorno.TextoDesarrollador, retorno.Exito);
+        }
+
+        /// <summary>
+        /// Genera el código completo de la clase que el usuario está visualizando.
+        /// </summary>
+        /// <param name="sender">Componente que lanza el evento.</param>
+        /// <param name="e">Argumentos asociados al evento.</param>
+        private async void generarCódigoCompletoToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (string.IsNullOrEmpty(_controlador.ClaveOpenAI))
+            {
+                MessageBox.Show("Es necesario configurar una clave de OpenAI para generar el código completo",
+                    "Aviso",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information);
+                return;
+            }
+
+            ActivarPantallaTrabajo(false);
+            Clase clase_seleccionada = ObtenerClaseSeleccionada();
+            if (clase_seleccionada == null)
+            {
+                ActivarPantallaTrabajo(true);
+                return;
+            }
+
+            RetornoMultiple retorno = await _controlador.GenerarCodigoIAClase(clase_seleccionada, true, toolStripProgressBar);
+            do
+            {
+                if (retorno.Exito)
+                    break;
+
+                if (retorno.Estado == RetornoMultiple.EnumEstado.CONFIRMACION_USUARIO)
+                {
+                    DialogResult respuesta = MessageBox.Show(retorno.TextoDesarrollador,
+                        "Aviso",
+                        MessageBoxButtons.YesNo,
+                        MessageBoxIcon.Information);
+
+                    if (respuesta == DialogResult.No)
+                    {
+                        ActivarPantallaTrabajo(true);
+                        return;
+                    }
+
+                    retorno = await _controlador.GenerarCodigoIAClase(clase_seleccionada, true, toolStripProgressBar, true);
+                }
+                else
+                {
+                    MessageBox.Show(retorno.TextoUsuario,
+                        "Error",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Error);
+                    ActivarPantallaTrabajo(true);
+                    return;
+                }
+            }
+            while (true);
+
+            PrepararVistaDespuesDeGenerarCodigo(retorno.TextoDesarrollador, retorno.Exito);
+        }
+
+        /// <summary>
+        /// Obtiene la clase que el usuario está visualizando.
+        /// </summary>
+        /// <returns>Null si no tienen ninguna clase abierta o el objeto clase que esté visualizando.</returns>
+        private Clase ObtenerClaseSeleccionada()
         {
             if (treeView.Nodes.Count <= 0)
             {
@@ -789,25 +893,35 @@ namespace transformador_mda.src.Vistas
                     "Aviso",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Information);
-                return;
+                ActivarPantallaTrabajo(true);
+                return null;
             }
-            if (!(treeView.SelectedNode.Tag is Clase clase_seleccionada))
+            if (!(treeView.SelectedNode.Tag is Clase ret_clase))
             {
                 MessageBox.Show("Debe seleccionar una clase en el explorador de soluicones para poder generar código.",
                     "Aviso",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Information);
-                return;
+                ActivarPantallaTrabajo(true);
+                return null;
             }
 
-            RetornoBase retorno = await _controlador.GenerarCodigoClase(clase_seleccionada, true);
-            if (!retorno.Exito)
-                MessageBox.Show(retorno.TextoDesarrollador,
-                    "Error",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
+            return ret_clase;
+        }
 
-            richTextBoxCodigo.Text = retorno.TextoDesarrollador;
+        /// <summary>
+        /// Después de la generación de código activa la pantalla de trabajo y rellena el rich text.
+        /// </summary>
+        /// <param name="param_texto">Texto a mostrar en el rich text.</param>
+        /// <param name="param_mostrar_texto">True para mostrar el texto, false para no mostrarlo.</param>
+        private void PrepararVistaDespuesDeGenerarCodigo(string param_texto, bool param_mostrar_texto)
+        {
+            if (param_mostrar_texto)
+                richTextBoxCodigo.Text = param_texto;
+
+            ActivarPantallaTrabajo(true);
+            toolStripProgressBar.Value = 0;
+            toolStripProgressBar.Maximum = 0;
         }
 
         #endregion
@@ -843,6 +957,28 @@ namespace transformador_mda.src.Vistas
         #region "Métodos auxiliares"
 
         /// <summary>
+        /// Activa y desactiva los paneles de trabajo para que el usuario no pueda interactuar con ella si hay un proceso en marcha.
+        /// </summary>
+        /// <param name="param_activar">True para activar el espacio de trabajo, false para desactivarlo.</param>
+        private void ActivarPantallaTrabajo(bool param_activar)
+        {
+            menuStrip.Enabled = param_activar;
+            panelIzquierdo.Enabled = param_activar;
+            treeView.Enabled = param_activar;
+            splitContainer.Enabled = param_activar;
+            panelSelClase.Enabled = param_activar;
+
+            if (param_activar)
+            {
+                this.Cursor = Cursors.Default;
+            }
+            else
+            {
+                this.Cursor = Cursors.WaitCursor;
+            }
+        }
+
+        /// <summary>
         /// Método auxiliar para centrar los paneles a visualizar.
         /// </summary>
         /// <param name="param_panel">Panel a centrar en mitad de su contenedor.</param>
@@ -858,38 +994,71 @@ namespace transformador_mda.src.Vistas
 
         #endregion
 
-        private async void pruebaIAToolStripMenuItem_Click(object sender, EventArgs e)
+        #region "Panel de ClaveOpenAI"
+
+        /// <summary>
+        /// Cierra el panel.
+        /// </summary>
+        /// <param name="sender">Componente que lanza el evento.</param>
+        /// <param name="e">Argumentos asociados al evento.</param>
+        private void buttonClaveOpenAICerrar_Click(object sender, EventArgs e)
         {
-            if (treeView.Nodes.Count <= 0)
-            {
-                MessageBox.Show("Debe seleccionar un fichero XMI o un proyecto y una clase en el explorador de soluicones para poder generar código.",
-                    "Aviso",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Information);
-                return;
-            }
-            if (!(treeView.SelectedNode.Tag is Clase clase_seleccionada))
-            {
-                MessageBox.Show("Debe seleccionar una clase en el explorador de soluicones para poder generar código.",
-                    "Aviso",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Information);
-                return;
-            }
-
-            RetornoBase retorno_codigo = await _controlador.GenerarCodigoIA(clase_seleccionada);
-            if (!retorno_codigo.Exito)
-            {
-                MessageBox.Show(retorno_codigo.TextoUsuario,
-                    "Error",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
-                //return;
-            }
-
-            richTextBoxCodigo.Text = retorno_codigo.TextoDesarrollador;
+            panelClaveOpenAI.Enabled = false;
+            panelClaveOpenAI.Visible = false;
+            panelClaveOpenAI.SendToBack();
+            ActivarPantallaTrabajo(true);
         }
 
+        /// <summary>
+        /// Centra y muestra el panel
+        /// </summary>
+        /// <param name="sender">Componente que lanza el evento.</param>
+        /// <param name="e">Argumentos asociados al evento.</param>
+        private void añadirClaveOpenAIToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ActivarPantallaTrabajo(false);
+            CentrarPanel(panelClaveOpenAI);
+            panelClaveOpenAI.Enabled = true;
+            panelClaveOpenAI.Visible = true;
+            panelClaveOpenAI.BringToFront();
+        }
 
+        /// <summary>
+        /// Cambia el icono del cursor
+        /// </summary>
+        /// <param name="sender">Componente que lanza el evento.</param>
+        /// <param name="e">Argumentos asociados al evento.</param>
+        private void panelClaveOpenAICentral_MouseHover(object sender, EventArgs e)
+        {
+            this.Cursor = Cursors.Default;
+        }
+
+        /// <summary>
+        /// Permite que el panel se mueva por la pantalla
+        /// </summary>
+        /// <param name="sender">Componente que lanza el evento.</param>
+        /// <param name="e">Argumentos asociados al evento.</param>
+        private void labelClaveOpenAI_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
+            {
+                ReleaseCapture();
+                SendMessage(panelClaveOpenAI.Handle, WM_NCLBUTTONDOWN, HTCAPTION, 0);
+            }
+        }
+
+        /// <summary>
+        /// Graba la clave open ai en la instalación
+        /// </summary>
+        /// <param name="sender">Componente que lanza el evento.</param>
+        /// <param name="e">Argumentos asociados al evento.</param>
+        private void buttonClaveOpenAIGrabar_Click(object sender, EventArgs e)
+        {
+            _controlador.ClaveOpenAI = richTextBoxClaveOpenAI.Text;
+            _controlador.GuardarClave();
+            buttonClaveOpenAICerrar_Click(sender, e);
+        }
+
+        #endregion
     }
 }

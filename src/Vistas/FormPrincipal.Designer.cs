@@ -62,7 +62,10 @@
             this.importarDiagramaToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.importarXMIToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.generaciónDeCódigoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.generarEsqueletoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.añadirClaveOpenAIToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.deUnaClaseToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.generarEsqueletoToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            this.generarCódigoCompletoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.panelPrincipal = new System.Windows.Forms.Panel();
             this.splitContainer = new System.Windows.Forms.SplitContainer();
             this.tabControlClases = new System.Windows.Forms.TabControl();
@@ -120,19 +123,31 @@
             this.tabPage1 = new System.Windows.Forms.TabPage();
             this.panelBordeTextCodigo = new System.Windows.Forms.Panel();
             this.richTextBoxCodigo = new System.Windows.Forms.RichTextBox();
-            this.panelSelClase = new System.Windows.Forms.Panel();
-            this.pictureBoxSelClase = new System.Windows.Forms.PictureBox();
+            this.tableLayoutPanelHerramientas = new System.Windows.Forms.TableLayoutPanel();
+            this.buttonGenerarEsqueleto = new System.Windows.Forms.Button();
+            this.buttonGenerarCodigoIA = new System.Windows.Forms.Button();
+            this.labelLenguaje = new System.Windows.Forms.Label();
+            this.buttonCopiar = new System.Windows.Forms.Button();
             this.panelIzquierdo = new System.Windows.Forms.Panel();
             this.treeView = new System.Windows.Forms.TreeView();
             this.textBoxBuscarComponente = new System.Windows.Forms.TextBox();
+            this.panelSelClase = new System.Windows.Forms.Panel();
+            this.pictureBoxSelClase = new System.Windows.Forms.PictureBox();
             this.statusStrip = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabelProgreso = new System.Windows.Forms.ToolStripStatusLabel();
-            this.toolStripProgressBar1 = new System.Windows.Forms.ToolStripProgressBar();
+            this.toolStripProgressBar = new System.Windows.Forms.ToolStripProgressBar();
             this.pictureBoxInicio = new System.Windows.Forms.PictureBox();
             this.tableLayoutPanelInicio = new System.Windows.Forms.TableLayoutPanel();
             this.buttonAbrirXMI = new System.Windows.Forms.Button();
             this.buttonAbrirProyecto = new System.Windows.Forms.Button();
-            this.pruebaIAToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.panelClaveOpenAI = new System.Windows.Forms.Panel();
+            this.tableLayoutPanelClaveOpenAIBotones = new System.Windows.Forms.TableLayoutPanel();
+            this.buttonClaveOpenAICerrar = new System.Windows.Forms.Button();
+            this.buttonClaveOpenAIGrabar = new System.Windows.Forms.Button();
+            this.panelClaveOpenAICentral = new System.Windows.Forms.Panel();
+            this.richTextBoxClaveOpenAI = new System.Windows.Forms.RichTextBox();
+            this.panelClaveOpenAISuperior = new System.Windows.Forms.Panel();
+            this.labelClaveOpenAI = new System.Windows.Forms.Label();
             imageList = new System.Windows.Forms.ImageList(this.components);
             this.panelAbrirXMI.SuspendLayout();
             this.panelSuperiorXMI.SuspendLayout();
@@ -165,12 +180,17 @@
             this.tabControlCodigo.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.panelBordeTextCodigo.SuspendLayout();
+            this.tableLayoutPanelHerramientas.SuspendLayout();
+            this.panelIzquierdo.SuspendLayout();
             this.panelSelClase.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxSelClase)).BeginInit();
-            this.panelIzquierdo.SuspendLayout();
             this.statusStrip.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxInicio)).BeginInit();
             this.tableLayoutPanelInicio.SuspendLayout();
+            this.panelClaveOpenAI.SuspendLayout();
+            this.tableLayoutPanelClaveOpenAIBotones.SuspendLayout();
+            this.panelClaveOpenAICentral.SuspendLayout();
+            this.panelClaveOpenAISuperior.SuspendLayout();
             this.SuspendLayout();
             // 
             // imageList
@@ -372,14 +392,14 @@
             // 
             this.importarToolStripMenuItem.Name = "importarToolStripMenuItem";
             this.importarToolStripMenuItem.Size = new System.Drawing.Size(173, 22);
-            this.importarToolStripMenuItem.Text = "Importar";
+            this.importarToolStripMenuItem.Text = "Cargar Proyecto";
             this.importarToolStripMenuItem.Click += new System.EventHandler(this.importarToolStripMenuItem_Click);
             // 
             // exportarToolStripMenuItem
             // 
             this.exportarToolStripMenuItem.Name = "exportarToolStripMenuItem";
             this.exportarToolStripMenuItem.Size = new System.Drawing.Size(173, 22);
-            this.exportarToolStripMenuItem.Text = "Exportar";
+            this.exportarToolStripMenuItem.Text = "Guardar Proyecto";
             this.exportarToolStripMenuItem.Click += new System.EventHandler(this.exportarToolStripMenuItem_Click);
             // 
             // importarDiagramaToolStripMenuItem
@@ -400,25 +420,48 @@
             // generaciónDeCódigoToolStripMenuItem
             // 
             this.generaciónDeCódigoToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.generarEsqueletoToolStripMenuItem,
-            this.pruebaIAToolStripMenuItem});
+            this.añadirClaveOpenAIToolStripMenuItem,
+            this.deUnaClaseToolStripMenuItem});
             this.generaciónDeCódigoToolStripMenuItem.Name = "generaciónDeCódigoToolStripMenuItem";
-            this.generaciónDeCódigoToolStripMenuItem.Size = new System.Drawing.Size(135, 20);
-            this.generaciónDeCódigoToolStripMenuItem.Text = "Generación de código";
+            this.generaciónDeCódigoToolStripMenuItem.Size = new System.Drawing.Size(102, 20);
+            this.generaciónDeCódigoToolStripMenuItem.Text = "Generar Código";
             // 
-            // generarEsqueletoToolStripMenuItem
+            // añadirClaveOpenAIToolStripMenuItem
             // 
-            this.generarEsqueletoToolStripMenuItem.Name = "generarEsqueletoToolStripMenuItem";
-            this.generarEsqueletoToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.generarEsqueletoToolStripMenuItem.Text = "Generar Esqueleto";
-            this.generarEsqueletoToolStripMenuItem.Click += new System.EventHandler(this.generarEsqueletoToolStripMenuItem_Click);
+            this.añadirClaveOpenAIToolStripMenuItem.Name = "añadirClaveOpenAIToolStripMenuItem";
+            this.añadirClaveOpenAIToolStripMenuItem.Size = new System.Drawing.Size(182, 22);
+            this.añadirClaveOpenAIToolStripMenuItem.Text = "Añadir clave OpenAI";
+            this.añadirClaveOpenAIToolStripMenuItem.Click += new System.EventHandler(this.añadirClaveOpenAIToolStripMenuItem_Click);
+            // 
+            // deUnaClaseToolStripMenuItem
+            // 
+            this.deUnaClaseToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.generarEsqueletoToolStripMenuItem1,
+            this.generarCódigoCompletoToolStripMenuItem});
+            this.deUnaClaseToolStripMenuItem.Name = "deUnaClaseToolStripMenuItem";
+            this.deUnaClaseToolStripMenuItem.Size = new System.Drawing.Size(182, 22);
+            this.deUnaClaseToolStripMenuItem.Text = "De una clase";
+            // 
+            // generarEsqueletoToolStripMenuItem1
+            // 
+            this.generarEsqueletoToolStripMenuItem1.Name = "generarEsqueletoToolStripMenuItem1";
+            this.generarEsqueletoToolStripMenuItem1.Size = new System.Drawing.Size(209, 22);
+            this.generarEsqueletoToolStripMenuItem1.Text = "Generar esqueleto";
+            this.generarEsqueletoToolStripMenuItem1.Click += new System.EventHandler(this.generarEsqueletoToolStripMenuItem1_Click);
+            // 
+            // generarCódigoCompletoToolStripMenuItem
+            // 
+            this.generarCódigoCompletoToolStripMenuItem.Name = "generarCódigoCompletoToolStripMenuItem";
+            this.generarCódigoCompletoToolStripMenuItem.Size = new System.Drawing.Size(209, 22);
+            this.generarCódigoCompletoToolStripMenuItem.Text = "Generar código completo";
+            this.generarCódigoCompletoToolStripMenuItem.Click += new System.EventHandler(this.generarCódigoCompletoToolStripMenuItem_Click);
             // 
             // panelPrincipal
             // 
             this.panelPrincipal.BackColor = System.Drawing.Color.White;
             this.panelPrincipal.Controls.Add(this.splitContainer);
-            this.panelPrincipal.Controls.Add(this.panelSelClase);
             this.panelPrincipal.Controls.Add(this.panelIzquierdo);
+            this.panelPrincipal.Controls.Add(this.panelSelClase);
             this.panelPrincipal.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panelPrincipal.Location = new System.Drawing.Point(0, 0);
             this.panelPrincipal.Name = "panelPrincipal";
@@ -1119,6 +1162,7 @@
             // 
             this.tabPage1.BackColor = System.Drawing.SystemColors.Control;
             this.tabPage1.Controls.Add(this.panelBordeTextCodigo);
+            this.tabPage1.Controls.Add(this.tableLayoutPanelHerramientas);
             this.tabPage1.Location = new System.Drawing.Point(4, 22);
             this.tabPage1.Name = "tabPage1";
             this.tabPage1.Padding = new System.Windows.Forms.Padding(10);
@@ -1131,9 +1175,9 @@
             this.panelBordeTextCodigo.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.panelBordeTextCodigo.Controls.Add(this.richTextBoxCodigo);
             this.panelBordeTextCodigo.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panelBordeTextCodigo.Location = new System.Drawing.Point(10, 10);
+            this.panelBordeTextCodigo.Location = new System.Drawing.Point(10, 39);
             this.panelBordeTextCodigo.Name = "panelBordeTextCodigo";
-            this.panelBordeTextCodigo.Size = new System.Drawing.Size(411, 681);
+            this.panelBordeTextCodigo.Size = new System.Drawing.Size(411, 652);
             this.panelBordeTextCodigo.TabIndex = 1;
             // 
             // richTextBoxCodigo
@@ -1144,30 +1188,70 @@
             this.richTextBoxCodigo.Location = new System.Drawing.Point(0, 0);
             this.richTextBoxCodigo.Name = "richTextBoxCodigo";
             this.richTextBoxCodigo.ReadOnly = true;
-            this.richTextBoxCodigo.Size = new System.Drawing.Size(409, 679);
+            this.richTextBoxCodigo.Size = new System.Drawing.Size(409, 650);
             this.richTextBoxCodigo.TabIndex = 0;
             this.richTextBoxCodigo.Text = "";
             // 
-            // panelSelClase
+            // tableLayoutPanelHerramientas
             // 
-            this.panelSelClase.BackColor = System.Drawing.SystemColors.Control;
-            this.panelSelClase.Controls.Add(this.pictureBoxSelClase);
-            this.panelSelClase.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panelSelClase.Location = new System.Drawing.Point(150, 0);
-            this.panelSelClase.Name = "panelSelClase";
-            this.panelSelClase.Size = new System.Drawing.Size(1220, 727);
-            this.panelSelClase.TabIndex = 10;
+            this.tableLayoutPanelHerramientas.ColumnCount = 5;
+            this.tableLayoutPanelHerramientas.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanelHerramientas.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanelHerramientas.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanelHerramientas.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanelHerramientas.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanelHerramientas.Controls.Add(this.buttonGenerarEsqueleto, 1, 0);
+            this.tableLayoutPanelHerramientas.Controls.Add(this.buttonGenerarCodigoIA, 2, 0);
+            this.tableLayoutPanelHerramientas.Controls.Add(this.labelLenguaje, 0, 0);
+            this.tableLayoutPanelHerramientas.Controls.Add(this.buttonCopiar, 4, 0);
+            this.tableLayoutPanelHerramientas.Dock = System.Windows.Forms.DockStyle.Top;
+            this.tableLayoutPanelHerramientas.Location = new System.Drawing.Point(10, 10);
+            this.tableLayoutPanelHerramientas.Name = "tableLayoutPanelHerramientas";
+            this.tableLayoutPanelHerramientas.RowCount = 1;
+            this.tableLayoutPanelHerramientas.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanelHerramientas.Size = new System.Drawing.Size(411, 29);
+            this.tableLayoutPanelHerramientas.TabIndex = 2;
             // 
-            // pictureBoxSelClase
+            // buttonGenerarEsqueleto
             // 
-            this.pictureBoxSelClase.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.pictureBoxSelClase.Image = ((System.Drawing.Image)(resources.GetObject("pictureBoxSelClase.Image")));
-            this.pictureBoxSelClase.Location = new System.Drawing.Point(0, 0);
-            this.pictureBoxSelClase.Name = "pictureBoxSelClase";
-            this.pictureBoxSelClase.Size = new System.Drawing.Size(1220, 727);
-            this.pictureBoxSelClase.SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage;
-            this.pictureBoxSelClase.TabIndex = 0;
-            this.pictureBoxSelClase.TabStop = false;
+            this.buttonGenerarEsqueleto.Location = new System.Drawing.Point(69, 3);
+            this.buttonGenerarEsqueleto.Name = "buttonGenerarEsqueleto";
+            this.buttonGenerarEsqueleto.Size = new System.Drawing.Size(75, 23);
+            this.buttonGenerarEsqueleto.TabIndex = 0;
+            this.buttonGenerarEsqueleto.Text = "Esqueleto";
+            this.buttonGenerarEsqueleto.UseVisualStyleBackColor = true;
+            this.buttonGenerarEsqueleto.Click += new System.EventHandler(this.generarEsqueletoToolStripMenuItem1_Click);
+            // 
+            // buttonGenerarCodigoIA
+            // 
+            this.buttonGenerarCodigoIA.Location = new System.Drawing.Point(150, 3);
+            this.buttonGenerarCodigoIA.Name = "buttonGenerarCodigoIA";
+            this.buttonGenerarCodigoIA.Size = new System.Drawing.Size(75, 23);
+            this.buttonGenerarCodigoIA.TabIndex = 1;
+            this.buttonGenerarCodigoIA.Text = "Código IA";
+            this.buttonGenerarCodigoIA.UseVisualStyleBackColor = true;
+            this.buttonGenerarCodigoIA.Click += new System.EventHandler(this.generarCódigoCompletoToolStripMenuItem_Click);
+            // 
+            // labelLenguaje
+            // 
+            this.labelLenguaje.AutoSize = true;
+            this.labelLenguaje.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.labelLenguaje.Location = new System.Drawing.Point(3, 0);
+            this.labelLenguaje.Name = "labelLenguaje";
+            this.labelLenguaje.Size = new System.Drawing.Size(60, 29);
+            this.labelLenguaje.TabIndex = 2;
+            this.labelLenguaje.Text = "Código: C#";
+            this.labelLenguaje.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // buttonCopiar
+            // 
+            this.buttonCopiar.Location = new System.Drawing.Point(333, 3);
+            this.buttonCopiar.Name = "buttonCopiar";
+            this.buttonCopiar.Size = new System.Drawing.Size(75, 23);
+            this.buttonCopiar.TabIndex = 3;
+            this.buttonCopiar.Text = "Copiar ";
+            this.buttonCopiar.UseVisualStyleBackColor = true;
+            this.buttonCopiar.Click += new System.EventHandler(this.buttonCopiar_Click);
             // 
             // panelIzquierdo
             // 
@@ -1205,11 +1289,32 @@
             this.textBoxBuscarComponente.Size = new System.Drawing.Size(140, 20);
             this.textBoxBuscarComponente.TabIndex = 0;
             // 
+            // panelSelClase
+            // 
+            this.panelSelClase.BackColor = System.Drawing.SystemColors.Control;
+            this.panelSelClase.Controls.Add(this.pictureBoxSelClase);
+            this.panelSelClase.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panelSelClase.Location = new System.Drawing.Point(0, 0);
+            this.panelSelClase.Name = "panelSelClase";
+            this.panelSelClase.Size = new System.Drawing.Size(1370, 727);
+            this.panelSelClase.TabIndex = 10;
+            // 
+            // pictureBoxSelClase
+            // 
+            this.pictureBoxSelClase.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.pictureBoxSelClase.Image = ((System.Drawing.Image)(resources.GetObject("pictureBoxSelClase.Image")));
+            this.pictureBoxSelClase.Location = new System.Drawing.Point(0, 0);
+            this.pictureBoxSelClase.Name = "pictureBoxSelClase";
+            this.pictureBoxSelClase.Size = new System.Drawing.Size(1370, 727);
+            this.pictureBoxSelClase.SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage;
+            this.pictureBoxSelClase.TabIndex = 0;
+            this.pictureBoxSelClase.TabStop = false;
+            // 
             // statusStrip
             // 
             this.statusStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripStatusLabelProgreso,
-            this.toolStripProgressBar1});
+            this.toolStripProgressBar});
             this.statusStrip.Location = new System.Drawing.Point(0, 727);
             this.statusStrip.Name = "statusStrip";
             this.statusStrip.Size = new System.Drawing.Size(1370, 22);
@@ -1222,10 +1327,10 @@
             this.toolStripStatusLabelProgreso.Size = new System.Drawing.Size(92, 17);
             this.toolStripStatusLabelProgreso.Text = "Progreso actual:";
             // 
-            // toolStripProgressBar1
+            // toolStripProgressBar
             // 
-            this.toolStripProgressBar1.Name = "toolStripProgressBar1";
-            this.toolStripProgressBar1.Size = new System.Drawing.Size(100, 16);
+            this.toolStripProgressBar.Name = "toolStripProgressBar";
+            this.toolStripProgressBar.Size = new System.Drawing.Size(100, 16);
             // 
             // pictureBoxInicio
             // 
@@ -1284,12 +1389,101 @@
             this.buttonAbrirProyecto.UseVisualStyleBackColor = true;
             this.buttonAbrirProyecto.Click += new System.EventHandler(this.importarToolStripMenuItem_Click);
             // 
-            // pruebaIAToolStripMenuItem
+            // panelClaveOpenAI
             // 
-            this.pruebaIAToolStripMenuItem.Name = "pruebaIAToolStripMenuItem";
-            this.pruebaIAToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.pruebaIAToolStripMenuItem.Text = "Prueba IA";
-            this.pruebaIAToolStripMenuItem.Click += new System.EventHandler(this.pruebaIAToolStripMenuItem_Click);
+            this.panelClaveOpenAI.BackColor = System.Drawing.Color.Navy;
+            this.panelClaveOpenAI.Controls.Add(this.tableLayoutPanelClaveOpenAIBotones);
+            this.panelClaveOpenAI.Controls.Add(this.panelClaveOpenAICentral);
+            this.panelClaveOpenAI.Controls.Add(this.panelClaveOpenAISuperior);
+            this.panelClaveOpenAI.Location = new System.Drawing.Point(212, 56);
+            this.panelClaveOpenAI.Name = "panelClaveOpenAI";
+            this.panelClaveOpenAI.Padding = new System.Windows.Forms.Padding(3, 0, 3, 3);
+            this.panelClaveOpenAI.Size = new System.Drawing.Size(519, 142);
+            this.panelClaveOpenAI.TabIndex = 10;
+            // 
+            // tableLayoutPanelClaveOpenAIBotones
+            // 
+            this.tableLayoutPanelClaveOpenAIBotones.BackColor = System.Drawing.SystemColors.Control;
+            this.tableLayoutPanelClaveOpenAIBotones.ColumnCount = 5;
+            this.tableLayoutPanelClaveOpenAIBotones.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 20F));
+            this.tableLayoutPanelClaveOpenAIBotones.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 20F));
+            this.tableLayoutPanelClaveOpenAIBotones.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 20F));
+            this.tableLayoutPanelClaveOpenAIBotones.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 20F));
+            this.tableLayoutPanelClaveOpenAIBotones.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 20F));
+            this.tableLayoutPanelClaveOpenAIBotones.Controls.Add(this.buttonClaveOpenAICerrar, 3, 0);
+            this.tableLayoutPanelClaveOpenAIBotones.Controls.Add(this.buttonClaveOpenAIGrabar, 1, 0);
+            this.tableLayoutPanelClaveOpenAIBotones.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.tableLayoutPanelClaveOpenAIBotones.Location = new System.Drawing.Point(3, 110);
+            this.tableLayoutPanelClaveOpenAIBotones.Name = "tableLayoutPanelClaveOpenAIBotones";
+            this.tableLayoutPanelClaveOpenAIBotones.RowCount = 1;
+            this.tableLayoutPanelClaveOpenAIBotones.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanelClaveOpenAIBotones.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 29F));
+            this.tableLayoutPanelClaveOpenAIBotones.Size = new System.Drawing.Size(513, 29);
+            this.tableLayoutPanelClaveOpenAIBotones.TabIndex = 2;
+            this.tableLayoutPanelClaveOpenAIBotones.MouseHover += new System.EventHandler(this.panelClaveOpenAICentral_MouseHover);
+            // 
+            // buttonClaveOpenAICerrar
+            // 
+            this.buttonClaveOpenAICerrar.Location = new System.Drawing.Point(309, 3);
+            this.buttonClaveOpenAICerrar.Name = "buttonClaveOpenAICerrar";
+            this.buttonClaveOpenAICerrar.Size = new System.Drawing.Size(75, 23);
+            this.buttonClaveOpenAICerrar.TabIndex = 1;
+            this.buttonClaveOpenAICerrar.Text = "Cerrar ❌";
+            this.buttonClaveOpenAICerrar.UseVisualStyleBackColor = true;
+            this.buttonClaveOpenAICerrar.Click += new System.EventHandler(this.buttonClaveOpenAICerrar_Click);
+            // 
+            // buttonClaveOpenAIGrabar
+            // 
+            this.buttonClaveOpenAIGrabar.Location = new System.Drawing.Point(105, 3);
+            this.buttonClaveOpenAIGrabar.Name = "buttonClaveOpenAIGrabar";
+            this.buttonClaveOpenAIGrabar.Size = new System.Drawing.Size(75, 23);
+            this.buttonClaveOpenAIGrabar.TabIndex = 0;
+            this.buttonClaveOpenAIGrabar.Text = "Grabar✔";
+            this.buttonClaveOpenAIGrabar.UseVisualStyleBackColor = true;
+            this.buttonClaveOpenAIGrabar.Click += new System.EventHandler(this.buttonClaveOpenAIGrabar_Click);
+            // 
+            // panelClaveOpenAICentral
+            // 
+            this.panelClaveOpenAICentral.BackColor = System.Drawing.SystemColors.Control;
+            this.panelClaveOpenAICentral.Controls.Add(this.richTextBoxClaveOpenAI);
+            this.panelClaveOpenAICentral.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panelClaveOpenAICentral.Location = new System.Drawing.Point(3, 28);
+            this.panelClaveOpenAICentral.Name = "panelClaveOpenAICentral";
+            this.panelClaveOpenAICentral.Size = new System.Drawing.Size(513, 111);
+            this.panelClaveOpenAICentral.TabIndex = 1;
+            this.panelClaveOpenAICentral.MouseHover += new System.EventHandler(this.panelClaveOpenAICentral_MouseHover);
+            // 
+            // richTextBoxClaveOpenAI
+            // 
+            this.richTextBoxClaveOpenAI.Location = new System.Drawing.Point(11, 6);
+            this.richTextBoxClaveOpenAI.Name = "richTextBoxClaveOpenAI";
+            this.richTextBoxClaveOpenAI.Size = new System.Drawing.Size(485, 66);
+            this.richTextBoxClaveOpenAI.TabIndex = 0;
+            this.richTextBoxClaveOpenAI.Text = "";
+            // 
+            // panelClaveOpenAISuperior
+            // 
+            this.panelClaveOpenAISuperior.BackColor = System.Drawing.Color.Navy;
+            this.panelClaveOpenAISuperior.Controls.Add(this.labelClaveOpenAI);
+            this.panelClaveOpenAISuperior.Dock = System.Windows.Forms.DockStyle.Top;
+            this.panelClaveOpenAISuperior.Location = new System.Drawing.Point(3, 0);
+            this.panelClaveOpenAISuperior.Name = "panelClaveOpenAISuperior";
+            this.panelClaveOpenAISuperior.Size = new System.Drawing.Size(513, 28);
+            this.panelClaveOpenAISuperior.TabIndex = 0;
+            // 
+            // labelClaveOpenAI
+            // 
+            this.labelClaveOpenAI.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.labelClaveOpenAI.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.labelClaveOpenAI.ForeColor = System.Drawing.Color.White;
+            this.labelClaveOpenAI.Location = new System.Drawing.Point(0, 0);
+            this.labelClaveOpenAI.Name = "labelClaveOpenAI";
+            this.labelClaveOpenAI.Size = new System.Drawing.Size(513, 28);
+            this.labelClaveOpenAI.TabIndex = 1;
+            this.labelClaveOpenAI.Text = "Clave de acceso a OpenAI";
+            this.labelClaveOpenAI.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.labelClaveOpenAI.MouseDown += new System.Windows.Forms.MouseEventHandler(this.labelClaveOpenAI_MouseDown);
+            this.labelClaveOpenAI.MouseHover += new System.EventHandler(this.panelClaveOpenAICentral_MouseHover);
             // 
             // FormPrincipal
             // 
@@ -1301,6 +1495,7 @@
             this.Controls.Add(this.statusStrip);
             this.Controls.Add(this.tableLayoutPanelInicio);
             this.Controls.Add(this.panelAbrirXMI);
+            this.Controls.Add(this.panelClaveOpenAI);
             this.MainMenuStrip = this.menuStrip;
             this.MinimumSize = new System.Drawing.Size(800, 500);
             this.Name = "FormPrincipal";
@@ -1344,14 +1539,20 @@
             this.tabControlCodigo.ResumeLayout(false);
             this.tabPage1.ResumeLayout(false);
             this.panelBordeTextCodigo.ResumeLayout(false);
-            this.panelSelClase.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxSelClase)).EndInit();
+            this.tableLayoutPanelHerramientas.ResumeLayout(false);
+            this.tableLayoutPanelHerramientas.PerformLayout();
             this.panelIzquierdo.ResumeLayout(false);
             this.panelIzquierdo.PerformLayout();
+            this.panelSelClase.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxSelClase)).EndInit();
             this.statusStrip.ResumeLayout(false);
             this.statusStrip.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxInicio)).EndInit();
             this.tableLayoutPanelInicio.ResumeLayout(false);
+            this.panelClaveOpenAI.ResumeLayout(false);
+            this.tableLayoutPanelClaveOpenAIBotones.ResumeLayout(false);
+            this.panelClaveOpenAICentral.ResumeLayout(false);
+            this.panelClaveOpenAISuperior.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -1407,9 +1608,8 @@
         private System.Windows.Forms.Label labelClase;
         private System.Windows.Forms.StatusStrip statusStrip;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabelProgreso;
-        private System.Windows.Forms.ToolStripProgressBar toolStripProgressBar1;
+        private System.Windows.Forms.ToolStripProgressBar toolStripProgressBar;
         private System.Windows.Forms.ToolStripMenuItem generaciónDeCódigoToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem generarEsqueletoToolStripMenuItem;
         private System.Windows.Forms.RichTextBox richTextBoxCodigo;
         private System.Windows.Forms.DataGridViewTextBoxColumn ColumnIDAtributos;
         private System.Windows.Forms.DataGridViewTextBoxColumn ColumnNombreAtributos;
@@ -1452,7 +1652,23 @@
         private System.Windows.Forms.Panel panelSuperiorXMI;
         private System.Windows.Forms.Label labelTituloXMI;
         private System.Windows.Forms.Button buttonCerrarXMI;
-        private System.Windows.Forms.ToolStripMenuItem pruebaIAToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem deUnaClaseToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem generarEsqueletoToolStripMenuItem1;
+        private System.Windows.Forms.ToolStripMenuItem generarCódigoCompletoToolStripMenuItem;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanelHerramientas;
+        private System.Windows.Forms.Button buttonGenerarEsqueleto;
+        private System.Windows.Forms.Button buttonGenerarCodigoIA;
+        private System.Windows.Forms.Label labelLenguaje;
+        private System.Windows.Forms.Button buttonCopiar;
+        private System.Windows.Forms.Panel panelClaveOpenAI;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanelClaveOpenAIBotones;
+        private System.Windows.Forms.Panel panelClaveOpenAICentral;
+        private System.Windows.Forms.Panel panelClaveOpenAISuperior;
+        private System.Windows.Forms.Label labelClaveOpenAI;
+        private System.Windows.Forms.Button buttonClaveOpenAICerrar;
+        private System.Windows.Forms.Button buttonClaveOpenAIGrabar;
+        private System.Windows.Forms.RichTextBox richTextBoxClaveOpenAI;
+        private System.Windows.Forms.ToolStripMenuItem añadirClaveOpenAIToolStripMenuItem;
     }
 }
 
