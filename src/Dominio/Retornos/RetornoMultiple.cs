@@ -12,11 +12,20 @@ namespace transformador_mda.src.Dominio.Retornos
         /// </summary>
         public enum EnumEstado
         {
-            NO_DEFINIDO = 0,                /// <summary>Estado no definido.</summary>
-            CORRECTO = 1,                   /// <summary>Estado correcto.</summary>
-            ERROR = 2,                      /// <summary>Estado incorrecto.</summary>
-            CANCELADO_POR_USUARIO = 3,      /// <summary>Proceso cancelado por el usuario.</summary>
-            CONFIRMACION_USUARIO = 4        /// <summary>El proceso puede continuar, pero a falta de confirmación por el usuario porque faltan requisitos no fundamentales.</summary>
+            /// <summary>Estado no definido.</summary>
+            NO_DEFINIDO = 0,
+
+            /// <summary>Estado correcto.</summary>
+            CORRECTO = 1,
+
+            /// <summary>Estado incorrecto.</summary>
+            ERROR = 2,
+
+            /// <summary>Proceso cancelado por el usuario.</summary>
+            CANCELADO_POR_USUARIO = 3,
+
+            /// <summary>El proceso puede continuar, pero a falta de confirmación por el usuario porque faltan requisitos no fundamentales.</summary>
+            CONFIRMACION_USUARIO = 4        
         }
 
         /// <summary>

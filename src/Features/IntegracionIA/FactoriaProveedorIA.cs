@@ -7,7 +7,8 @@ namespace transformador_mda.src.Features.IntegracionIA
     /// </summary>
     public enum ProveedorIA
     {
-        OpenAI = 0 /// <summary> Identificador para el cliente Open AI </summary>
+        /// <summary> Identificador para el cliente Open AI </summary>
+        OpenAI = 0 
     }
 
     internal class FactoriaProveedorIA

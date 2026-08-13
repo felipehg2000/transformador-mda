@@ -1213,15 +1213,32 @@ namespace transformador_mda.src.Features.ParserEntrada
         /// </summary>
         public enum Enumeracion
         {
-            NULO = 0,           ///<summary>Clave XMI no soportada por la solución.</summary>
-            CLASE = 1,          ///<summary>Clave XMI asociada a las Clases.</summary>
-            ASOCIACION = 2,     ///<summary>Clave XMI asociada a las asociaciones entre clases.</summary>
-            PAQUETE = 3,        ///<summary>Clave XMI asociada a los directorios y paquetes.</summary>
-            ATRIBUTO = 4,       ///<summary>Clave XMI asociada a los atributos.</summary>
-            METODO = 5,         ///<summary>Clave XMI asociada a los métodos</summary>
-            PARAMETRO = 6,      ///<summary>Clave XMI asociada a los parámetros de los métodos.</summary>
-            HERENCIA = 7,       ///<summary>Clave XMI asociada a las herencias.</summary>
-            LITERAL = 8,        ///<summary>Clave XMI asociada a los literales de las enumeraciones.</summary>
+            ///<summary>Clave XMI no soportada por la solución.</summary>
+            NULO = 0,
+
+            ///<summary>Clave XMI asociada a las Clases.</summary>
+            CLASE = 1,
+
+            ///<summary>Clave XMI asociada a las asociaciones entre clases.</summary>
+            ASOCIACION = 2,
+
+            ///<summary>Clave XMI asociada a los directorios y paquetes.</summary>
+            PAQUETE = 3,
+
+            ///<summary>Clave XMI asociada a los atributos.</summary>
+            ATRIBUTO = 4,
+
+            ///<summary>Clave XMI asociada a los métodos</summary>
+            METODO = 5,
+
+            ///<summary>Clave XMI asociada a los parámetros de los métodos.</summary>
+            PARAMETRO = 6,
+
+            ///<summary>Clave XMI asociada a las herencias.</summary>
+            HERENCIA = 7,
+
+            ///<summary>Clave XMI asociada a los literales de las enumeraciones.</summary>
+            LITERAL = 8,        
         }
 
         /// <summary>
