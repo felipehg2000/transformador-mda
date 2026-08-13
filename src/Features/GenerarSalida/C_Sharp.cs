@@ -1,9 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Windows.Forms;
-using transformador_mda.src.Dominio.ElementosUML;
+using System.Collections.Generic;
 using transformador_mda.src.Dominio.Retornos;
 using transformador_mda.src.Features.Utilidades;
+using transformador_mda.src.Dominio.ElementosUML;
 
 namespace transformador_mda.src.Features.GenerarSalida
 {
@@ -27,16 +27,6 @@ namespace transformador_mda.src.Features.GenerarSalida
         #endregion
 
         #region "Métodos publicos heredados"
-
-        /// <summary>
-        /// Método sin implementar
-        /// </summary>
-        /// <returns></returns>
-        /// <exception cref="NotImplementedException"></exception>
-        public override RetornoBase GenerarSalida()
-        {
-            throw new NotImplementedException();
-        }
 
         /// <summary>
         /// Genera el código de una única clase.
@@ -94,6 +84,7 @@ namespace transformador_mda.src.Features.GenerarSalida
         /// </summary>
         /// <param name="param_proyecto">Datos de todo el proyecto.</param>
         /// <param name="param_clase">Datos de la clase cuyo código debe generarse.</param>
+        /// <param name="param_barra_progreso">Barra visual de progreso para que el usuario sepa que el programa no se ha quedado colgado.</param>
         /// <returns>Objecto con el código de una clase e información del proceso de generación.</returns>
         static private RetornoBase GenerarCodigoClases(ProyectoBase param_proyecto, Clase param_clase, ToolStripProgressBar param_barra_progreso)
         {

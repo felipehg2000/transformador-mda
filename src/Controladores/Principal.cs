@@ -11,7 +11,6 @@ using transformador_mda.src.Dominio.ElementosUML;
 using transformador_mda.src.Features.GenerarSalida;
 using transformador_mda.src.Features.IntegracionIA;
 using transformador_mda.src.Features.ParserEntrada;
-using System;
 
 namespace transformador_mda.src.Controladores
 {
@@ -27,6 +26,14 @@ namespace transformador_mda.src.Controladores
         /// </summary>
         public Configuracion Configuracion { get; set; }
 
+        /// <summary>
+        /// Clave o token de acceso a OpenAI, para hacer login y permitir el desarrollo con IA
+        /// </summary>
+        /// <remarks>
+        /// No se almacena en el atributo de configuración  para evitar filtraciones de la clave.
+        /// Se persiste en un fichero local para reutilizar la configuración del token entre ejecuciones,
+        /// pero al guardar la configuración del proyecto se evita exportar la clave.
+        /// </remarks>
         public string ClaveOpenAI { get; set; }
 
         #endregion
@@ -330,6 +337,15 @@ namespace transformador_mda.src.Controladores
             }
         }
 
+        /// <summary>
+        /// Procesa el JSON dado por la generación con IA y sustituye los marcadores de la generación sin IA por el código correspondiente.
+        /// </summary>
+        /// <remarks>
+        /// Solo sustituye los identificadores de las clases por el cuerpo generado por la IA
+        /// </remarks>
+        /// <param name="param_json_document">JSON de respuesta de la inteligencia artificial</param>
+        /// <param name="param_codigo_sin_ia">Esqueleto generado sin inteligencia artificial</param>
+        /// <returns>Objeto con información del proceso y, si todo ha ido bien con el código sustituido en la variable de desarrollo.</returns>
         private RetornoMultiple GenerarClasesCompletas(JsonDocument param_json_document, string param_codigo_sin_ia)
         {
             JsonElement elemento_raiz = param_json_document.RootElement;
@@ -382,6 +398,15 @@ namespace transformador_mda.src.Controladores
                 codigo_completo);
         }
 
+        /// <summary>
+        /// Procesa el JSON dado por la generación con IA y sustituye los marcadores de la generación sin IA por el código correspondiente.
+        /// </summary>
+        /// <remarks>
+        /// Solo sustituye las liberías devueltas por la IA
+        /// </remarks>
+        /// <param name="param_json">JSON de respuesta de la inteligencia artificial</param>
+        /// <param name="param_codigo">Esqueleto generado sin inteligencia artificial</param>
+        /// <returns>Objeto con información del proceso y, si todo ha ido bien con el código sustituido en la variable de desarrollo.</returns>
         private RetornoMultiple GenerarClasesLibreria(JsonDocument param_json, string param_codigo)
         {
             JsonElement elemento_raiz = param_json.RootElement;
@@ -404,6 +429,15 @@ namespace transformador_mda.src.Controladores
                 param_codigo);
         }
 
+        /// <summary>
+        /// Procesa el JSON dado por la generación con IA y sustituye los marcadores de la generación sin IA por el código correspondiente.
+        /// </summary>
+        /// <remarks>
+        /// Solo sustituye las funciones auxiliares que ha necesitado utilizar la IA.
+        /// </remarks>
+        /// <param name="param_json">JSON de respuesta de la inteligencia artificial</param>
+        /// <param name="param_codigo">Esqueleto generado sin inteligencia artificial</param>
+        /// <returns>Objeto con información del proceso y, si todo ha ido bien con el código sustituido en la variable de desarrollo.</returns>
         private RetornoMultiple GenerarClasesFuncAux(JsonDocument param_json, string param_codigo)
         {
             JsonElement elemento_raiz = param_json.RootElement;
@@ -426,6 +460,15 @@ namespace transformador_mda.src.Controladores
                 param_codigo);
         }
 
+        /// <summary>
+        /// Procesa el JSON dado por la generación con IA y sustituye los marcadores de la generación sin IA por el código correspondiente.
+        /// </summary>
+        /// <remarks>
+        /// Solo sustituye el comentario principal de la clase, con la información de las extensiones NuGet a instalar.
+        /// </remarks>
+        /// <param name="param_json">JSON de respuesta de la inteligencia artificial</param>
+        /// <param name="param_codigo">Esqueleto generado sin inteligencia artificial</param>
+        /// <returns>Objeto con información del proceso y, si todo ha ido bien con el código sustituido en la variable de desarrollo.</returns>
         private RetornoMultiple GenerarClasesComentario(JsonDocument param_json, string param_codigo)
         {
             JsonElement elemento_raiz = param_json.RootElement;

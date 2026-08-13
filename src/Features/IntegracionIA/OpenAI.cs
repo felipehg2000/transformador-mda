@@ -15,14 +15,12 @@ using transformador_mda.src.Features.IntegracionIA.Dominio;
 
 namespace transformador_mda.src.Features.IntegracionIA
 {
+    /// <summary>
+    /// Clase que implementa la conexión con el proveedor IA OpenAI.
+    /// </summary>
     public class OpenAI : IProveedorIA
     {
         #region "Constantes"
-
-        /// <summary>
-        /// Token de OpenAI
-        /// </summary>
-        public string Token { get; set; }
 
         /// <summary>
         /// Texto que se envía a la inteligencia artificial para indicarle cómo debe generar el código de los métodos identificados en el esqueleto.
@@ -712,6 +710,11 @@ Devuelve exclusivamente el objeto JSON.";
         /// </summary>
         private InformacionIA _metadatos;
 
+        /// <summary>
+        /// Token de OpenAI
+        /// </summary>
+        public string Token { get; set; }
+
         #endregion
 
         #region "Constructor"
@@ -734,8 +737,8 @@ Devuelve exclusivamente el objeto JSON.";
         /// <summary>
         /// Método principal de generación de código IA para una clase. Se encarga de coordinar los distintos pasos para obtener el código de una clase generado por IA completo.
         /// </summary>
+        /// <param name="param_proyecto">Información del proyecto completo.</param>
         /// <param name="param_clase">Objeto de tipo clase con la información de la clase cuyo código se va a generar.</param>
-        /// <param name="param_ruta_json">Ruta del archivo JSON que contiene la información del proyecto.</param>
         /// <param name="param_esqueleto">Código esqueleto de la clase cuyo código completo se va a generar.</param>
         /// <param name="param_barra_progreso">Barra de progreso para mostrar el avance de la generación de código.</param>
         /// <returns></returns>

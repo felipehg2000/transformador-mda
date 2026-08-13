@@ -52,14 +52,15 @@ namespace transformador_mda.src.Features.GenerarSalida
         #endregion
 
         #region "Métodos públicos abstractos"
-
+        
         /// <summary>
-        /// Método inicial de las clases descendientes. Se llama para la generación de la salida.
+        /// Genera el esqueleto de una única clase.
         /// </summary>
-        /// <returns>True si todo es correcto, false si no.</returns>
-        public abstract RetornoBase GenerarSalida();
-
+        /// <param name="param_clase">Datos de la clase cuyo esqueleto se va a generar.</param>
+        /// <param name="param_barra_progreso">Barra visual de progreso para que el usuario sepa que el programa no se ha quedado colgado.</param>
+        /// <returns></returns>
         public abstract RetornoBase GenerarTexto(Clase param_clase, ToolStripProgressBar param_barra_progreso);
+
         #endregion
 
     }
