@@ -313,7 +313,7 @@ namespace transformador_mda.src.Features.ParserEntrada
         protected RetornoElementoUML ProcesarAtributo()
         {
             EnumTipoDato tipo_dato_tmp = ObtenerTipoDeDato(_elemento_actual);
-            string tipo_dato_especifico_tmp = tipo_dato_tmp == EnumTipoDato.NO_DEFINIDO ? _elemento_actual.Attributes().FirstOrDefault(a => a.Name.LocalName == "name")?.Value : string.Empty;
+            string tipo_dato_especifico_tmp = tipo_dato_tmp == EnumTipoDato.NO_DEFINIDO ? ObtenerTipoDatoEspecifico(_elemento_actual) : string.Empty;
 
             Atributo nuevo_nodo = new Atributo()
             {
@@ -373,7 +373,7 @@ namespace transformador_mda.src.Features.ParserEntrada
         protected RetornoElementoUML ProcesarParametro()
         {
             EnumTipoDato tipo_dato_tmp = ObtenerTipoDeDato(_elemento_actual);
-            string tipo_dato_especifico_tmp = tipo_dato_tmp == EnumTipoDato.NO_DEFINIDO ? _elemento_actual.Attributes().FirstOrDefault(a => a.Name.LocalName == "name")?.Value : string.Empty;
+            string tipo_dato_especifico_tmp = tipo_dato_tmp == EnumTipoDato.NO_DEFINIDO ? ObtenerTipoDatoEspecifico(_elemento_actual) : string.Empty;
 
             Parametro nuevo_nodo = new Parametro()
             {
@@ -1032,6 +1032,25 @@ namespace transformador_mda.src.Features.ParserEntrada
         {
             string valor = ObtenerAtributo(param_elemento, param_nombre_atributo);
             return valor == "true" || valor == "1";
+        }
+
+        /// <summary>
+        /// Obtiene el tipo de dato específico de un elemento, es decir, el nombre del tipo de dato si es un tipo definido por el usuario.
+        /// </summary>
+        /// <param name="param_elemento">Elemento XML del fichero XMI que se está procesando.</param>
+        /// <returns>Nombre del tipo de dato específico.</returns>
+        public string ObtenerTipoDatoEspecifico(XElement param_elemento)
+        {
+            string id_tipo = ObtenerAtributo(param_elemento, "type");
+
+            if (string.IsNullOrWhiteSpace(id_tipo))
+                return string.Empty;
+
+            XElement elemento_tipo = BuscarElementoPorID(_documento, id_tipo);
+            if (elemento_tipo == null)
+                return string.Empty;
+
+            return ObtenerNombre(elemento_tipo);
         }
 
         #endregion
