@@ -13,6 +13,11 @@ namespace transformador_mda.src.Dominio.ElementosUML
         public EnumTipoDato TipoDato { get; set; }
 
         /// <summary>
+        /// Indica el tipo de dato específico de un atributo, en caso de que sea un tipo de dato definido por el usuario.
+        /// </summary>
+        public string TipoDatoEspecifico { get; set; }
+
+        /// <summary>
         /// Constructor de la clase, incializa atributos.
         /// </summary>
         [JsonConstructor]
@@ -20,6 +25,7 @@ namespace transformador_mda.src.Dominio.ElementosUML
         {
             Tipo = EnumTipoElemento.ATRIBUTO;
             TipoDato = EnumTipoDato.NO_DEFINIDO;
+            TipoDatoEspecifico = string.Empty;
         }
     }
 }

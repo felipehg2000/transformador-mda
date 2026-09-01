@@ -312,13 +312,17 @@ namespace transformador_mda.src.Features.ParserEntrada
         /// <returns>Objeto de tipo RetornoElementoUML con información del proceso y, si todo ha funcionado bien con el objeto Atributo con información del XMI.</returns>
         protected RetornoElementoUML ProcesarAtributo()
         {
+            EnumTipoDato tipo_dato_tmp = ObtenerTipoDeDato(_elemento_actual);
+            string tipo_dato_especifico_tmp = tipo_dato_tmp == EnumTipoDato.NO_DEFINIDO ? _elemento_actual.Attributes().FirstOrDefault(a => a.Name.LocalName == "name")?.Value : string.Empty;
+
             Atributo nuevo_nodo = new Atributo()
             {
                 Id = ObtenerID(_elemento_actual),
                 Nombre = ObtenerNombre(_elemento_actual),
                 Comentario = ObtenerComentario(_elemento_actual),
                 Tipo = EnumTipoElemento.ATRIBUTO,
-                TipoDato = ObtenerTipoDeDato(_elemento_actual),
+                TipoDato = tipo_dato_tmp,
+                TipoDatoEspecifico = tipo_dato_especifico_tmp,
                 Visibilidad = ObtenerVisibilidad(_elemento_actual)
             };
 
@@ -368,12 +372,16 @@ namespace transformador_mda.src.Features.ParserEntrada
         /// <returns>Objeto de tipo RetornoElementoUML con información del proceso y, si todo ha funcionado bien con el objeto Parametro con información del XMI.</returns>
         protected RetornoElementoUML ProcesarParametro()
         {
+            EnumTipoDato tipo_dato_tmp = ObtenerTipoDeDato(_elemento_actual);
+            string tipo_dato_especifico_tmp = tipo_dato_tmp == EnumTipoDato.NO_DEFINIDO ? _elemento_actual.Attributes().FirstOrDefault(a => a.Name.LocalName == "name")?.Value : string.Empty;
+
             Parametro nuevo_nodo = new Parametro()
             {
                 Id = ObtenerID(_elemento_actual),
                 Nombre = ObtenerNombre(_elemento_actual),
                 Comentario = ObtenerComentario(_elemento_actual),
-                TipoDato = ObtenerTipoDeDato(_elemento_actual),
+                TipoDato = tipo_dato_tmp,
+                TipoDatoEspecifico = tipo_dato_especifico_tmp,
                 Tipo = _elemento_actual.Attributes().FirstOrDefault(a => a.Name.LocalName == "direction")?.Value == "return" ?
                     EnumTipoElemento.RETORNO : EnumTipoElemento.PARAMETRO
             };
