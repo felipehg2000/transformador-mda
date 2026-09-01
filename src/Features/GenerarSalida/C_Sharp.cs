@@ -61,10 +61,12 @@ namespace transformador_mda.src.Features.GenerarSalida
 
             foreach (Atributo atributo in param_atributos)
             {
+                string tipo_dato_tmp = string.IsNullOrEmpty(atributo.TipoDatoEspecifico) ? ObtenerTipoDato(atributo.TipoDato) : atributo.TipoDatoEspecifico;
+
                 texto_atributos += "\t\t/// <summary>\n";
                 texto_atributos += "\t\t/// " + atributo.Comentario + "\n";
                 texto_atributos += "\t\t/// </summary>\n";
-                texto_atributos += "\t\t" + ObtenerTipoVisibilidad(atributo.Visibilidad) + " " + ObtenerTipoDato(atributo.TipoDato) + " " + atributo.Nombre;
+                texto_atributos += "\t\t" + ObtenerTipoVisibilidad(atributo.Visibilidad) + " " + tipo_dato_tmp + " " + atributo.Nombre;
                 if (atributo.Visibilidad == EnumTipoVisibilidad.PUBLICO)
                     texto_atributos += " { get; set; } \n\n";
                 else
@@ -242,12 +244,13 @@ namespace transformador_mda.src.Features.GenerarSalida
 
             foreach (Parametro parametro in param_parametros)
             {
-                // <param name="param_parametros"></param>
+                string tipo_dato_tmp = string.IsNullOrEmpty(parametro.TipoDatoEspecifico) ? ObtenerTipoDato(parametro.TipoDato) : parametro.TipoDatoEspecifico;
+                
                 comentarios += "\t\t/// <param name=\"" + parametro.Nombre + "\"> " + parametro.Comentario + "</param>\n";
                 if (parametros != string.Empty)
                     parametros += ", ";
 
-                parametros += ObtenerTipoDato(parametro.TipoDato) + " " + parametro.Nombre;
+                parametros += tipo_dato_tmp + " " + parametro.Nombre;
             }
 
             return new RetornoBase(true,
@@ -479,6 +482,8 @@ namespace transformador_mda.src.Features.GenerarSalida
             string texto_comentarios = partes.Length > 0 ? partes[0] : string.Empty;
             string texto_parametros = partes.Length > 1 ? partes[1] : string.Empty;
 
+            string tipo_dato_tmp = string.IsNullOrEmpty(param_metodo.Retorno.TipoDatoEspecifico) ? ObtenerTipoDato(param_metodo.Retorno.TipoDato) : param_metodo.Retorno.TipoDatoEspecifico;
+
             string texto_metodo = string.Empty;
             if (param_clase.TipoClase == EnumTiposClases.INTERFAZ)
             {
@@ -490,7 +495,7 @@ namespace transformador_mda.src.Features.GenerarSalida
                     "\t\t/// </summary>\n" +
                     texto_comentarios +
                     "\t\t/// <return> " + param_metodo.Retorno.Comentario + " </return>\n" +
-                    "\t\t" + ObtenerTipoDato(param_metodo.Retorno.TipoDato) + " " +
+                    "\t\t" + tipo_dato_tmp + " " +
                     param_metodo.Nombre + "(" + texto_parametros + ")";
             }
             else if (param_metodo.EsDestructor && param_clase.TipoClase != EnumTiposClases.INTERFAZ)
@@ -521,7 +526,7 @@ namespace transformador_mda.src.Features.GenerarSalida
                     texto_comentarios +
                     "\t\t/// <return> " + param_metodo.Retorno.Comentario + " </return>\n" +
                     "\t\t" + ObtenerTipoVisibilidad(param_metodo.Visibilidad) + " abstract " +
-                    ObtenerTipoDato(param_metodo.Retorno.TipoDato) + " " +
+                    tipo_dato_tmp + " " +
                     param_metodo.Nombre + "(" + texto_parametros + ")";
             }
             else
@@ -532,7 +537,7 @@ namespace transformador_mda.src.Features.GenerarSalida
                     texto_comentarios +
                     "\t\t/// <return> " + param_metodo.Retorno.Comentario + " </return>\n" +
                     "\t\t" + ObtenerTipoVisibilidad(param_metodo.Visibilidad) + " " +
-                    ObtenerTipoDato(param_metodo.Retorno.TipoDato) + " " +
+                    tipo_dato_tmp + " " +
                     param_metodo.Nombre + "(" + texto_parametros + ")";
             }
 
