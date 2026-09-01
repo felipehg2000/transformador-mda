@@ -1,0 +1,359 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="transformador_mda.src.Controladores.Principal" Collapsed="true">
+    <Position X="29.75" Y="5.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ACIAAoACRQAAAoYAAAABAAAEQAQDADAAAIAiAAAAAAE=</HashCode>
+      <FileName>src\Controladores\Principal.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="transformador_mda.src.Dominio.Configuracion" Collapsed="true">
+    <Position X="29.75" Y="2.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAIAAAEAAgAAAAAAAAAAgAAAAAAAAIBAAAAgAAA=</HashCode>
+      <FileName>src\Dominio\Configuracion.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="transformador_mda.src.Dominio.ElementosUML.Asociacion" Collapsed="true">
+    <Position X="19.25" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>CAAIAAAAAAAAAAAAAAgQAEAAQAAAAAAAAAAIAAAAhAA=</HashCode>
+      <FileName>src\Dominio\ElementosUML\Asociacion.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="transformador_mda.src.Dominio.ElementosUML.Atributo" Collapsed="true">
+    <Position X="17" Y="5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAA=</HashCode>
+      <FileName>src\Dominio\ElementosUML\Atributo.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="transformador_mda.src.Dominio.ElementosUML.Clase" Collapsed="true">
+    <Position X="12.5" Y="5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AECAAAAAAAIAAAAAIAAAAAAAAACAAAAAAAEAAgAIAAg=</HashCode>
+      <FileName>src\Dominio\ElementosUML\Clase.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="transformador_mda.src.Dominio.ElementosUML.Directorio" Collapsed="true">
+    <Position X="10.25" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAACAAAAAEIAAAAAAAAACAAIA=</HashCode>
+      <FileName>src\Dominio\ElementosUML\Directorio.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="transformador_mda.src.Dominio.ElementosUML.ElementoBase" Collapsed="true">
+    <Position X="17" Y="2.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAACAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAACAAAAQ=</HashCode>
+      <FileName>src\Dominio\ElementosUML\ElementoBase.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="transformador_mda.src.Dominio.ElementosUML.ElementoVisible" Collapsed="true">
+    <Position X="14.75" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAA=</HashCode>
+      <FileName>src\Dominio\ElementosUML\ElementoVisible.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="transformador_mda.src.Dominio.ElementosUML.Metodo" Collapsed="true">
+    <Position X="14.75" Y="5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAACAAAAAAAAAAAAAQAAAAAAAAAAAAAEAAAAAAAAEEA=</HashCode>
+      <FileName>src\Dominio\ElementosUML\Metodo.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="transformador_mda.src.Dominio.ElementosUML.Parametro" Collapsed="true">
+    <Position X="21.5" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAA=</HashCode>
+      <FileName>src\Dominio\ElementosUML\Parametro.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="transformador_mda.src.Dominio.ElementosUML.ProyectoBase" Collapsed="true">
+    <Position X="23.75" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAAAAEAAA=</HashCode>
+      <FileName>src\Dominio\ElementosUML\ProyectoBase.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="transformador_mda.src.Dominio.Retornos.RetornoBase" Collapsed="true">
+    <Position X="13.25" Y="6.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>CAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAIAAAAAAAAAA=</HashCode>
+      <FileName>src\Dominio\Retornos\RetornoBase.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="transformador_mda.src.Dominio.Retornos.RetornoConfiguracion" Collapsed="true">
+    <Position X="16.75" Y="7.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>src\Dominio\Retornos\RetornoConfiguracion.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="transformador_mda.src.Dominio.Retornos.RetornoElementoUML" Collapsed="true">
+    <Position X="10" Y="7.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>src\Dominio\Retornos\RetornoElementoUML.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="transformador_mda.src.Dominio.Retornos.RetornoMultiple" Collapsed="true">
+    <Position X="12.25" Y="7.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAg=</HashCode>
+      <FileName>src\Dominio\Retornos\RetornoMultiple.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="transformador_mda.src.Features.DAO.ConfiguracionDAO" Collapsed="true">
+    <Position X="31.5" Y="2.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AgAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAA=</HashCode>
+      <FileName>src\Features\DAO\ConfiguracionDAO.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="transformador_mda.src.Features.DAO.ProyectoDAO" Collapsed="true">
+    <Position X="31.5" Y="5.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>src\Features\DAO\ProyectoDAO.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="transformador_mda.src.Features.GenerarSalida.C_Sharp" Collapsed="true">
+    <Position X="12.75" Y="10.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>IAAAAgQAAAAAQAACAACAIAASBAAABAAAAAAAAIAAAAE=</HashCode>
+      <FileName>src\Features\GenerarSalida\C_Sharp.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="transformador_mda.src.Features.GenerarSalida.FactoriaSalida" Collapsed="true">
+    <Position X="31.5" Y="3.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAA=</HashCode>
+      <FileName>src\Features\GenerarSalida\FactoriaSalida.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="transformador_mda.src.Features.GenerarSalida.GenerarSalidaBase" Collapsed="true">
+    <Position X="12.75" Y="9.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAACAEAAgAAAAAAAAAAAAACAAAICAAA=</HashCode>
+      <FileName>src\Features\GenerarSalida\GenerarSalidaBase.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="transformador_mda.src.Features.IntegracionIA.Dominio.InformacionFichero" Collapsed="true">
+    <Position X="31.5" Y="4.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAABAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAABA=</HashCode>
+      <FileName>src\Features\IntegracionIA\Dominio\InformacionFichero.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="transformador_mda.src.Features.IntegracionIA.Dominio.InformacionIA" Collapsed="true">
+    <Position X="26.25" Y="5.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAIAAAAAAAAAQAAAAAEAAAAAAAAAAA=</HashCode>
+      <FileName>src\Features\IntegracionIA\Dominio\InformacionIA.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="transformador_mda.src.Features.IntegracionIA.Dominio.RetornoFicheroIA" Collapsed="true">
+    <Position X="14.5" Y="7.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>QAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>src\Features\IntegracionIA\Dominio\RetornoFicheroIA.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="transformador_mda.src.Features.IntegracionIA.FactoriaProveedorIA" Collapsed="true">
+    <Position X="29.75" Y="3.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>src\Features\IntegracionIA\FactoriaProveedorIA.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="transformador_mda.src.Features.IntegracionIA.OpenAI" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="28" Y="5.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAgAAAAAIAAAABAgCAAIAAACAAAAGAAAAABAAA=</HashCode>
+      <FileName>src\Features\IntegracionIA\OpenAI.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="transformador_mda.src.Features.ParserEntrada.FactoríaParser" Collapsed="true">
+    <Position X="28" Y="3.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>src\Features\ParserEntrada\FactoríaParser.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="transformador_mda.src.Features.ParserEntrada.ParserUMLBase" Collapsed="true">
+    <Position X="9.75" Y="9.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAAAAAA=</HashCode>
+      <FileName>src\Features\ParserEntrada\ParserUMLBase.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="transformador_mda.src.Features.ParserEntrada.ParserXMI" Collapsed="true">
+    <Position X="9.75" Y="10.5" Width="1.5" />
+    <Compartments>
+      <Compartment Name="Fields" Collapsed="true" />
+      <Compartment Name="Methods" Collapsed="true" />
+    </Compartments>
+    <NestedTypes>
+      <Class Name="transformador_mda.src.Features.ParserEntrada.ParserXMI.ExtremoAsociacionXMI" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>src\Features\ParserEntrada\ParserXMI.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Class>
+    </NestedTypes>
+    <TypeIdentifier>
+      <HashCode>AAAAAMEgIENAUIIjAEAwIQqILAZAhQBAKAABgIhOhIA=</HashCode>
+      <FileName>src\Features\ParserEntrada\ParserXMI.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="transformador_mda.src.Features.ParserEntrada.ClavesSoportadasXMI" Collapsed="true">
+    <Position X="28" Y="2.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIA=</HashCode>
+      <FileName>src\Features\ParserEntrada\ParserXMI.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="transformador_mda.src.Features.Utilidades.BuscarComponentes" Collapsed="true">
+    <Position X="26.25" Y="2.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAQAAAAEAAAAABIAAAAAAABAAAAAAAgAAAAAAA=</HashCode>
+      <FileName>src\Features\Utilidades\BuscarComponentes.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="transformador_mda.src.Features.Utilidades.CrearIdentificador" Collapsed="true">
+    <Position X="26.25" Y="3.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>src\Features\Utilidades\CrearIdentificador.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="transformador_mda.src.Features.Utilidades.Ficheros" Collapsed="true">
+    <Position X="26.25" Y="4.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>QAAAAAAAAAAABIAACAAAAAAAAAAAAAAAAAAABAAAQAA=</HashCode>
+      <FileName>src\Features\Utilidades\Ficheros.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="transformador_mda.src.Features.Utilidades.Folder" Collapsed="true">
+    <Position X="28" Y="4.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>src\Features\Utilidades\Folder.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="transformador_mda.src.Vistas.FormPrincipal" Collapsed="true">
+    <Position X="29.75" Y="4.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>Y4Rp2+nAIXVScgakHiS40FmKQjsyPQI5Y8fwX7qxEoU=</HashCode>
+      <FileName>src\Vistas\FormPrincipal.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Interface Name="transformador_mda.src.Features.IntegracionIA.IProveedorIA" Collapsed="true">
+    <Position X="26.25" Y="6.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>src\Features\IntegracionIA\IProveedorIA.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Enum Name="transformador_mda.src.Dominio.EnumTipoFicheroEntrada" Collapsed="true">
+    <Position X="28" Y="9" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAACAAAAAAABAAAAAAAAAAAAA=</HashCode>
+      <FileName>src\Dominio\Enumeraciones.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="transformador_mda.src.Dominio.EnumTipoDiagrama" Collapsed="true">
+    <Position X="31.5" Y="8.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAIAABAAAAAAAAAAAAA=</HashCode>
+      <FileName>src\Dominio\Enumeraciones.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="transformador_mda.src.Dominio.EnumTipoSalida" Collapsed="true">
+    <Position X="29.75" Y="9" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAACAAAAAAAABAAAAAAAAAAAAA=</HashCode>
+      <FileName>src\Dominio\Enumeraciones.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="transformador_mda.src.Dominio.ElementosUML.EnumTipoElemento" Collapsed="true">
+    <Position X="26.25" Y="9" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AIQCAAAAAAAAACAIAAAAAQAAAACAAAABAAAAAAAAgAg=</HashCode>
+      <FileName>src\Dominio\ElementosUML\Tipos.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="transformador_mda.src.Dominio.ElementosUML.EnumTiposClases" Collapsed="true">
+    <Position X="31.5" Y="9" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AICAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAEA=</HashCode>
+      <FileName>src\Dominio\ElementosUML\Tipos.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="transformador_mda.src.Dominio.ElementosUML.EnumTipoAsociacion" Collapsed="true">
+    <Position X="28" Y="8.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAEAAAAgAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAEEA=</HashCode>
+      <FileName>src\Dominio\ElementosUML\Tipos.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="transformador_mda.src.Dominio.ElementosUML.EnumTipoVisibilidad" Collapsed="true">
+    <Position X="26.25" Y="9.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAIAAAAAAAAAAAAAQAAAAAAABAACAAAEA=</HashCode>
+      <FileName>src\Dominio\ElementosUML\Tipos.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="transformador_mda.src.Dominio.ElementosUML.EnumTipoDato" Collapsed="true">
+    <Position X="29.75" Y="8.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAgEAAAAABAAAAAIAAAgAQQAAAAAAAAIAAgAAAABAAA=</HashCode>
+      <FileName>src\Dominio\ElementosUML\Tipos.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="transformador_mda.src.Features.IntegracionIA.ProveedorIA" Collapsed="true">
+    <Position X="28" Y="9.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAA=</HashCode>
+      <FileName>src\Features\IntegracionIA\FactoriaProveedorIA.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="transformador_mda.src.Vistas.EnumIndiceImagenes" Collapsed="true">
+    <Position X="26.25" Y="8.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>EICAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEA=</HashCode>
+      <FileName>src\Vistas\FormPrincipal.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="transformador_mda.src.Vistas.EnumColumnasAtributos" Collapsed="true">
+    <Position X="28" Y="7.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAQQAAAAAAgAAAAAAAAAAAAIAAAAAAAAAAAAAAAEA=</HashCode>
+      <FileName>src\Vistas\FormPrincipal.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="transformador_mda.src.Vistas.EnumColumnasAsociaciones" Collapsed="true">
+    <Position X="26.25" Y="7.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAQAAAAAAgAAAAAAAAAAAAAAAAAAAAAAgAIAAAEA=</HashCode>
+      <FileName>src\Vistas\FormPrincipal.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="transformador_mda.src.Vistas.EnumColumnasParametros" Collapsed="true">
+    <Position X="31.5" Y="7.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAQAAAAAAgAAAAAAAAAAAAIAAAAAAAAAAAAAAAEA=</HashCode>
+      <FileName>src\Vistas\FormPrincipal.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="transformador_mda.src.Vistas.EnumColumnasLiterales" Collapsed="true">
+    <Position X="29.75" Y="7.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAQAAAAAAgAAAAAAAAAAAAIAAAAAAAAAAAAAAAEA=</HashCode>
+      <FileName>src\Vistas\FormPrincipal.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>
