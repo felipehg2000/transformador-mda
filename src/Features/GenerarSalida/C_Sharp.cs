@@ -513,7 +513,7 @@ namespace transformador_mda.src.Features.GenerarSalida
                     texto_comentarios +
                     "\t\t" + ObtenerTipoVisibilidad(param_metodo.Visibilidad) + " " + param_metodo.Nombre + "(" + texto_parametros + ")";
             }
-            else if (param_clase.TipoClase == EnumTiposClases.CLASE_ABSTRACTA && !param_metodo.EsConstructor && !param_metodo.EsDestructor)
+            else if (param_clase.TipoClase == EnumTiposClases.CLASE_ABSTRACTA && param_metodo.EsAbstracto && !param_metodo.EsConstructor && !param_metodo.EsDestructor)
             {
                 if (param_metodo.Visibilidad == EnumTipoVisibilidad.PRIVADO)
                     return new RetornoBase(false,

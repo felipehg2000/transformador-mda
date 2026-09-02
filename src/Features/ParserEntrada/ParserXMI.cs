@@ -338,6 +338,9 @@ namespace transformador_mda.src.Features.ParserEntrada
         /// <returns>Objeto de tipo RetornoElementoUML con información del proceso y, si todo ha funcionado bien con el objeto Metodo con información del XMI.</returns>
         protected RetornoElementoUML ProcesarMetodo()
         {
+            bool es_abstracto = _elemento_actual.Attribute("isAbstract") != null &&
+                _elemento_actual.Attribute("isAbstract").Value == "true";
+
             Metodo nuevo_nodo = new Metodo()
             {
                 Id = ObtenerID(_elemento_actual),
@@ -345,7 +348,8 @@ namespace transformador_mda.src.Features.ParserEntrada
                 Comentario = ObtenerComentario(_elemento_actual),
                 Tipo = EnumTipoElemento.METODO,
                 Visibilidad = ObtenerVisibilidad(_elemento_actual),
-                Parametros = new List<Parametro>()
+                Parametros = new List<Parametro>(),
+                EsAbstracto = es_abstracto
             };
 
             foreach (XElement hijo in ObtenerHijosProcesables(_elemento_actual))

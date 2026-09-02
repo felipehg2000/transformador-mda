@@ -29,6 +29,11 @@ namespace transformador_mda.src.Dominio.ElementosUML
         public bool EsDestructor { get; set; }
 
         /// <summary>
+        /// True si el método es abstracto, false si no.
+        /// </summary>
+        public bool EsAbstracto { get; set; }
+
+        /// <summary>
         /// Constructor de la clase, inicializa atributos.
         /// </summary>
         [JsonConstructor]
@@ -39,6 +44,7 @@ namespace transformador_mda.src.Dominio.ElementosUML
             Parametros = new List<Parametro>();
             EsConstructor = false;
             EsDestructor = false;
+            EsAbstracto = false;
         }
 
         /// <summary>
