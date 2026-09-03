@@ -623,6 +623,8 @@ namespace transformador_mda.src.Vistas
             splitContainer.Enabled = true;
             splitContainer.BringToFront();
 
+            labelTituloEdicion.Text = "Clase: " + clase.Nombre;
+
             if (clase.TipoClase == EnumTiposClases.ENUMERACION)
             {
                 tabControlEnumeraciones.Visible = true;
@@ -706,6 +708,8 @@ namespace transformador_mda.src.Vistas
             richTextBoxMetodo.Text = string.Empty;
             richTextBoxRetorno.Text = string.Empty;
             dataGridViewParametros.Rows.Clear();
+
+            labelTitulo.Text = "Comentarios del método: " + e.Item.Text;
 
             if (!(e.Item.Tag is Metodo metodo))
                 return;
