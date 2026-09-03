@@ -624,6 +624,7 @@ namespace transformador_mda.src.Vistas
             splitContainer.BringToFront();
 
             labelTituloEdicion.Text = "Clase: " + clase.Nombre;
+            labelTituloEnumComentario.Text = "Enumeración: " + clase.Nombre;
 
             if (clase.TipoClase == EnumTiposClases.ENUMERACION)
             {
